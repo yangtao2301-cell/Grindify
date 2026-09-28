@@ -84,6 +84,6 @@ export class UpdateUserPreferencesDto {
   startWeight?: number;
 
   @IsOptional()
-  @IsIn(['default', 'eng', 'swe'])
-  language?: 'default' | 'eng' | 'swe';
+  @IsIn(['default', 'eng', 'swe', 'zho'])
+  language?: 'default' | 'eng' | 'swe' | 'zho';
 }

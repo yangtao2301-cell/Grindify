@@ -495,7 +495,11 @@ const { t, locale } = useI18n({ useScope: 'global' })
 const { lang } = useUserLanguage()
 const router = useRouter()
 
-const dateLocale = computed(() => (locale.value === 'sv' ? 'sv-SE' : 'en-US'))
+const dateLocale = computed(() => {
+  if (locale.value === 'sv') return 'sv-SE'
+  if (locale.value === 'zh-CN') return 'zh-CN'
+  return 'en-US'
+})
 
 const currentDate = ref(new Date())
 const selectedDate = ref(toLocalDateString(new Date()))

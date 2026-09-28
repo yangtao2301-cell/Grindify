@@ -13,13 +13,13 @@
  * <https://www.gnu.org/licenses/>.
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Resend } from 'resend';
 
 @Injectable()
 export class EmailService {
-  private readonly resend: Resend;
+  private readonly resend: Resend | null;
   private readonly from: string;
   private readonly frontendUrl: string;
   private readonly logger = new Logger(EmailService.name);
@@ -28,7 +28,17 @@ export class EmailService {
     const apiKey = this.configService.get<string>('RESEND_API_KEY');
     this.from = this.configService.get<string>('EMAIL_FROM') ?? 'noreply@localhost';
     this.frontendUrl = this.configService.get<string>('FRONTEND_URL') ?? 'http://localhost:3000';
-    this.resend = new Resend(apiKey);
+    this.resend = apiKey ? new Resend(apiKey) : null;
+    if (!this.resend) {
+      this.logger.warn('Email delivery is disabled: RESEND_API_KEY is not set');
+    }
+  }
+
+  private getResend(): Resend {
+    if (!this.resend) {
+      throw new ServiceUnavailableException('Email delivery is not configured');
+    }
+    return this.resend;
   }
 
   async sendVerificationEmail(to: string, code: string): Promise<void> {
@@ -44,7 +54,7 @@ export class EmailService {
     `;
 
     try {
-      await this.resend.emails.send({
+      await this.getResend().emails.send({
         from: this.from,
         to,
         subject: `${code} is your Grindify verification code`,
@@ -69,7 +79,7 @@ export class EmailService {
     `;
 
     try {
-      await this.resend.emails.send({
+      await this.getResend().emails.send({
         from: this.from,
         to,
         subject: `${code} is your Grindify password reset code`,

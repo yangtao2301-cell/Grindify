@@ -17,11 +17,12 @@ import {
 import { ApiError } from '@/services/api'
 import ExerciseImagesView from './ExerciseImagesView.vue'
 
-type Lang = 'default' | 'eng' | 'swe'
+type Lang = 'default' | 'eng' | 'swe' | 'zho'
 const LANGS: { key: Lang; label: string }[] = [
   { key: 'default', label: 'Default' },
   { key: 'eng', label: 'English' },
   { key: 'swe', label: 'Swedish' },
+  { key: 'zho', label: 'Chinese (Simplified)' },
 ]
 
 const BASE_URL = (import.meta.env.VITE_API_URL as string | undefined) ?? 'http://localhost:1337/v1'

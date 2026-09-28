@@ -169,6 +169,7 @@ export default {
     chooseLanguage: 'Välj språk',
     english: 'Engelska',
     swedish: 'Svenska',
+    chinese: 'Kinesiska (förenklad)',
     goals: 'Mål',
     goalsDescription:
       'Ställ in och spåra dina träningsmål för att hålla dig motiverad och på rätt spår.',

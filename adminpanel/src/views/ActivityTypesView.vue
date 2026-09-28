@@ -4,11 +4,12 @@ import { Search, Loader2, AlertCircle, Plus, Pencil, Trash2 } from 'lucide-vue-n
 import { adminApi, type GlobalActivity, type CreateGlobalActivityPayload, type I18nString } from '@/services/adminApi'
 import { ApiError } from '@/services/api'
 
-type Lang = 'default' | 'eng' | 'swe'
+type Lang = 'default' | 'eng' | 'swe' | 'zho'
 const LANGS: { key: Lang; label: string }[] = [
   { key: 'default', label: 'Default' },
   { key: 'eng', label: 'English' },
   { key: 'swe', label: 'Swedish' },
+  { key: 'zho', label: 'Chinese (Simplified)' },
 ]
 
 const ICONS = [

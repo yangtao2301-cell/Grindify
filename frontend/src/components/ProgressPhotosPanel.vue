@@ -202,7 +202,7 @@
           />
           <template v-else>
             <v-icon size="40" color="textSecondary" class="mb-2">mdi-image-plus</v-icon>
-            <p class="text-body-2 text-textSecondary">Tap to select a photo</p>
+            <p class="text-body-2 text-textSecondary">{{ $t('progressPhotos.tapToSelectPhoto') }}</p>
           </template>
         </v-card>
       </div>

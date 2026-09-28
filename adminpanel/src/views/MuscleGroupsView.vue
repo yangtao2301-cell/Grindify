@@ -9,11 +9,12 @@ import {
 } from '@/services/adminApi'
 import { ApiError } from '@/services/api'
 
-type Lang = 'default' | 'eng' | 'swe'
+type Lang = 'default' | 'eng' | 'swe' | 'zho'
 const LANGS: { key: Lang; label: string }[] = [
   { key: 'default', label: 'Default' },
   { key: 'eng', label: 'English' },
   { key: 'swe', label: 'Swedish' },
+  { key: 'zho', label: 'Chinese (Simplified)' },
 ]
 
 const loading = ref(true)

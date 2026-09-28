@@ -87,7 +87,7 @@ export class UserWithoutPasswordDto {
   startWeight?: number;
 
   @ApiProperty({ default: 'default' })
-  language: 'default' | 'eng' | 'swe';
+  language: 'default' | 'eng' | 'swe' | 'zho';
 
   constructor(user: User) {
     this.id = user.id;

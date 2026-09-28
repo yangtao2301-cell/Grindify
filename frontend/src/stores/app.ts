@@ -18,11 +18,11 @@ import { defineStore } from 'pinia'
 
 export const useAppStore = defineStore('app', {
   state: () => ({
-    locale: 'en' as 'en' | 'sv',
+    locale: 'en' as 'en' | 'sv' | 'zh-CN',
     darkMode: true,
   }),
   actions: {
-    setLocale(locale: 'en' | 'sv') {
+    setLocale(locale: 'en' | 'sv' | 'zh-CN') {
       this.locale = locale
     },
     setDarkMode(value: boolean) {

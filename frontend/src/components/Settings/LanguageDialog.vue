@@ -30,6 +30,12 @@
             <v-icon v-if="currentLocale === 'sv'"> mdi-check </v-icon>
           </template>
         </v-list-item>
+        <v-list-item :active="currentLocale === 'zh-CN'" @click="selectLanguage('zh-CN')">
+          <v-list-item-title>{{ $t('settings.chinese') }}</v-list-item-title>
+          <template #append>
+            <v-icon v-if="currentLocale === 'zh-CN'"> mdi-check </v-icon>
+          </template>
+        </v-list-item>
       </v-list>
     </v-card-text>
   </v-card>
@@ -41,6 +47,7 @@ import { useAppStore } from '@/stores/app'
 import { useAuthStore } from '@/stores/auth.store'
 import { updateUserPreferences } from '@/services/user.service'
 import type { SupportedLanguage } from '@/interfaces/i18n.types'
+import type { AppLocale } from '@/plugins/i18n'
 
 const emit = defineEmits<{
   close: []
@@ -55,9 +62,10 @@ const currentLocale = computed(() => locale.value)
 const LOCALE_TO_LANG: Record<string, SupportedLanguage> = {
   en: 'eng',
   sv: 'swe',
+  'zh-CN': 'zho',
 }
 
-const selectLanguage = async (nextLocale: 'en' | 'sv') => {
+const selectLanguage = async (nextLocale: AppLocale) => {
   appStore.setLocale(nextLocale)
   locale.value = nextLocale
 

@@ -41,19 +41,25 @@ import { AdminModule } from './admin/admin.module';
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.get<string>('DATABASE_HOST'),
-        port: configService.get<number>('DATABASE_PORT'),
-        username: configService.get<string>('DATABASE_USER'),
-        password: configService.get<string>('DATABASE_PASSWORD'),
-        database: configService.get<string>('DATABASE_NAME'),
-        autoLoadEntities: true,
-        synchronize: false,
-        migrations: [__dirname + '/migrations/*.{ts,js}'],
-        migrationsRun: true,
-        logging: ['error', 'warn', 'query'],
-      }),
+      useFactory: async (configService: ConfigService) => {
+        const synchronize =
+          configService.get<string>('DATABASE_SYNCHRONIZE') === 'true' &&
+          configService.get<string>('NODE_ENV') !== 'production';
+
+        return {
+          type: 'postgres' as const,
+          host: configService.get<string>('DATABASE_HOST'),
+          port: configService.get<number>('DATABASE_PORT'),
+          username: configService.get<string>('DATABASE_USER'),
+          password: configService.get<string>('DATABASE_PASSWORD'),
+          database: configService.get<string>('DATABASE_NAME'),
+          autoLoadEntities: true,
+          synchronize,
+          migrations: [__dirname + '/migrations/*.{ts,js}'],
+          migrationsRun: !synchronize,
+          logging: ['error', 'warn', 'query'] as const,
+        };
+      },
       inject: [ConfigService],
     }),
     AuthModule,

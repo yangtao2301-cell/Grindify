@@ -22,43 +22,33 @@
     <v-card class="bg-background">
       <BackHeader :title="$t('settings.imprint')" @click="$emit('update:modelValue', false)" />
       <v-card-text class="pa-6">
-        <p class="text-caption text-textSecondary mb-6">Last updated: March 2026</p>
+        <p class="text-caption text-textSecondary mb-6">{{ $t('legal.lastUpdated') }}</p>
 
-        <h3 class="text-h6 mb-2">Service Operator</h3>
+        <h3 class="text-h6 mb-2">{{ $t('legal.imprint.operatorTitle') }}</h3>
         <p class="text-body-2 mb-4">
-          <strong>{{ operatorName }}</strong
-          ><br />
+          <strong>{{ operatorName }}</strong><br />
           {{ operatorCity }}, {{ operatorCountry }}<br />
-          Email: <strong>{{ contactEmail }}</strong>
+          {{ $t('legal.imprint.operatorEmail') }} <strong>{{ contactEmail }}</strong>
         </p>
 
-        <h3 class="text-h6 mb-2">About This Service</h3>
-        <p class="text-body-2 mb-4">
-          Grindify is a personal fitness tracking application provided for personal and beta use.
-          The service is operated by an individual developer and is not a commercial entity.
-        </p>
+        <h3 class="text-h6 mb-2">{{ $t('legal.imprint.aboutTitle') }}</h3>
+        <p class="text-body-2 mb-4">{{ $t('legal.imprint.aboutText') }}</p>
 
-        <h3 class="text-h6 mb-2">Supervisory Authority</h3>
+        <h3 class="text-h6 mb-2">{{ $t('legal.imprint.authorityTitle') }}</h3>
         <p class="text-body-2 mb-4">
-          For privacy-related complaints, you may contact the Swedish data protection supervisory
-          authority:
-          <br /><br />
+          {{ $t('legal.imprint.authorityText') }}<br /><br />
           <strong>Integritetsskyddsmyndigheten (IMY)</strong><br />
-          Website: <strong>imy.se</strong><br />
-          Phone: +46 8 657 61 00<br />
-          Address: Box 8114, 104 20 Stockholm, Sweden
+          {{ $t('legal.imprint.website') }} <strong>imy.se</strong><br />
+          {{ $t('legal.imprint.phone') }} +46 8 657 61 00<br />
+          {{ $t('legal.imprint.address') }} Box 8114, 104 20 Stockholm, Sweden
         </p>
 
-        <h3 class="text-h6 mb-2">Open Source License</h3>
-        <p class="text-body-2 mb-4">
-          Grindify is free software licensed under the GNU Affero General Public License v3
-          (AGPL-3.0). Source code is available at the project repository.
-        </p>
+        <h3 class="text-h6 mb-2">{{ $t('legal.imprint.licenseTitle') }}</h3>
+        <p class="text-body-2 mb-4">{{ $t('legal.imprint.licenseText') }}</p>
 
-        <h3 class="text-h6 mb-2">Contact</h3>
+        <h3 class="text-h6 mb-2">{{ $t('legal.imprint.contactTitle') }}</h3>
         <p class="text-body-2 mb-4">
-          For any inquiries, including GDPR data requests (access, erasure, portability), contact:
-          <strong>{{ contactEmail }}</strong>
+          {{ $t('legal.imprint.contactText', { email: contactEmail }) }}
         </p>
       </v-card-text>
       <v-card-actions class="pa-4">

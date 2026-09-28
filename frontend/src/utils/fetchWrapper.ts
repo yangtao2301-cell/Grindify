@@ -16,6 +16,53 @@
 import router from '@/router';
 import { useAuthStore } from '@/stores/auth.store';
 
+const isLoopbackHost = (hostname: string) =>
+  hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1';
+
+const isPrivateIpv4 = (hostname: string) => {
+  const octets = hostname.split('.').map(Number);
+  if (octets.length !== 4 || octets.some((octet) => !Number.isInteger(octet) || octet < 0 || octet > 255)) {
+    return false;
+  }
+
+  return (
+    octets[0] === 10 ||
+    (octets[0] === 192 && octets[1] === 168) ||
+    (octets[0] === 172 && octets[1] >= 16 && octets[1] <= 31)
+  );
+};
+
+const isLocalDevelopmentHost = (hostname: string) =>
+  isLoopbackHost(hostname) || isPrivateIpv4(hostname);
+
+/**
+ * Keep local development requests on the same host as the page.
+ *
+ * The auth token is an httpOnly, host-only cookie. When the app is opened at
+ * localhost but VITE_API_URL points to a LAN IP (or the reverse), browsers
+ * treat the request as cross-site and do not send that cookie with SameSite=Lax.
+ */
+const resolveRequestUrl = (url: string) => {
+  if (typeof window === 'undefined') return url;
+
+  try {
+    const requestUrl = new URL(url, window.location.href);
+    const pageHost = window.location.hostname;
+
+    if (
+      pageHost !== requestUrl.hostname &&
+      isLocalDevelopmentHost(pageHost) &&
+      isLocalDevelopmentHost(requestUrl.hostname)
+    ) {
+      requestUrl.hostname = pageHost;
+    }
+
+    return requestUrl.toString();
+  } catch {
+    return url;
+  }
+};
+
 export const fetchWrapper = async <T = unknown>(
   url: string,
   options: RequestInit = {},
@@ -36,7 +83,7 @@ export const fetchWrapper = async <T = unknown>(
     }
     mergedOptions.headers = headers;
 
-    const response = await fetch(url, mergedOptions);
+    const response = await fetch(resolveRequestUrl(url), mergedOptions);
 
     if (response.status === 401) {
       await handleUnauthorized();

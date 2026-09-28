@@ -23,9 +23,23 @@ import { useMuscleGroupStore } from './muscleGroup.store';
 import { useWorkoutSessionStore } from './workoutSession.store';
 import { fetchWrapper } from '@/utils/fetchWrapper';
 import type { User } from '@/interfaces/User.interface';
-import i18n from '@/plugins/i18n';
+import i18n, { type AppLocale } from '@/plugins/i18n';
+import { useAppStore } from './app';
 
 const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:1337/v1';
+
+function applyUserLocale(user: User | null | undefined) {
+  const localeByLanguage: Partial<Record<NonNullable<User['language']>, AppLocale>> = {
+    eng: 'en',
+    swe: 'sv',
+    zho: 'zh-CN',
+  };
+  const nextLocale = user?.language ? localeByLanguage[user.language] : undefined;
+  if (!nextLocale) return;
+
+  useAppStore().setLocale(nextLocale);
+  i18n.global.locale.value = nextLocale;
+}
 
 export const useAuthStore = defineStore(
   'authStore',
@@ -49,6 +63,7 @@ export const useAuthStore = defineStore(
 
         isAuthenticated.value = true;
         user.value = data.user;
+        applyUserLocale(data.user);
         token.value = '';
 
         // Give the browser a tick to persist Set-Cookie before fetching protected resources.
@@ -139,6 +154,7 @@ export const useAuthStore = defineStore(
       });
       isAuthenticated.value = true;
       user.value = data.user;
+      applyUserLocale(data.user);
       token.value = '';
     };
 
@@ -169,6 +185,7 @@ export const useAuthStore = defineStore(
     const setUserFromOAuth = (oauthUser: User) => {
       isAuthenticated.value = true;
       user.value = oauthUser;
+      applyUserLocale(oauthUser);
       token.value = '';
     };
 
@@ -183,6 +200,7 @@ export const useAuthStore = defineStore(
       try {
         const data = await fetchWrapper<User>(`${apiUrl}/users`);
         user.value = data;
+        applyUserLocale(data);
         return data;
       } catch (error) {
         console.error('Failed to refresh user data:', error);

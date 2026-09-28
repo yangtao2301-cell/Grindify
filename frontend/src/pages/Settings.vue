@@ -38,7 +38,9 @@
         <h1 class="text-h5 white--text">
           {{ currentUser?.firstName || '' }} {{ currentUser?.lastName || '' }}
         </h1>
-        <p class="text-textSecondary text-subtitle-1">Member since Jan 2024</p>
+        <p v-if="memberSince" class="text-textSecondary text-subtitle-1">
+          {{ $t('settings.memberSince', { date: memberSince }) }}
+        </p>
       </div>
     </v-card>
     <div class="d-flex flex-column ga-5">
@@ -65,7 +67,7 @@
         </v-card>
       </div>
       <div>
-        <h1 class="text-h6 mb-3">Data</h1>
+        <h1 class="text-h6 mb-3">{{ $t('settings.data') }}</h1>
         <v-card
           v-for="item in dataList"
           :key="item.titleKey"
@@ -85,7 +87,7 @@
         </v-card>
       </div>
       <div>
-        <h1 class="text-h6 mb-3">Preferences</h1>
+        <h1 class="text-h6 mb-3">{{ $t('settings.preferences') }}</h1>
         <v-list
           class="bg-cardBg rounded-lg"
           :style="{ border: '1px solid rgb(var(--v-theme-borderColor))' }"
@@ -148,7 +150,9 @@
           </v-list-item>
         </v-list>
       </div>
-      <v-btn variant="outlined" @click="setPreferenceDialogToOpen('logout')">Logout</v-btn>
+      <v-btn variant="outlined" @click="setPreferenceDialogToOpen('logout')">
+        {{ $t('settings.logout') }}
+      </v-btn>
     </div>
 
     <!-- Account Edit Dialog -->
@@ -247,6 +251,13 @@ const isImprintOpen = ref(false)
 const currentUser = ref<User | null>(null)
 const weightTrackingEnabled = ref(false)
 const streakInfo = ref<StreakInfo | null>(null)
+
+const memberSince = computed(() => {
+  if (!currentUser.value?.createdAt) return ''
+  return new Intl.DateTimeFormat(locale.value, { year: 'numeric', month: 'short' }).format(
+    new Date(currentUser.value.createdAt),
+  )
+})
 
 const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:1337/v1'
 

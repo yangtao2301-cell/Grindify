@@ -32,7 +32,7 @@ export interface User {
   targetWeight?: number
   goalTimeframe?: number
   onboardingCompleted?: boolean
-  language?: 'default' | 'eng' | 'swe'
+  language?: 'default' | 'eng' | 'swe' | 'zho'
   showWeightTracking?: boolean
   weightGoalType?: string
   startWeight?: number

@@ -17,8 +17,9 @@ import { createI18n } from 'vue-i18n';
 
 import en from '@/locales/en';
 import sv from '@/locales/sv';
+import zh from '@/locales/zh';
 
-export type AppLocale = 'en' | 'sv';
+export type AppLocale = 'en' | 'sv' | 'zh-CN';
 
 const STORAGE_KEY = 'app';
 
@@ -28,7 +29,9 @@ function readPersistedLocale(): AppLocale | null {
     if (!raw) return null;
 
     const parsed = JSON.parse(raw) as { locale?: unknown };
-    if (parsed?.locale === 'en' || parsed?.locale === 'sv') return parsed.locale;
+    if (parsed?.locale === 'en' || parsed?.locale === 'sv' || parsed?.locale === 'zh-CN') {
+      return parsed.locale;
+    }
     return null;
   } catch {
     return null;
@@ -40,7 +43,10 @@ function defaultLocale(): AppLocale {
   if (persisted) return persisted;
 
   const browser = typeof navigator !== 'undefined' ? navigator.language : 'en';
-  return browser.toLowerCase().startsWith('sv') ? 'sv' : 'en';
+  const normalized = browser.toLowerCase();
+  if (normalized.startsWith('sv')) return 'sv';
+  if (normalized.startsWith('zh')) return 'zh-CN';
+  return 'en';
 }
 
 const i18n = createI18n({
@@ -51,6 +57,7 @@ const i18n = createI18n({
   messages: {
     en,
     sv,
+    'zh-CN': zh,
   },
 });
 

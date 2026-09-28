@@ -22,113 +22,73 @@
       <v-toolbar-title>{{ $t('auth.privacyPolicyTitle') }}</v-toolbar-title>
     </v-toolbar>
     <v-card-text class="pa-6">
-      <p class="text-caption text-textSecondary mb-6">Last updated: March 2026</p>
+      <p class="text-caption text-textSecondary mb-6">{{ $t('legal.lastUpdated') }}</p>
 
-      <h3 class="text-h6 mb-2">1. Data Controller</h3>
+      <h3 class="text-h6 mb-2">{{ $t('legal.privacy.dataControllerTitle') }}</h3>
       <p class="text-body-2 mb-4">
-        FalkenDev is the data controller for personal data processed through Grindify.
-        Contact: <strong>{{ contactEmail }}</strong>
+        {{ $t('legal.privacy.dataControllerText', { email: contactEmail }) }}
       </p>
 
-      <h3 class="text-h6 mb-2">2. Personal Data We Collect</h3>
-      <p class="text-body-2 mb-2">We collect and process the following personal data:</p>
+      <h3 class="text-h6 mb-2">{{ $t('legal.privacy.collectTitle') }}</h3>
+      <p class="text-body-2 mb-2">{{ $t('legal.privacy.collectIntro') }}</p>
       <ul class="text-body-2 mb-4 pl-4">
-        <li><strong>Account data:</strong> Name, email address, password (hashed)</li>
-        <li><strong>Profile data:</strong> Date of birth, gender, body weight, height</li>
-        <li>
-          <strong>Fitness data:</strong> Workout sessions, exercise logs, sets, reps, weights,
-          RPE, goals, and progress
-        </li>
-        <li><strong>Usage data:</strong> Login timestamps, app activity</li>
-        <li><strong>Consent records:</strong> Date and version of accepted Terms & Privacy Policy</li>
+        <li>{{ $t('legal.privacy.accountData') }}</li>
+        <li>{{ $t('legal.privacy.profileData') }}</li>
+        <li>{{ $t('legal.privacy.fitnessData') }}</li>
+        <li>{{ $t('legal.privacy.usageData') }}</li>
+        <li>{{ $t('legal.privacy.consentRecords') }}</li>
       </ul>
 
-      <h3 class="text-h6 mb-2">3. Legal Basis for Processing (GDPR)</h3>
-      <p class="text-body-2 mb-2">We process your data on the following legal bases:</p>
+      <h3 class="text-h6 mb-2">{{ $t('legal.privacy.legalBasisTitle') }}</h3>
+      <p class="text-body-2 mb-2">{{ $t('legal.privacy.legalBasisIntro') }}</p>
       <ul class="text-body-2 mb-4 pl-4">
-        <li>
-          <strong>Art. 6(1)(b) — Contract performance:</strong> Processing necessary to provide
-          the Service you signed up for (account management, storing your workout data)
-        </li>
-        <li>
-          <strong>Art. 6(1)(a) — Consent:</strong> Processing based on your explicit agreement
-          at registration (e.g., optional health-related data such as body metrics)
-        </li>
-        <li>
-          <strong>Art. 6(1)(f) — Legitimate interests:</strong> Security, fraud prevention, and
-          service improvement
-        </li>
+        <li>{{ $t('legal.privacy.contractPerformance') }}</li>
+        <li>{{ $t('legal.privacy.consent') }}</li>
+        <li>{{ $t('legal.privacy.legitimateInterests') }}</li>
       </ul>
 
-      <h3 class="text-h6 mb-2">4. Purpose of Processing</h3>
-      <p class="text-body-2 mb-2">Your data is used to:</p>
+      <h3 class="text-h6 mb-2">{{ $t('legal.privacy.purposeTitle') }}</h3>
+      <p class="text-body-2 mb-2">{{ $t('legal.privacy.purposeIntro') }}</p>
       <ul class="text-body-2 mb-4 pl-4">
-        <li>Create and manage your account</li>
-        <li>Provide and improve the fitness tracking features</li>
-        <li>Display your personal progress and statistics</li>
-        <li>Ensure the security and integrity of the Service</li>
-        <li>Comply with legal obligations</li>
+        <li>{{ $t('legal.privacy.purposeAccount') }}</li>
+        <li>{{ $t('legal.privacy.purposeFeatures') }}</li>
+        <li>{{ $t('legal.privacy.purposeProgress') }}</li>
+        <li>{{ $t('legal.privacy.purposeSecurity') }}</li>
+        <li>{{ $t('legal.privacy.purposeLegal') }}</li>
       </ul>
 
-      <h3 class="text-h6 mb-2">5. Data Retention</h3>
+      <h3 class="text-h6 mb-2">{{ $t('legal.privacy.retentionTitle') }}</h3>
+      <p class="text-body-2 mb-4">{{ $t('legal.privacy.retentionText') }}</p>
+
+      <h3 class="text-h6 mb-2">{{ $t('legal.privacy.rightsTitle') }}</h3>
+      <p class="text-body-2 mb-2">{{ $t('legal.privacy.rightsIntro') }}</p>
+      <ul class="text-body-2 mb-4 pl-4">
+        <li>{{ $t('legal.privacy.access') }}</li>
+        <li>{{ $t('legal.privacy.rectification') }}</li>
+        <li>{{ $t('legal.privacy.erasure') }}</li>
+        <li>{{ $t('legal.privacy.restriction') }}</li>
+        <li>{{ $t('legal.privacy.portability') }}</li>
+        <li>{{ $t('legal.privacy.object') }}</li>
+        <li>{{ $t('legal.privacy.withdraw') }}</li>
+      </ul>
       <p class="text-body-2 mb-4">
-        We retain your personal data for as long as your account is active. When you delete
-        your account, all associated personal data is permanently deleted within 30 days,
-        except where retention is required by law.
+        {{ $t('legal.privacy.rightsContact', { email: contactEmail }) }}
       </p>
 
-      <h3 class="text-h6 mb-2">6. Your Rights Under GDPR</h3>
-      <p class="text-body-2 mb-2">You have the following rights regarding your personal data:</p>
-      <ul class="text-body-2 mb-4 pl-4">
-        <li><strong>Right of access (Art. 15):</strong> Request a copy of your data</li>
-        <li><strong>Right to rectification (Art. 16):</strong> Correct inaccurate data</li>
-        <li>
-          <strong>Right to erasure (Art. 17):</strong> Request deletion of your data
-          ("right to be forgotten")
-        </li>
-        <li>
-          <strong>Right to restriction (Art. 18):</strong> Request limited processing of
-          your data
-        </li>
-        <li>
-          <strong>Right to data portability (Art. 20):</strong> Receive your data in a
-          machine-readable format
-        </li>
-        <li>
-          <strong>Right to object (Art. 21):</strong> Object to processing based on
-          legitimate interests
-        </li>
-        <li>
-          <strong>Right to withdraw consent:</strong> Withdraw consent at any time without
-          affecting prior processing
-        </li>
-      </ul>
-      <p class="text-body-2 mb-4">
-        To exercise your rights, contact us at <strong>{{ contactEmail }}</strong>.
-        We will respond within 30 days.
-      </p>
+      <h3 class="text-h6 mb-2">{{ $t('legal.privacy.sharingTitle') }}</h3>
+      <p class="text-body-2 mb-4">{{ $t('legal.privacy.sharingText') }}</p>
 
-      <h3 class="text-h6 mb-2">7. Data Sharing</h3>
+      <h3 class="text-h6 mb-2">{{ $t('legal.privacy.complaintTitle') }}</h3>
       <p class="text-body-2 mb-4">
-        We do not sell, rent, or share your personal data with third parties for marketing
-        purposes. Data may be shared only with service providers necessary to operate the
-        Service (e.g., hosting), who are bound by data processing agreements under GDPR Art. 28.
-      </p>
-
-      <h3 class="text-h6 mb-2">8. Right to Lodge a Complaint</h3>
-      <p class="text-body-2 mb-4">
-        If you believe we have not handled your personal data in accordance with GDPR, you have
-        the right to lodge a complaint with the Swedish supervisory authority:
-        <br /><br />
+        {{ $t('legal.privacy.complaintText') }}<br /><br />
         <strong>Integritetsskyddsmyndigheten (IMY)</strong><br />
-        Website: <strong>imy.se</strong><br />
-        Phone: +46 8 657 61 00
+        {{ $t('legal.imprint.website') }} <strong>imy.se</strong><br />
+        {{ $t('legal.imprint.phone') }} +46 8 657 61 00
       </p>
 
-      <h3 class="text-h6 mb-2">9. Contact</h3>
+      <h3 class="text-h6 mb-2">{{ $t('legal.privacy.contactTitle') }}</h3>
       <p class="text-body-2 mb-4">
-        For privacy-related inquiries, contact our Data Protection point of contact at:
-        <strong>{{ contactEmail }}</strong>
+        {{ $t('legal.privacy.contactText', { email: contactEmail }) }}
       </p>
     </v-card-text>
   </v-card>
