@@ -16,13 +16,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
-interface GithubRelease {
+interface GiteeRelease {
   tag_name?: string;
   name?: string;
-  published_at?: string;
+  created_at?: string;
   body?: string;
-  prerelease?: boolean;
-  html_url?: string;
+  prerelease?: boolean | string;
 }
 
 export interface ReleaseHistoryEntry {
@@ -36,7 +35,7 @@ export interface ReleaseHistoryEntry {
 
 export interface ReleaseHistoryResponse {
   status: 'ok' | 'unconfigured' | 'unavailable';
-  source: 'github';
+  source: 'gitee';
   repo: string | null;
   fetchedAt: string;
   latestReleaseVersion: string | null;
@@ -56,58 +55,65 @@ export class ReleasesService {
       return this.buildFallbackResponse(
         'unconfigured',
         null,
-        'GitHub release proxy is not configured.',
+        'Gitee release proxy is not configured.',
       );
     }
 
     try {
       const headers = new Headers({
-        Accept: 'application/vnd.github+json',
+        Accept: 'application/json',
         'User-Agent': 'Grindify Release Proxy',
       });
       const token = this.configService
-        .get<string>('GITHUB_RELEASES_TOKEN')
+        .get<string>('GITEE_RELEASES_TOKEN')
         ?.trim();
       if (token) {
         headers.set('Authorization', `Bearer ${token}`);
       }
 
-      const response = await fetch(
-        `https://api.github.com/repos/${repo.owner}/${repo.name}/releases?per_page=12`,
-        { headers },
+      const releasesUrl = new URL(
+        `https://gitee.com/api/v5/repos/${encodeURIComponent(repo.owner)}/${encodeURIComponent(repo.name)}/releases`,
       );
+      releasesUrl.searchParams.set('page', '1');
+      releasesUrl.searchParams.set('per_page', '12');
+
+      const response = await fetch(releasesUrl, { headers });
 
       if (!response.ok) {
         const details = await response.text();
         this.logger.warn(
-          `GitHub releases request failed with ${response.status}: ${details}`,
+          `Gitee releases request failed with ${response.status}: ${details}`,
         );
         return this.buildFallbackResponse(
           'unavailable',
           `${repo.owner}/${repo.name}`,
-          `GitHub releases are currently unavailable (${response.status}).`,
+          `Gitee releases are currently unavailable (${response.status}).`,
         );
       }
 
-      const payload = (await response.json()) as GithubRelease[];
+      const payload = (await response.json()) as GiteeRelease[];
       if (!Array.isArray(payload)) {
         return this.buildFallbackResponse(
           'unavailable',
           `${repo.owner}/${repo.name}`,
-          'Unexpected GitHub releases response.',
+          'Unexpected Gitee releases response.',
         );
       }
 
       const releases = payload
         .filter((release) => Boolean(release.tag_name))
-        .map((release) => ({
-          tagName: String(release.tag_name),
-          name: release.name?.trim() || String(release.tag_name),
-          publishedAt: release.published_at ?? null,
-          body: release.body?.trim() || '',
-          prerelease: Boolean(release.prerelease),
-          htmlUrl: release.html_url ?? null,
-        }));
+        .map((release) => {
+          const tagName = String(release.tag_name);
+
+          return {
+            tagName,
+            name: release.name?.trim() || tagName,
+            publishedAt: release.created_at ?? null,
+            body: release.body?.trim() || '',
+            prerelease: this.isPrerelease(release.prerelease),
+            htmlUrl: this.buildReleaseUrl(repo, tagName),
+          };
+        });
 
       const latestStableRelease = releases.find(
         (release) => !release.prerelease,
@@ -115,7 +121,7 @@ export class ReleasesService {
 
       return {
         status: 'ok',
-        source: 'github',
+        source: 'gitee',
         repo: `${repo.owner}/${repo.name}`,
         fetchedAt: new Date().toISOString(),
         latestReleaseVersion:
@@ -125,34 +131,49 @@ export class ReleasesService {
       };
     } catch (error) {
       this.logger.warn(
-        `Failed to fetch GitHub releases: ${error instanceof Error ? error.message : String(error)}`,
+        `Failed to fetch Gitee releases: ${error instanceof Error ? error.message : String(error)}`,
       );
       return this.buildFallbackResponse(
         'unavailable',
         `${repo.owner}/${repo.name}`,
-        'GitHub releases could not be fetched right now.',
+        'Gitee releases could not be fetched right now.',
       );
     }
   }
 
   private getConfiguredRepo(): { owner: string; name: string } | null {
     const configuredOwner = this.configService.get<string>(
-      'GITHUB_RELEASES_OWNER',
+      'GITEE_RELEASES_OWNER',
     );
     const configuredRepo = this.configService.get<string>(
-      'GITHUB_RELEASES_REPO',
+      'GITEE_RELEASES_REPO',
     );
 
     const owner =
-      configuredOwner === undefined ? 'FalkenDev' : configuredOwner.trim();
+      configuredOwner === undefined ? 'yang_taoo' : configuredOwner.trim();
     const name =
-      configuredRepo === undefined ? 'Grindify' : configuredRepo.trim();
+      configuredRepo === undefined ? 'grindify' : configuredRepo.trim();
 
     if (!owner || !name) {
       return null;
     }
 
     return { owner, name };
+  }
+
+  private isPrerelease(value: boolean | string | undefined): boolean {
+    if (typeof value === 'string') {
+      return value.toLowerCase() === 'true';
+    }
+
+    return value === true;
+  }
+
+  private buildReleaseUrl(
+    repo: { owner: string; name: string },
+    tagName: string,
+  ): string {
+    return `https://gitee.com/${encodeURIComponent(repo.owner)}/${encodeURIComponent(repo.name)}/releases/tag/${encodeURIComponent(tagName)}`;
   }
 
   private buildFallbackResponse(
@@ -162,7 +183,7 @@ export class ReleasesService {
   ): ReleaseHistoryResponse {
     return {
       status,
-      source: 'github',
+      source: 'gitee',
       repo,
       fetchedAt: new Date().toISOString(),
       latestReleaseVersion: null,

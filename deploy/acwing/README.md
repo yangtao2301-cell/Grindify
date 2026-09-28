@@ -25,7 +25,7 @@ Server public IP: `39.102.99.126` (Ubuntu 24.04)
    ```
 
 4. Install Certbot and issue a Let's Encrypt certificate for the domain using the Nginx HTTP challenge. Keep port 80 reachable for automatic renewal. Never commit or share the private key.
-5. Install the host Nginx and enable [`nginx.conf`](nginx.conf) as a site configuration. The `/v1/` and `/uploads/` paths go to the API; all other paths go to the frontend. The admin panel stays local-only on port 3001.
+5. Install the host Nginx and enable [`nginx.conf`](nginx.conf) as a site configuration. The `/v1/` and `/uploads/` paths go to the API, `/admin/` goes to the admin panel with HTTP Basic Auth, and all other paths go to the frontend. The admin panel container itself stays loopback-only on port 3001. Before enabling the `/admin/` route, install `apache2-utils` and run `bash deploy/acwing/provision-admin-basic-auth.sh` as the SSH deployment user with temporary sudo access. Read `~/.grindify-admin-access` privately over SSH and remove that plaintext file after saving the password. Do not place the password in a command line, repository, or chat.
 6. This host has limited memory. Run frontend type-checking on a development machine (`cd frontend && npm run type-check`), then build the server images **one at a time**. Do not run all image builds concurrently:
 
    ```sh
@@ -46,4 +46,4 @@ Server public IP: `39.102.99.126` (Ubuntu 24.04)
 
 8. Check `docker compose -f docker-compose.prod.yml ps`, then `sudo nginx -t` and reload Nginx. Verify `https://app7592.acapp.acwing.com.cn/v1/auth/health` returns `{"ok":true,"at":"auth"}` and the site root, `/acapp.css`, `/acapp.js`, `/manifest.webmanifest`, and `/sw.js` respond. Test register/login and a photo upload before installing the PWA on a phone.
 
-The production Compose file publishes the API, frontend, and admin panel on loopback only and keeps PostgreSQL inside the Docker network. The front-end API URL is baked into the production image, so rebuild after changing it. The admin panel is not publicly routed by Nginx.
+The production Compose file publishes the API, frontend, and admin panel on loopback only and keeps PostgreSQL inside the Docker network. The front-end API URL is baked into the production image, so rebuild after changing it. The admin panel is reachable at `https://app7592.acapp.acwing.com.cn/admin/` only after the Nginx password prompt, and its API still requires an authenticated `superadmin` account. To promote an existing registered account, first inspect it with `ADMIN_CHECK_ONLY=true` using [`promote-admin.js`](promote-admin.js) in the backend container; then run it without `ADMIN_CHECK_ONLY` for that exact email. Never create or change a user's password during promotion.

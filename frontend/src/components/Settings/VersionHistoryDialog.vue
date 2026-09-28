@@ -250,7 +250,7 @@
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    {{ $t('settings.viewReleaseOnGitHub') }}
+                    {{ $t('settings.viewReleaseOnGitee') }}
                   </v-btn>
                 </div>
               </v-expansion-panel-text>
@@ -299,7 +299,7 @@ const deployedBuildInfo = ref<AppBuildInfo | null>(null)
 const isRefreshing = ref(false)
 const releaseHistory = ref<ReleaseHistoryResponse>({
   status: 'unavailable',
-  source: 'github',
+  source: 'gitee',
   repo: null,
   fetchedAt: new Date().toISOString(),
   latestReleaseVersion: null,

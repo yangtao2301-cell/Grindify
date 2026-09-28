@@ -228,7 +228,7 @@ export default {
     versionHistoryServerBehindLatest: '已有更新的官方版本，但服务器尚未部署。',
     versionHistoryDeployedAheadOfRelease: '部署版本比最新发布信息更新，可能处于预发布或开发流程中。',
     versionHistoryReleaseMismatch: '有发布信息，但无法准确比较部署版本。',
-    versionHistoryReleaseProxyUnavailable: '暂时无法从 GitHub 获取发布历史。',
+    versionHistoryReleaseProxyUnavailable: '暂时无法从 Gitee 获取发布历史。',
     versionHistoryReleaseProxyUnconfigured: '此部署尚未配置发布历史。',
     versionHistoryPrerelease: '预发布版',
     versionHistoryUpdateReady: '新的 PWA 版本已准备好，可安装到此设备。',
@@ -236,7 +236,7 @@ export default {
     versionHistoryUpdateCheckUnavailable: '暂时无法检查更新，请在应用联网后重试。',
     noReleaseHistory: '暂无发布历史。',
     noReleaseNotes: '此版本没有提供发布说明。',
-    viewReleaseOnGitHub: '在 GitHub 查看',
+    viewReleaseOnGitee: '在 Gitee 查看',
   },
   auth: {
     ...en.auth,

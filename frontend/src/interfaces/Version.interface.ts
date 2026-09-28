@@ -31,7 +31,7 @@ export interface ReleaseHistoryEntry {
 
 export interface ReleaseHistoryResponse {
   status: 'ok' | 'unconfigured' | 'unavailable'
-  source: 'github'
+  source: 'gitee'
   repo: string | null
   fetchedAt: string
   latestReleaseVersion: string | null

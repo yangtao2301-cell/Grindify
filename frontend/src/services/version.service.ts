@@ -19,7 +19,7 @@ const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:1337/v1'
 
 const releaseHistoryFallback: ReleaseHistoryResponse = {
   status: 'unavailable',
-  source: 'github',
+  source: 'gitee',
   repo: null,
   fetchedAt: new Date().toISOString(),
   latestReleaseVersion: null,

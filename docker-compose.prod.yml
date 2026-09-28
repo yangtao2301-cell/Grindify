@@ -63,6 +63,7 @@ services:
       target: production
       args:
         VITE_API_URL: ${VITE_API_URL}
+        ADMIN_BASE_PATH: /admin/
     container_name: grindify_adminpanel
     restart: unless-stopped
     depends_on:

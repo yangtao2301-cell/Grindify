@@ -57,7 +57,7 @@ export interface ReleaseEntry {
 
 export interface ReleasesResponse {
   status: 'ok' | 'unconfigured' | 'unavailable'
-  source: 'github'
+  source: 'gitee'
   repo: string | null
   fetchedAt: string
   latestReleaseVersion: string | null

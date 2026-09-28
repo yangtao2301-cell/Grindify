@@ -252,7 +252,7 @@ export default {
     versionHistoryReleaseMismatch:
       'Release-metadata finns, men den utrullade versionen kunde inte jämföras på ett tydligt sätt.',
     versionHistoryReleaseProxyUnavailable:
-      'Versionshistorik kunde inte hämtas från GitHub just nu.',
+      'Versionshistorik kunde inte hämtas från Gitee just nu.',
     versionHistoryReleaseProxyUnconfigured:
       'Versionshistorik är inte konfigurerad för den här installationen.',
     versionHistoryPrerelease: 'Förhandsversion',
@@ -263,7 +263,7 @@ export default {
       'Det gick inte att söka efter uppdateringar just nu. Försök igen när appen är online.',
     noReleaseHistory: 'Ingen versionshistorik är tillgänglig ännu.',
     noReleaseNotes: 'Inga release notes angavs för den här releasen.',
-    viewReleaseOnGitHub: 'Visa på GitHub',
+    viewReleaseOnGitee: 'Visa på Gitee',
   },
   auth: {
     loginFailed: 'Inloggningen misslyckades. Kontrollera dina uppgifter.',

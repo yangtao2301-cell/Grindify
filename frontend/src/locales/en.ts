@@ -254,7 +254,7 @@ export default {
     versionHistoryReleaseMismatch:
       'Release metadata is available, but the deployed version could not be compared cleanly.',
     versionHistoryReleaseProxyUnavailable:
-      'Release history could not be fetched from GitHub right now.',
+      'Release history could not be fetched from Gitee right now.',
     versionHistoryReleaseProxyUnconfigured:
       'Release history is not configured for this deployment.',
     versionHistoryPrerelease: 'Prerelease',
@@ -264,7 +264,7 @@ export default {
       'Could not check for updates right now. Try again when the app is online.',
     noReleaseHistory: 'No release history is available yet.',
     noReleaseNotes: 'No release notes were provided for this release.',
-    viewReleaseOnGitHub: 'View on GitHub',
+    viewReleaseOnGitee: 'View on Gitee',
   },
   auth: {
     gymAccess: 'Gym Access',

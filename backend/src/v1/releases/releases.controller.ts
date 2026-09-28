@@ -26,7 +26,7 @@ export class ReleasesController {
   constructor(private readonly releasesService: ReleasesService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Get normalized public GitHub release history' })
+  @ApiOperation({ summary: 'Get normalized public Gitee release history' })
   getReleaseHistory(): Promise<ReleaseHistoryResponse> {
     return this.releasesService.getReleaseHistory();
   }

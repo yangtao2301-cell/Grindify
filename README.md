@@ -226,7 +226,7 @@ Grindify 在“设置”中提供“版本历史”视图，用于比较：
 
 - `installedVersion`：当前安装在设备上或由 PWA 缓存的构建版本
 - `deployedVersion`：实时前端通过 `/version.json` 提供的版本
-- `latestReleaseVersion`：由后端代理返回的最新官方 GitHub Release 版本
+- `latestReleaseVersion`：由后端代理返回的最新官方 Gitee Release 版本
 
 前端镜像会内置一个 `/version.json` 文件，其中包含：
 
@@ -242,21 +242,21 @@ Grindify 在“设置”中提供“版本历史”视图，用于比较：
 - `deployedVersion < latestReleaseVersion`：存在更新的官方版本，但服务器尚未部署该版本
 - `installedVersion > latestReleaseVersion`：设备运行的是开发版或预发布版；此情况会显示为中性的版本不匹配
 
-### GitHub Releases 代理
+### Gitee Releases 代理
 
-后端通过 `GET /v1/releases` 提供发布历史。默认情况下，它指向 `FalkenDev/Grindify` 仓库；你也可以通过以下变量进行覆盖：
+后端通过 `GET /v1/releases` 提供发布历史。默认情况下，它指向 `yang_taoo/grindify` 仓库；你也可以通过以下变量进行覆盖：
 
 ```env
-GITHUB_RELEASES_OWNER=FalkenDev
-GITHUB_RELEASES_REPO=Grindify
-GITHUB_RELEASES_TOKEN=
+GITEE_RELEASES_OWNER=yang_taoo
+GITEE_RELEASES_REPO=grindify
+GITEE_RELEASES_TOKEN=
 ```
 
-如果希望在自托管部署中获得更高的 GitHub API 限额，请使用 `GITHUB_RELEASES_TOKEN`。
+如果仓库不可公开访问，请使用 `GITEE_RELEASES_TOKEN` 配置 Gitee API 访问令牌。
 
 ### 维护者说明
 
-标签、发布和部署流程仅针对维护者，相关文档与 Homelab 仓库中的 Grindify 技术栈一同维护。贡献者和普通自托管用户无需创建 GitHub Releases 即可在本地运行 Grindify。
+标签、发布和部署流程仅针对维护者，相关文档与 Homelab 仓库中的 Grindify 技术栈一同维护。贡献者和普通自托管用户无需创建 Gitee Releases 即可在本地运行 Grindify。
 
 ## 参与贡献
 
