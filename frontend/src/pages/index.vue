@@ -102,7 +102,7 @@
         <p class="text-caption text-textSecondary mt-1">
           {{
             streakInfo?.freezeUsedThisWeek
-              ? `$t('home.freezeUsed')`
+              ? $t('home.freezeUsed')
               : `${(streakInfo?.weeklyWorkoutGoal || 3) - (streakInfo?.currentWeekWorkouts || 0)} ${$t('home.toNextMilestone')}`
           }}
         </p>

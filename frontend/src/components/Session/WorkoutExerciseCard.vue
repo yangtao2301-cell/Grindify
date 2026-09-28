@@ -209,7 +209,7 @@ import type {
   WorkoutSet,
 } from '@/interfaces/Workout.interface';
 
-const { t } = useI18n({ useScope: 'global' });
+const { t, locale } = useI18n({ useScope: 'global' });
 const { lang } = useUserLanguage();
 
 const props = defineProps({
@@ -273,6 +273,7 @@ const propagateSetsIndices = computed(() => {
 
   if (indices.length === 0) return '';
   if (indices.length === 1) return indices[0].toString();
+  if (locale.value === 'zh-CN') return indices.join('、');
   const last = indices.pop();
   return indices.join(', ') + ` ${t('common.and')} ` + last;
 });

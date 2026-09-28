@@ -74,7 +74,7 @@ const duplicate = async (transferStats: boolean) => {
   try {
     await duplicateExercise(props.exerciseId, transferStats)
     await exerciseStore.setExercises(true)
-    toast.success(t('exercise.personalized'), { progressBar: true, duration: 1200 })
+    toast.success(t('exercise.personalizeSuccess'), { progressBar: true, duration: 1200 })
     emit('update:modelValue', false)
     emit('duplicated')
   } catch {

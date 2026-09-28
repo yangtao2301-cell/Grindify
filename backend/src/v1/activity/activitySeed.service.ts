@@ -18,6 +18,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Activity } from './activity.entity';
 import { activitiesToSeed } from '../seed/data/activities.data';
+import { chineseActivityNames } from '../seed/data/chinese.data';
 
 @Injectable()
 export class ActivitySeedService implements OnModuleInit {
@@ -38,7 +39,26 @@ export class ActivitySeedService implements OnModuleInit {
 
   async seedGlobalActivities(): Promise<void> {
     const existing = await this.activityRepo.count({ where: { isGlobal: true } });
-    if (existing > 0) return;
+    if (existing > 0) {
+      const activities = await this.activityRepo.find({ where: { isGlobal: true } });
+      const missingChinese = activities.filter(
+        (activity) =>
+          !activity.title?.zho &&
+          !!activity.title?.default &&
+          !!chineseActivityNames[activity.title.default],
+      );
+      for (const activity of missingChinese) {
+        activity.title = {
+          ...activity.title,
+          zho: chineseActivityNames[activity.title.default!],
+        };
+      }
+      if (missingChinese.length > 0) {
+        await this.activityRepo.save(missingChinese);
+        this.logger.log(`Added Chinese names to ${missingChinese.length} global activity/activities`);
+      }
+      return;
+    }
 
     this.logger.log('No global activities found – seeding defaults…');
 
@@ -50,6 +70,7 @@ export class ActivitySeedService implements OnModuleInit {
           default: def.name,
           eng: def.name,
           swe: def.swedenName ?? def.name,
+          zho: chineseActivityNames[def.name] ?? def.name,
         },
         descriptionI18n: def.description
           ? {

@@ -508,6 +508,7 @@ export default {
     failedToUpdateLog: 'Failed to update session',
     global: 'Global',
     personalized: 'Personalized',
+    personalizeSuccess: 'Activity copied to your library',
     personalize: 'Personalize',
     personalizeTitle: 'Personalize {name}?',
     personalizeBody:
@@ -551,6 +552,7 @@ export default {
     myExercise: 'My Exercise',
     global: 'Global',
     personalized: 'Personalized',
+    personalizeSuccess: 'Exercise copied to your library',
     personalize: 'Personalize',
     personalizedBanner: 'This exercise has been personalized from the global library for you.',
     personalizeTitle: 'Personalize {name}?',

@@ -504,6 +504,7 @@ export default {
     failedToUpdateLog: 'Kunde inte uppdatera pass',
     global: 'Global',
     personalized: 'Personaliserad',
+    personalizeSuccess: 'Aktiviteten kopierades till ditt bibliotek',
     personalize: 'Personalisera',
     personalizeTitle: 'Personalisera {name}?',
     personalizeBody:
@@ -536,6 +537,7 @@ export default {
     myExercise: 'Min övning',
     global: 'Global',
     personalized: 'Personaliserad',
+    personalizeSuccess: 'Övningen kopierades till ditt bibliotek',
     personalize: 'Personalisera',
     personalizedBanner: 'Den här övningen har personaliserats från det globala biblioteket åt dig.',
     personalizeTitle: 'Personalisera {name}?',

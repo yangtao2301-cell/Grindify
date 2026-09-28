@@ -74,7 +74,7 @@ const duplicate = async (transferStats: boolean) => {
   try {
     await duplicateActivity(props.activityId, transferStats)
     await activityStore.fetchActivities()
-    toast.success(t('activity.personalized'), { progressBar: true, duration: 1200 })
+    toast.success(t('activity.personalizeSuccess'), { progressBar: true, duration: 1200 })
     emit('update:modelValue', false)
     emit('duplicated')
   } catch {

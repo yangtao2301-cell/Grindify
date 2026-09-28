@@ -256,7 +256,7 @@ const openViewExercise = (exercise: Exercise) => {
 }
 
 const muscleGroups = computed(() =>
-  muscleGroupStore.muscleGroups.map(g => ({ name: g.name, translatedName: t(g.name), id: g.id }))
+  muscleGroupStore.muscleGroups.map(g => ({ name: g.name, translatedName: t(`muscleGroups.${g.name}`), id: g.id }))
 )
 
 const filteredExercises = computed<Exercise[]>(() =>

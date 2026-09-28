@@ -19,6 +19,7 @@ import { Repository } from 'typeorm';
 import { Exercise } from './exercise.entity';
 import { MuscleGroupService } from '../muscleGroup/muscleGroup.service';
 import { exercisesToSeed } from '../seed/data/exercises.data';
+import { chineseExerciseNames } from '../seed/data/chinese.data';
 
 @Injectable()
 export class ExerciseSeedService implements OnModuleInit {
@@ -40,7 +41,26 @@ export class ExerciseSeedService implements OnModuleInit {
 
   async seedGlobalExercises(): Promise<void> {
     const existing = await this.exerciseRepo.count({ where: { isGlobal: true } });
-    if (existing > 0) return;
+    if (existing > 0) {
+      const exercises = await this.exerciseRepo.find({ where: { isGlobal: true } });
+      const missingChinese = exercises.filter(
+        (exercise) =>
+          !exercise.title?.zho &&
+          !!exercise.title?.default &&
+          !!chineseExerciseNames[exercise.title.default],
+      );
+      for (const exercise of missingChinese) {
+        exercise.title = {
+          ...exercise.title,
+          zho: chineseExerciseNames[exercise.title.default!],
+        };
+      }
+      if (missingChinese.length > 0) {
+        await this.exerciseRepo.save(missingChinese);
+        this.logger.log(`Added Chinese names to ${missingChinese.length} global exercise(s)`);
+      }
+      return;
+    }
 
     this.logger.log('No global exercises found – seeding defaults…');
 
@@ -63,6 +83,7 @@ export class ExerciseSeedService implements OnModuleInit {
           default: def.defaultName,
           eng: def.defaultName,
           swe: def.swedenName ?? def.defaultName,
+          zho: chineseExerciseNames[def.defaultName] ?? def.defaultName,
         },
         descriptionI18n: {
           default: def.defaultDescription,

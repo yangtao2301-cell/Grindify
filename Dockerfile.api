@@ -1,4 +1,4 @@
-FROM node:22-slim
+FROM node:22-slim AS development
 
 # Install sharp dependencies and procps for Debian ARM
 RUN apt-get update && apt-get install -y \
@@ -24,3 +24,9 @@ EXPOSE 1337
 
 # Run dev script (with hot reload)
 CMD ["npm", "run", "start:dev"]
+
+# Compile the Nest application once for the production container.
+FROM development AS production
+RUN npm run build && npm prune --omit=dev
+ENV NODE_ENV=production
+CMD ["node", "dist/main.js"]
