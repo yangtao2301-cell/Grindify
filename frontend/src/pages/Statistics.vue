@@ -261,7 +261,7 @@ const showWorkoutDetail = ref(false)
 const selectedExercise = ref<Exercise | null>(null)
 const selectedWorkout = ref<Workout | null>(null)
 
-const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8393/v1'
+const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:1337/v1'
 
 function getImageUrl(image: string | null | undefined): string {
   if (!image) return ''

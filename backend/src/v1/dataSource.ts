@@ -16,6 +16,7 @@
 import 'reflect-metadata';
 import { DataSource } from 'typeorm';
 import * as dotenv from 'dotenv';
+import { resolve } from 'path';
 
 import { User } from './user/user.entity';
 import { Exercise } from './exercise/exercise.entity';
@@ -34,6 +35,7 @@ import { ExerciseRecord } from './statistics/exerciseRecord.entity';
 import { WeightLog } from './weightLog/weightLog.entity';
 import { ProgressPhoto } from './progressPhoto/progressPhoto.entity';
 
+dotenv.config({ path: resolve(process.cwd(), '../.env') });
 dotenv.config();
 
 export const AppDataSource = new DataSource({

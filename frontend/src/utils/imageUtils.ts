@@ -24,7 +24,7 @@ export const getImageUrl = (imagePath: string | null | undefined): string | null
     return imagePath;
   }
   
-  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8393/v1';
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:1337/v1';
   // Remove /v1 from API URL for static assets
   const baseUrl = apiUrl.replace('/v1', '');
   return `${baseUrl}${imagePath}`;

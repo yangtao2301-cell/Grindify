@@ -16,7 +16,7 @@
 import { fetchWrapper } from '@/utils/fetchWrapper'
 import type { ProgressPhoto, CreateProgressPhotoDto } from '@/interfaces/ProgressPhoto.interface'
 
-const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8393/v1'
+const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:1337/v1'
 
 export const fetchAllProgressPhotos = async (): Promise<ProgressPhoto[]> => {
   const data = await fetchWrapper<ProgressPhoto[]>(`${apiUrl}/progress-photos`)

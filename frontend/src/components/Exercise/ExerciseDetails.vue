@@ -258,7 +258,7 @@ const isDeleteDialogOpen = ref(false)
 const isDuplicateDialogOpen = ref(false)
 const isDeleting = ref(false)
 
-const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8393/v1'
+const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:1337/v1'
 
 const getMediaUrl = (url: string) => {
   if (url.startsWith('http')) return url

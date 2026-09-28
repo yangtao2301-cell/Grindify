@@ -58,7 +58,7 @@ const { greeting } = useGreeting(streakInfoRef)
 
 const user = computed<User | null>(() => authStore.user)
 
-const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8393/v1'
+const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:1337/v1'
 
 const getImageUrl = (imagePath: string) => {
   if (imagePath.startsWith('http')) {

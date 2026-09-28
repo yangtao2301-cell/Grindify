@@ -29,7 +29,7 @@ import type {
   HeatmapDay,
 } from '@/interfaces/Statistics.interface'
 
-const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8393/v1'
+const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:1337/v1'
 
 export const fetchOverviewStatistics = async (): Promise<OverviewStatistics> => {
   const data = await fetchWrapper<OverviewStatistics>(`${apiUrl}/statistics/overview`)

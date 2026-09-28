@@ -15,6 +15,11 @@
 
 import 'reflect-metadata';
 import { DataSource } from 'typeorm';
+import * as dotenv from 'dotenv';
+import { resolve } from 'path';
+
+dotenv.config({ path: resolve(process.cwd(), '../.env') });
+dotenv.config();
 
 import { User } from '../user/user.entity';
 import { Exercise } from '../exercise/exercise.entity';

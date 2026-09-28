@@ -22,7 +22,7 @@ import type {
   DeleteScheduledSessionParams,
 } from '@/interfaces/ScheduledSession.interface'
 
-const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8393/v1'
+const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:1337/v1'
 
 export const fetchAllScheduledSessions = async (): Promise<ScheduledSession[]> => {
   try {

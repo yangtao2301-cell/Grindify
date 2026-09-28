@@ -264,7 +264,7 @@ const emit = defineEmits<{
 const authStore = useAuthStore()
 const { t } = useI18n({ useScope: 'global' })
 
-const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8393/v1'
+const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:1337/v1'
 
 const getImageUrl = (imagePath: string) => {
   if (imagePath.startsWith('http')) return imagePath

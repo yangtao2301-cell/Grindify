@@ -16,7 +16,7 @@
 import { fetchWrapper } from '@/utils/fetchWrapper';
 import type { Activity, CreateActivityDto } from '@/interfaces/Activity.interface';
 
-const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8393/v1';
+const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:1337/v1';
 
 export const fetchAllActivities = async (filter: 'all' | 'global' | 'mine' = 'all') => {
   try {

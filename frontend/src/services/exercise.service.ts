@@ -16,7 +16,7 @@
 import { fetchWrapper } from '@/utils/fetchWrapper'
 import type { CreateExercise, Exercise, UpdateExercise } from '@/interfaces/Exercise.interface'
 
-const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8393/v1'
+const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:1337/v1'
 
 export const fetchAllExercises = async (filter: 'all' | 'global' | 'mine' = 'all') => {
   try {

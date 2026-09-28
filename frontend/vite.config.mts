@@ -36,6 +36,7 @@ const versionManifestPlugin: Plugin = {
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  envDir: '..',
   plugins: [
     versionManifestPlugin,
     VueRouter({
