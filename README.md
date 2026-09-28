@@ -4,117 +4,117 @@
 
 <h1 align="center">Grindify</h1>
 
-  <p align="center">A self-hosted fitness tracking web application built with NestJS and Vue 3.</p>
+  <p align="center">一个基于 NestJS 和 Vue 3 构建的自托管健身追踪 Web 应用。</p>
     <p align="center">
-<a href="LICENSE" target="_blank"><img src="https://img.shields.io/badge/license-AGPL--3.0-blue.svg" alt="License" /></a>
-<a href="https://nestjs.com/" target="_blank"><img src="https://img.shields.io/badge/backend-NestJS-E0234E.svg" alt="Backend" /></a>
-<a href="https://vuejs.org/" target="_blank"><img src="https://img.shields.io/badge/frontend-Vue.js-4FC08D.svg" alt="Frontend" /></a>
-<a href="https://www.postgresql.org/" target="_blank"><img src="https://img.shields.io/badge/database-PostgreSQL-336791.svg" alt="Database" /></a>
+<a href="LICENSE" target="_blank"><img src="https://img.shields.io/badge/license-AGPL--3.0-blue.svg" alt="许可证" /></a>
+<a href="https://nestjs.com/" target="_blank"><img src="https://img.shields.io/badge/backend-NestJS-E0234E.svg" alt="后端" /></a>
+<a href="https://vuejs.org/" target="_blank"><img src="https://img.shields.io/badge/frontend-Vue.js-4FC08D.svg" alt="前端" /></a>
+<a href="https://www.postgresql.org/" target="_blank"><img src="https://img.shields.io/badge/database-PostgreSQL-336791.svg" alt="数据库" /></a>
 </p>
 
 ---
 
-## Overview
+## 项目概览
 
-Grindify is a full-stack workout application designed for users who want full ownership of their data without subscription fees or connectivity requirements. It offers a complete suite of tools to plan routines, log sessions in real-time, and visualize progress over time. The platform is designed to be mobile-first for gym usage while providing a robust desktop interface for planning and analysis.
+Grindify 是一款全栈训练应用，面向希望完全掌控个人数据、无需订阅费用或网络连接的用户。它提供了一整套工具，用于规划训练计划、实时记录训练，并随时间推移可视化进步情况。平台采用移动端优先设计，适合在健身房使用，同时也为计划制定和数据分析提供了完善的桌面端界面。
 
-## Features
+## 功能特性
 
-- **Workout Management**: Create and organize custom workout routines with specific exercises, sets, and targets.
-- **Session Tracking**: Log workouts in real-time with an interface optimized for mobile devices.
-- **Exercise Library**: Manage a database of exercises with support for custom images and muscle group categorization.
-- **Progress Analytics**: View detailed statistics including volume, frequency, and personal records per exercise.
-- **Body Metrics**: Track weight logs and upload progress photos to monitor physical changes.
-- **Privacy Focused**: Complete data ownership with no third-party tracking or external dependencies.
+- **训练管理**：创建并整理自定义训练计划，为每个动作设置具体的组数和目标。
+- **训练记录**：通过针对移动设备优化的界面实时记录训练。
+- **动作库**：管理动作数据库，支持自定义图片和肌群分类。
+- **进步分析**：查看每个动作的训练量、频率和个人纪录等详细统计数据。
+- **身体指标**：记录体重并上传进度照片，跟踪身体变化。
+- **隐私优先**：数据完全由用户掌控，不使用第三方追踪，也不依赖外部服务。
 
-## Technology Stack
+## 技术栈
 
-### Backend
+### 后端
 
-- **Framework**: NestJS (v11)
-- **Database**: PostgreSQL 17
-- **ORM**: TypeORM
-- **Authentication**: Passport.js (JWT & Local Strategies)
-- **Validation**: class-validator & class-transformer
-- **Media**: Sharp (Image processing) & Multer (File uploads)
-- **Documentation**: Swagger/OpenAPI
+- **框架**：NestJS（v11）
+- **数据库**：PostgreSQL 17
+- **ORM**：TypeORM
+- **身份验证**：Passport.js（JWT 和本地策略）
+- **数据校验**：class-validator 和 class-transformer
+- **媒体处理**：Sharp（图片处理）和 Multer（文件上传）
+- **文档**：Swagger/OpenAPI
 
-### Frontend
+### 前端
 
-- **Framework**: Vue 3 (Composition API)
-- **Build Tool**: Vite
-- **UI Library**: Vuetify 3
-- **State Management**: Pinia (with persistence)
-- **Visualization**: Chart.js & Vue-Chartjs
-- **Routing**: Vue Router
+- **框架**：Vue 3（组合式 API）
+- **构建工具**：Vite
+- **UI 库**：Vuetify 3
+- **状态管理**：Pinia（支持持久化）
+- **可视化**：Chart.js 和 Vue-Chartjs
+- **路由**：Vue Router
 
-## Getting Started
+## 快速开始
 
-### Prerequisites
+### 环境要求
 
-- **Docker** & **Docker Compose** (Recommended)
-- OR
+- **Docker** 和 **Docker Compose**（推荐）
+- 或
 - **Node.js** v18+
 - **PostgreSQL** v15+
 
-### Installation (Docker - Recommended)
+### 安装（推荐使用 Docker）
 
-1. **Clone the repository**
+1. **克隆仓库**
 
    ```bash
    git clone https://github.com/FalkenDev/Grindify.git
    cd Grindify
    ```
 
-2. **Start the application**
+2. **启动应用**
 
    ```bash
    docker compose up -d --build
    ```
 
-   The database migrations will run automatically on startup.
+   应用启动时会自动执行数据库迁移。
 
-3. **Seed initial data** (optional)
-   Population of default exercises and muscle groups:
+3. **初始化种子数据**（可选）
+   填充默认动作和肌群：
 
    ```bash
    docker exec -it grindify_backend npm run seed
    ```
 
-4. **Access the application**
-   - **Frontend**: http://localhost:3000
-   - **API Documentation**: http://localhost:1337/api
-   - **Backend API**: http://localhost:1337
+4. **访问应用**
+   - **前端**：http://localhost:3000
+   - **API 文档**：http://localhost:1337/api
+   - **后端 API**：http://localhost:1337
 
-### Installation (Manual)
+### 安装（手动安装）
 
-1. **Clone the repository**
+1. **克隆仓库**
 
    ```bash
    git clone https://github.com/FalkenDev/Grindify.git
    cd Grindify
    ```
 
-2. **Configure Environment**
-   Copy the example environment file and configure your database credentials:
+2. **配置环境**
+   复制示例环境变量文件，并配置数据库凭据：
 
    ```bash
    cp .env.example .env
    ```
 
-3. **Backend Setup**
+3. **配置后端**
 
    ```bash
    cd backend
    npm install
 
-   # Ensure PostgreSQL is running and update .env with credentials
+   # 确保 PostgreSQL 正在运行，并使用凭据更新 .env
 
    npm run build
    npm run start:prod
    ```
 
-4. **Frontend Setup**
+4. **配置前端**
    ```bash
    cd frontend
    npm install
@@ -122,129 +122,129 @@ Grindify is a full-stack workout application designed for users who want full ow
    npm run preview
    ```
 
-## Development
+## 开发
 
-### Project Structure
+### 项目结构
 
 ```
 Grindify/
-├── backend/          # NestJS API application
-│   ├── src/          # Source code
-│   └── test/         # E2E tests
-├── frontend/         # Vue 3 application
-│   └── src/          # Source code
-├── docker-compose.yml # Development orchestration
-└── Dockerfile.*      # Container definitions
+├── backend/          # NestJS API 应用
+│   ├── src/          # 源代码
+│   └── test/         # E2E 测试
+├── frontend/         # Vue 3 应用
+│   └── src/          # 源代码
+├── docker-compose.yml # 开发环境编排
+└── Dockerfile.*      # 容器定义
 ```
 
-### Running in Development Mode
+### 以开发模式运行
 
-To start both services with hot-reload enabled:
+启动启用热重载的两个服务：
 
 ```bash
 docker compose -f docker-compose.yml up
 ```
 
-- Backend changes will trigger a transparent restart.
-- Frontend changes will be reflected instantly via Vite HMR.
+- 后端代码发生变化时会自动重启。
+- 前端代码会通过 Vite HMR 立即生效。
 
 ## GitHub OAuth
 
-Grindify supports optional GitHub sign-in. Leave `GITHUB_CLIENT_ID` blank to disable it entirely — the app works fine without it.
+Grindify 支持可选的 GitHub 登录。将 `GITHUB_CLIENT_ID` 留空即可完全禁用此功能——不配置它，应用也能正常运行。
 
-### Setup
+### 配置步骤
 
-1. Go to [github.com/settings/developers](https://github.com/settings/developers) → **OAuth Apps** → **New OAuth App**
-2. Fill in:
-   - **Application name**: Grindify
-   - **Homepage URL**: `http://localhost:3000` (or your domain)
-   - **Authorization callback URL**: `http://localhost:1337/v1/auth/github/callback`
-3. Copy the **Client ID** and generate a **Client Secret**
-4. Add to your `.env`:
+1. 访问 [github.com/settings/developers](https://github.com/settings/developers) → **OAuth Apps** → **New OAuth App**
+2. 填写以下信息：
+   - **Application name**：Grindify
+   - **Homepage URL**：`http://localhost:3000`（或你的域名）
+   - **Authorization callback URL**：`http://localhost:1337/v1/auth/github/callback`
+3. 复制 **Client ID** 并生成 **Client Secret**
+4. 将以下配置添加到 `.env`：
 
 ```env
 GITHUB_CLIENT_ID=your_client_id
 GITHUB_CLIENT_SECRET=your_client_secret
-BACKEND_URL=http://localhost:1337   # must match what GitHub redirects to
+BACKEND_URL=http://localhost:1337   # 必须与 GitHub 重定向到的地址一致
 ```
 
-5. Restart the backend
+5. 重启后端
 
-If `GITHUB_CLIENT_ID` is not set, the GitHub button on the login page still appears but the strategy is not loaded — set it to enable the full flow.
+如果未设置 `GITHUB_CLIENT_ID`，登录页面仍会显示 GitHub 按钮，但不会加载对应策略；设置该变量后即可启用完整流程。
 
-**Account linking:** If a GitHub email matches an existing password-based account, the accounts are automatically linked. The user can then sign in with either method.
+**账号关联**：如果 GitHub 邮箱与已有的密码账号匹配，系统会自动关联两个账号。之后用户可以使用任一方式登录。
 
-## Email Verification & Password Reset
+## 邮箱验证与密码重置
 
-Grindify supports optional email-based verification and password reset using [Resend](https://resend.com).
+Grindify 支持使用 [Resend](https://resend.com) 实现可选的邮箱验证和密码重置。
 
-### Configuration
+### 配置
 
-Set these variables in your `.env` file:
+在 `.env` 文件中设置以下变量：
 
 ```env
-# Enable email verification (false by default — users can log in immediately after registration)
+# 启用邮箱验证（默认为 false——用户注册后可以立即登录）
 REQUIRE_EMAIL_VERIFICATION=false
 
-# Resend API key — required only when REQUIRE_EMAIL_VERIFICATION=true
+# Resend API 密钥——仅在 REQUIRE_EMAIL_VERIFICATION=true 时必需
 RESEND_API_KEY=re_your_api_key_here
 
-# The "From" address for outgoing emails
+# 发件人地址
 EMAIL_FROM=noreply@yourdomain.com
 
-# The public URL of your frontend (used in email links)
+# 前端公开 URL（用于邮件中的链接）
 FRONTEND_URL=https://yourdomain.com
 ```
 
-### Setting up Resend
+### 设置 Resend
 
-1. Create a free account at [resend.com](https://resend.com).
-2. Go to **API Keys** and create a new key.
-3. Add a verified sending domain under **Domains** (required to send from your own domain).
-4. Set `RESEND_API_KEY` and `EMAIL_FROM` in your `.env`.
-5. Set `REQUIRE_EMAIL_VERIFICATION=true` to enforce verification.
+1. 在 [resend.com](https://resend.com) 创建免费账号。
+2. 进入 **API Keys** 并创建新密钥。
+3. 在 **Domains** 中添加已验证的发信域名（使用自有域名发信时必需）。
+4. 在 `.env` 中设置 `RESEND_API_KEY` 和 `EMAIL_FROM`。
+5. 设置 `REQUIRE_EMAIL_VERIFICATION=true` 以强制用户完成验证。
 
-### How it works
+### 工作方式
 
-| `REQUIRE_EMAIL_VERIFICATION` | Behaviour                                                                                                                    |
-| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `false` (default)            | Users are auto-verified on registration. No email is sent. Password reset still works if Resend is configured.               |
-| `true`                       | Users receive a 6-digit code by email after registration and must verify before logging in. Login is blocked until verified. |
+| `REQUIRE_EMAIL_VERIFICATION` | 行为                                                                                                                       |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `false`（默认）              | 用户注册后会自动验证，不会发送邮件。如果配置了 Resend，密码重置仍然可用。                                                |
+| `true`                       | 用户注册后会通过邮件收到 6 位验证码，必须完成验证后才能登录。验证完成前，登录会被阻止。                                    |
 
-**Password reset** (available regardless of the verification toggle):
+**密码重置**（无论验证开关如何设置都可用）：
 
-1. User clicks "Forgot password?" on the login page.
-2. They enter their email — a 6-digit reset code is sent.
-3. They enter the code + new password on the reset page.
-4. Codes expire after 15 minutes.
+1. 用户在登录页面点击“忘记密码？”。
+2. 输入邮箱地址，系统会发送 6 位重置验证码。
+3. 在重置页面输入验证码和新密码。
+4. 验证码将在 15 分钟后过期。
 
-> **Note:** If `REQUIRE_EMAIL_VERIFICATION=false` and no Resend credentials are set, password reset emails will fail silently. Configure Resend if you want password reset to work.
+> **注意：**如果 `REQUIRE_EMAIL_VERIFICATION=false` 且未配置 Resend 凭据，密码重置邮件将静默发送失败。如果需要使用密码重置功能，请配置 Resend。
 
-## Version History
+## 版本历史
 
-Grindify includes a Version History view in Settings. It compares:
+Grindify 在“设置”中提供“版本历史”视图，用于比较：
 
-- `installedVersion`: the build currently installed on the device or cached by the PWA
-- `deployedVersion`: the version served by the live frontend at `/version.json`
-- `latestReleaseVersion`: the latest official GitHub Release returned by the backend proxy
+- `installedVersion`：当前安装在设备上或由 PWA 缓存的构建版本
+- `deployedVersion`：实时前端通过 `/version.json` 提供的版本
+- `latestReleaseVersion`：由后端代理返回的最新官方 GitHub Release 版本
 
-The frontend image bakes a `/version.json` file that includes:
+前端镜像会内置一个 `/version.json` 文件，其中包含：
 
 - `version`
 - `gitSha`
 - `builtAt`
 - `channel`
 
-Status interpretation:
+状态说明：
 
-- `installedVersion == deployedVersion`: this device is current for the deployed server build
-- `installedVersion < deployedVersion`: this device still has an older cached PWA build and should update
-- `deployedVersion < latestReleaseVersion`: a newer official release exists but the server has not deployed it yet
-- `installedVersion > latestReleaseVersion`: the device is on a development or pre-release build; this is shown as a neutral mismatch
+- `installedVersion == deployedVersion`：此设备使用的是当前部署服务器构建版本
+- `installedVersion < deployedVersion`：此设备仍在使用较旧的 PWA 缓存版本，应进行更新
+- `deployedVersion < latestReleaseVersion`：存在更新的官方版本，但服务器尚未部署该版本
+- `installedVersion > latestReleaseVersion`：设备运行的是开发版或预发布版；此情况会显示为中性的版本不匹配
 
-### GitHub Releases proxy
+### GitHub Releases 代理
 
-The backend exposes release history through `GET /v1/releases`. By default it resolves to the `FalkenDev/Grindify` repository unless you override these variables:
+后端通过 `GET /v1/releases` 提供发布历史。默认情况下，它指向 `FalkenDev/Grindify` 仓库；你也可以通过以下变量进行覆盖：
 
 ```env
 GITHUB_RELEASES_OWNER=FalkenDev
@@ -252,20 +252,20 @@ GITHUB_RELEASES_REPO=Grindify
 GITHUB_RELEASES_TOKEN=
 ```
 
-Use `GITHUB_RELEASES_TOKEN` if you want higher GitHub API limits for self-hosted deployments.
+如果希望在自托管部署中获得更高的 GitHub API 限额，请使用 `GITHUB_RELEASES_TOKEN`。
 
-### Maintainer note
+### 维护者说明
 
-The tag/release/deploy workflow is maintainer-specific and is documented alongside the Grindify stack in the Homelab repository. Contributors and normal self-hosted users do not need to create GitHub Releases to run Grindify locally.
+标签、发布和部署流程仅针对维护者，相关文档与 Homelab 仓库中的 Grindify 技术栈一同维护。贡献者和普通自托管用户无需创建 GitHub Releases 即可在本地运行 Grindify。
 
-## Contributing
+## 参与贡献
 
-Contributions are welcome. Please read our [Contributing Guidelines](CONTRIBUTING.md) before submitting a Pull Request.
+欢迎贡献代码。提交 Pull Request 前，请先阅读我们的[贡献指南](CONTRIBUTING.md)。
 
-By contributing to Grindify, you agree to our [Contributor License Agreement (CLA)](CLA.md).
+向 Grindify 贡献代码即表示你同意我们的[贡献者许可协议（CLA）](CLA.md)。
 
-## License
+## 许可证
 
-This project is licensed under the **GNU Affero General Public License v3.0 (AGPL-3.0)**. See the [LICENSE](LICENSE) file for details.
+本项目采用 **GNU Affero 通用公共许可证 v3.0（AGPL-3.0）** 授权。详情请参阅 [LICENSE](LICENSE) 文件。
 
-This software is provided "as is", without warranty of any kind.
+本软件按“现状”提供，不附带任何形式的保证。
