@@ -1,7 +1,10 @@
 FROM node:22-slim AS development
 
+ARG APT_MIRROR=deb.debian.org
+
 # Install sharp dependencies and procps for Debian ARM
-RUN apt-get update && apt-get install -y \
+RUN sed -i "s|deb.debian.org|${APT_MIRROR}|g" /etc/apt/sources.list.d/debian.sources \
+    && apt-get -o Acquire::ForceIPv4=true update && apt-get install -y \
     bash \
     curl \
     git \

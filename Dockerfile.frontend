@@ -31,6 +31,8 @@ WORKDIR /app
 
 ARG VITE_API_URL
 ARG VITE_CONTACT_EMAIL
+ARG FRONTEND_BUILD_SCRIPT=build
+ARG NODE_OPTIONS
 ARG VERSION=0.0.0
 ARG GIT_SHA=unknown
 ARG BUILD_TIME=unknown
@@ -46,7 +48,7 @@ COPY ./frontend/package*.json ./
 RUN npm ci
 
 COPY ./frontend .
-RUN npm run build
+RUN npm run ${FRONTEND_BUILD_SCRIPT}
 
 # Serve stage
 FROM nginx:alpine AS production
@@ -74,7 +76,7 @@ RUN echo 'server { \
   # Web app manifest - must always revalidate \
   location ~* \.webmanifest$ { \
     add_header Cache-Control "no-cache"; \
-    add_header Content-Type "application/manifest+json"; \
+    default_type application/manifest+json; \
     try_files $uri =404; \
   } \
   \
