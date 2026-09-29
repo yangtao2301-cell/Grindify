@@ -15,19 +15,19 @@
 
 <template>
   <div class="pa-5 d-flex flex-column ga-5">
-    <!-- Month Navigation Header -->
+<!-- 月份导航标题 -->
     <div>
       <h1>{{ $t('calendar.calendar') }}</h1>
       <p>{{ $t('calendar.trackYourWorkoutHistory') }}</p>
     </div>
 
-    <!-- Dynamic Stats Card -->
+<!-- 动态统计卡片 -->
     <v-card
       class="bg-cardBg pa-3 rounded-lg"
       :style="{ border: '1px solid rgb(var(--v-theme-borderColor))' }"
     >
       <div class="d-flex justify-space-between">
-        <!-- Workouts this month -->
+<!-- 本月训练 -->
         <div class="d-flex flex-column align-center" style="flex: 1 1 0">
           <span
             class="text-caption text-textSecondary text-center text-uppercase"
@@ -39,7 +39,7 @@
 
         <v-divider vertical class="mx-1" />
 
-        <!-- Activities this month -->
+<!-- 本月活动 -->
         <div class="d-flex flex-column align-center" style="flex: 1 1 0">
           <span
             class="text-caption text-textSecondary text-center text-uppercase"
@@ -51,7 +51,7 @@
 
         <v-divider vertical class="mx-1" />
 
-        <!-- Streak freezes -->
+<!-- 连续打卡冻结 -->
         <div class="d-flex flex-column align-center" style="flex: 1 1 0">
           <span
             class="text-caption text-textSecondary text-center text-uppercase"
@@ -65,7 +65,7 @@
       </div>
     </v-card>
 
-    <!-- Calendar Grid -->
+<!-- 日历网格 -->
     <v-card
       elevation="0"
       class="calendar-card bg-cardBg pt-5 px-1 rounded-lg"
@@ -85,7 +85,7 @@
       </div>
       <v-card-text class="pa-2">
         <div class="modern-calendar">
-          <!-- Weekday headers -->
+<!-- 星期标题 -->
           <div
             v-for="day in weekdays"
             :key="day"
@@ -94,7 +94,7 @@
             {{ day }}
           </div>
 
-          <!-- Calendar days -->
+<!-- 日历日期 -->
           <div
             v-for="day in calendarDays"
             :key="day.date"
@@ -151,9 +151,9 @@
       </v-card-text>
     </v-card>
 
-    <!-- Day Detail View -->
+<!-- 日期详情视图 -->
     <div class="d-flex flex-column ga-3 pb-16">
-      <!-- Date Header -->
+<!-- 日期标题 -->
       <div class="d-flex align-center justify-space-between">
         <h3 class="text-h6 font-weight-bold">{{ selectedDateLabel }}</h3>
         <v-btn
@@ -178,7 +178,7 @@
         </v-btn>
       </div>
 
-      <!-- Scheduled Sessions (not completed) -->
+<!-- 计划会话（未完成） -->
       <template v-if="scheduledForSelectedDate.length > 0">
         <v-card
           v-for="session in scheduledForSelectedDate"
@@ -228,7 +228,7 @@
         </v-card>
       </template>
 
-      <!-- Completed Sessions -->
+<!-- 已完成会话 -->
       <template v-if="completedForSelectedDate.length > 0">
         <p class="text-caption text-uppercase font-weight-bold text-textSecondary">
           {{ $t('calendar.completedSessions') }}
@@ -285,7 +285,7 @@
         </v-card>
       </template>
 
-      <!-- Empty State -->
+<!-- 空状态 -->
       <v-card
         v-if="completedForSelectedDate.length === 0 && scheduledForSelectedDate.length === 0"
         class="bg-cardBg rounded-lg pa-8 d-flex flex-column align-center ga-3"
@@ -328,7 +328,7 @@
         </v-btn>
       </v-card>
 
-      <!-- Empty State -->
+<!-- 空状态 -->
       <v-card
         v-if="completedForSelectedDate.length === 0 && scheduledForSelectedDate.length === 0"
         class="bg-cardBg rounded-lg pa-8 d-flex flex-column align-center ga-3"
@@ -371,7 +371,7 @@
         </v-btn>
       </v-card>
 
-      <!-- Freeze Week Card (current week only) -->
+<!-- 冻结本周卡片（仅限当前周） -->
       <div
         v-if="isSelectedDateInCurrentWeek"
         class="bg-background rounded-lg px-4 py-3"
@@ -417,7 +417,7 @@
       </div>
     </div>
 
-    <!-- Dialogs -->
+<!-- 对话框 -->
     <ScheduleSessionDialog
       v-model="isScheduleDialogOpen"
       :preselected-date="selectedDate"
@@ -442,7 +442,7 @@
       @log-past="onLogPastFromSchedule"
     />
 
-    <!-- Freeze Confirmation Dialog -->
+<!-- 冻结确认对话框 -->
     <v-dialog v-model="isFreezeDialogOpen" max-width="360">
       <v-card class="bg-cardBg rounded-lg pa-2">
         <v-card-title class="d-flex align-center ga-2">
@@ -508,7 +508,7 @@ const activityStore = useActivityStore()
 const scheduledSessionStore = useScheduledSessionStore()
 const streakInfo = ref<StreakInfo | null>(null)
 
-// Dialog state
+// 对话框状态
 const isScheduleDialogOpen = ref(false)
 const isAddPastDialogOpen = ref(false)
 const isBottomSheetOpen = ref(false)
@@ -516,7 +516,7 @@ const selectedScheduledSession = ref<ScheduledSessionForDate | null>(null)
 const isFreezeDialogOpen = ref(false)
 const isFreezeLoading = ref(false)
 
-// Pre-selection state for AddPastSessionDialog (from scheduled session)
+// AddPastSessionDialog 的预选状态（来自计划会话）
 const pastSessionPreselectedType = ref<'workout' | 'activity' | undefined>(undefined)
 const pastSessionPreselectedWorkoutId = ref<number | null>(null)
 const pastSessionPreselectedActivityId = ref<number | null>(null)
@@ -546,7 +546,7 @@ interface CalendarDay {
 }
 
 const weekdays = computed(() => {
-  const base = new Date(2024, 0, 1) // Monday
+const base = new Date(2024, 0, 1) // 周一
   return Array.from({ length: 7 }, (_, i) => {
     const d = new Date(base)
     d.setDate(base.getDate() + i)
@@ -571,7 +571,7 @@ const isSelectedDateFuture = computed(() => selectedDate.value > todayStr.value)
 
 const isSelectedDateFutureOrToday = computed(() => selectedDate.value >= todayStr.value)
 
-/** Whether the selected date falls in the current ISO week */
+/** 所选日期是否属于当前 ISO 周。 */
 const isSelectedDateInCurrentWeek = computed(() => {
   const today = new Date()
   const getMondayOfWeek = (date: Date): Date => {
@@ -590,19 +590,19 @@ const isSelectedDateInCurrentWeek = computed(() => {
   return selected >= monday && selected <= sunday
 })
 
-/** Set of date strings belonging to the currently frozen ISO week */
+/** 当前被冻结 ISO 周所包含的日期字符串集合。 */
 const frozenWeekDates = computed<Set<string>>(() => {
   const key = streakInfo.value?.streakFreezeUsedWeek
   if (!key) return new Set()
   const [yearStr, weekStr] = key.split('-W')
   const year = parseInt(yearStr)
   const week = parseInt(weekStr)
-  // Get Monday of ISO week 1 for that year
+  // 获取该年份第 1 个 ISO 周的周一
   const jan4 = new Date(year, 0, 4)
   const dayOfWeek = jan4.getDay() || 7
   const week1Monday = new Date(jan4)
   week1Monday.setDate(jan4.getDate() - dayOfWeek + 1)
-  // Advance to the target week's Monday
+  // 推进到目标周的周一
   const monday = new Date(week1Monday)
   monday.setDate(week1Monday.getDate() + (week - 1) * 7)
   const dates = new Set<string>()
@@ -625,7 +625,7 @@ const selectedDateLabel = computed(() => {
   })
 })
 
-// Workouts this month (sessions only)
+// 本月训练（仅会话）
 const workoutSessionsThisMonth = computed(() => {
   const year = currentDate.value.getFullYear()
   const month = currentDate.value.getMonth()
@@ -641,7 +641,7 @@ const workoutSessionsThisMonth = computed(() => {
   return count
 })
 
-// Activities this month (activity logs only)
+// 本月活动（仅活动日志）
 const activitiesThisMonth = computed(() => {
   const year = currentDate.value.getFullYear()
   const month = currentDate.value.getMonth()
@@ -655,7 +655,7 @@ const activitiesThisMonth = computed(() => {
   return count
 })
 
-// Fetch data on mount
+// 挂载时获取数据
 onMounted(async () => {
   await Promise.all([
     workoutSessionStore.setWorkoutSessions(true),
@@ -692,7 +692,7 @@ async function fetchScheduledRange() {
   )
 }
 
-// All completed events (workout sessions and activity logs)
+// 所有已完成事件（训练会话和活动日志）
 const allCompletedEvents = computed<CalendarEvent[]>(() => {
   const events: CalendarEvent[] = []
 
@@ -734,7 +734,7 @@ const allCompletedEvents = computed<CalendarEvent[]>(() => {
   return events
 })
 
-// Scheduled events (not completed) from range cache
+// 从范围缓存获取计划事件（未完成）
 const scheduledEvents = computed<CalendarEvent[]>(() => {
   return scheduledSessionStore.rangeCache
     .filter(s => !s.isCompleted)
@@ -753,17 +753,17 @@ const scheduledEvents = computed<CalendarEvent[]>(() => {
     }))
 })
 
-// Completed events for selected date
+// 所选日期的已完成事件
 const completedForSelectedDate = computed(() => {
   return allCompletedEvents.value.filter(e => toLocalDateString(e.date) === selectedDate.value)
 })
 
-// Scheduled (not completed) for selected date
+// 所选日期的计划事件（未完成）
 const scheduledForSelectedDate = computed(() => {
   return scheduledSessionStore.selectedDateSessions.filter(s => !s.isCompleted)
 })
 
-// Build calendar days
+// 构建日历日期
 const calendarDays = computed<CalendarDay[]>(() => {
   const year = currentDate.value.getFullYear()
   const month = currentDate.value.getMonth()
@@ -778,7 +778,7 @@ const calendarDays = computed<CalendarDay[]>(() => {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
 
-  // Previous month days
+// 上个月的日期
   const prevMonthLastDay = new Date(year, month, 0)
   for (let i = firstDayOfWeek - 1; i >= 0; i--) {
     const day = new Date(year, month - 1, prevMonthLastDay.getDate() - i)
@@ -797,7 +797,7 @@ const calendarDays = computed<CalendarDay[]>(() => {
     })
   }
 
-  // Current month days
+// 当前月份的日期
   for (let i = 1; i <= lastDay.getDate(); i++) {
     const day = new Date(year, month, i)
     day.setHours(0, 0, 0, 0)
@@ -816,7 +816,7 @@ const calendarDays = computed<CalendarDay[]>(() => {
     })
   }
 
-  // Next month days
+// 下个月的日期
   const remainingDays = 42 - days.length
   for (let i = 1; i <= remainingDays; i++) {
     const day = new Date(year, month + 1, i)
@@ -905,7 +905,7 @@ function onLogPastFromSchedule(session: ScheduledSessionForDate) {
   pastSessionPreselectedWorkoutId.value = session.workout?.id ?? null
   pastSessionPreselectedActivityId.value = session.activity?.id ?? null
   pastSessionPreselectedScheduledSessionId.value = session.id
-  // Use the scheduled session's resolved date for the dialog
+// 对话框使用计划会话解析后的日期
   selectedDate.value = session.resolvedDate
   isAddPastDialogOpen.value = true
 }
@@ -972,7 +972,7 @@ async function freezeWeek() {
 </script>
 
 <style scoped>
-/* Calendar Grid — no Vuetify equivalent for CSS grid */
+/* 日历网格——Vuetify 没有对应的 CSS Grid 组件 */
 .modern-calendar {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -981,7 +981,7 @@ async function freezeWeek() {
   max-width: 100%;
 }
 
-/* Force grid children to shrink below content size */
+/* 强制网格子项可以缩小到内容尺寸以下 */
 .modern-calendar > * {
   min-width: 0;
   overflow: hidden;
@@ -1034,7 +1034,7 @@ async function freezeWeek() {
   padding: 4px 2px;
 }
 
-/* Badge circle */
+/* 标签圆圈 */
 .day-badge {
   width: 68%;
   aspect-ratio: 1;
@@ -1052,7 +1052,7 @@ async function freezeWeek() {
   user-select: none;
 }
 
-/* Trained: workout only — green */
+/* 已训练：仅训练——绿色 */
 .badge-workout {
   background: #4caf50;
   box-shadow: 0 2px 8px rgba(76, 175, 80, 0.45);
@@ -1063,7 +1063,7 @@ async function freezeWeek() {
   font-weight: 700;
 }
 
-/* Trained: activity only — amber */
+/* 已训练：仅活动——琥珀色 */
 .badge-activity {
   background: #ff8f00;
   box-shadow: 0 2px 8px rgba(255, 143, 0, 0.45);
@@ -1074,7 +1074,7 @@ async function freezeWeek() {
   font-weight: 700;
 }
 
-/* Trained: workout + activity — gradient */
+/* 已训练：训练 + 活动——渐变色 */
 .badge-both {
   background: linear-gradient(135deg, #4caf50 0%, #ff8f00 100%);
   box-shadow: 0 2px 8px rgba(76, 175, 80, 0.4);
@@ -1085,7 +1085,7 @@ async function freezeWeek() {
   font-weight: 700;
 }
 
-/* Scheduled but not done — outline ring */
+/* 已计划但未完成——轮廓环 */
 .badge-scheduled {
   background: transparent;
   border: 2px dashed rgba(var(--v-theme-info), 0.7);
@@ -1096,12 +1096,12 @@ async function freezeWeek() {
   font-weight: 600;
 }
 
-/* Frozen week — ice-blue tint */
+/* 冻结周——冰蓝色调 */
 .calendar-cell.is-frozen-week {
   background: rgba(100, 181, 246, 0.07) !important;
 }
 
-/* Frozen badge — when no training logged */
+/* 冻结标签——没有记录训练时显示 */
 .badge-frozen {
   background: transparent;
   border: 2px solid rgba(100, 181, 246, 0.5);
@@ -1116,7 +1116,7 @@ async function freezeWeek() {
   border: 2px solid rgba(100, 181, 246, 0.5);
 }
 
-/* Legend */
+/* 图例 */
 .legend-badge {
   width: 14px;
   height: 14px;

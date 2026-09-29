@@ -10,7 +10,7 @@ import { ApiError } from '@/services/api'
 type Tab = 'export' | 'import'
 const activeTab = ref<Tab>('export')
 
-// ─── Export ───────────────────────────────────────────────────────────────────
+// ─── 导出 ───────────────────────────────────────────────────────────────────
 
 const exportingExercises = ref(false)
 const exportingActivities = ref(false)
@@ -53,7 +53,7 @@ async function doExportActivities() {
   }
 }
 
-// ─── Import ───────────────────────────────────────────────────────────────────
+// ─── 导入 ───────────────────────────────────────────────────────────────────
 
 const exerciseFile = ref<File | null>(null)
 const activityFile = ref<File | null>(null)
@@ -117,7 +117,7 @@ async function doImportActivities() {
       <p class="text-[13px] text-mute mt-0.5">Bulk data operations for content migration between instances.</p>
     </div>
 
-    <!-- Tabs -->
+<!-- 标签页 -->
     <div class="flex border-b border-border mb-6">
       <button
         v-for="tab in (['export', 'import'] as Tab[])"
@@ -131,7 +131,7 @@ async function doImportActivities() {
       </button>
     </div>
 
-    <!-- ─── Export Tab ───────────────────────────────────────────────────────── -->
+<!-- ─── 导出标签页 ───────────────────────────────────────────────────────── -->
     <template v-if="activeTab === 'export'">
       <div v-if="exportError" class="flex items-center gap-2 text-[13px] text-red bg-red/10 border border-red/20 rounded-chip px-3 py-2 mb-4">
         <AlertCircle :size="14" class="shrink-0" />
@@ -140,7 +140,7 @@ async function doImportActivities() {
 
       <div class="flex flex-col gap-3">
 
-        <!-- Global Exercises -->
+<!-- 全局训练动作 -->
         <div class="bg-surface border border-border rounded-card p-5">
           <div class="flex items-start justify-between gap-4">
             <div class="flex items-center gap-3">
@@ -163,7 +163,7 @@ async function doImportActivities() {
           </div>
         </div>
 
-        <!-- Global Activities -->
+<!-- 全局活动 -->
         <div class="bg-surface border border-border rounded-card p-5">
           <div class="flex items-start justify-between gap-4">
             <div class="flex items-center gap-3">
@@ -189,11 +189,11 @@ async function doImportActivities() {
       </div>
     </template>
 
-    <!-- ─── Import Tab ───────────────────────────────────────────────────────── -->
+<!-- ─── 导入标签页 ───────────────────────────────────────────────────────── -->
     <template v-if="activeTab === 'import'">
       <div class="flex flex-col gap-4">
 
-        <!-- Import Exercises -->
+<!-- 导入训练动作 -->
         <div class="bg-surface border border-border rounded-card p-5">
           <div class="flex items-center gap-3 mb-4">
             <div class="w-9 h-9 rounded-chip bg-surface-2 border border-border flex items-center justify-center shrink-0">
@@ -228,7 +228,7 @@ async function doImportActivities() {
             </button>
           </div>
 
-          <!-- Result -->
+<!-- 结果 -->
           <div v-if="exerciseImportError" class="flex items-center gap-2 text-[12.5px] text-red bg-red/10 border border-red/20 rounded-chip px-3 py-2 mt-3">
             <AlertCircle :size="13" class="shrink-0" />
             {{ exerciseImportError }}
@@ -245,7 +245,7 @@ async function doImportActivities() {
           </div>
         </div>
 
-        <!-- Import Activities -->
+<!-- 导入活动 -->
         <div class="bg-surface border border-border rounded-card p-5">
           <div class="flex items-center gap-3 mb-4">
             <div class="w-9 h-9 rounded-chip bg-surface-2 border border-border flex items-center justify-center shrink-0">
@@ -280,7 +280,7 @@ async function doImportActivities() {
             </button>
           </div>
 
-          <!-- Result -->
+<!-- 结果 -->
           <div v-if="activityImportError" class="flex items-center gap-2 text-[12.5px] text-red bg-red/10 border border-red/20 rounded-chip px-3 py-2 mt-3">
             <AlertCircle :size="13" class="shrink-0" />
             {{ activityImportError }}

@@ -16,17 +16,17 @@
 /**
  * plugins/index.ts
  *
- * Automatically included in `./src/main.ts`
+ * 自动包含在 `./src/main.ts` 中
  */
 
-// Plugins
+// 插件
 import vuetify from './vuetify';
 import pinia from '../stores';
 import router from '../router';
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
 import i18n from './i18n';
 
-// Types
+// 类型
 import type { App } from 'vue';
 
 export function registerPlugins (app: App) {

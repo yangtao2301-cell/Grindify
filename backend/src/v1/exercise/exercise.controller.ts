@@ -150,16 +150,16 @@ export class ExerciseController {
       throw new BadRequestException('No file uploaded');
     }
 
-    // Validate the uploaded file
+    // 验证上传的文件
     const validation = this.uploadService.validateImageFile(file);
     if (!validation.valid) {
       throw new BadRequestException(validation.error);
     }
 
-    // Process and save the image
+    // 处理并保存图片
     const { url: imageUrl } = await this.uploadService.processExerciseImage(file);
 
-    // Update the exercise with the new image URL
+    // 使用新的图片 URL 更新训练动作
     return this.exerciseService.updateImage(id, imageUrl, +req.user.id);
   }
 
@@ -177,7 +177,7 @@ export class ExerciseController {
     return this.exerciseService.duplicateGlobalExercise(id, +req.user.id, body.transferStats ?? false);
   }
 
-  // --- Media endpoints ---
+  // --- 媒体接口 ---
 
   @Post(':id/media')
   @ApiOperation({ summary: 'Upload media (image or video) for an exercise' })

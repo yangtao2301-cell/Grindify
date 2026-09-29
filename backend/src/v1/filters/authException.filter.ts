@@ -36,7 +36,7 @@ export class AuthExceptionsFilter implements ExceptionFilter {
 
     const cookiePath = process.env.AUTH_COOKIE_PATH || '/';
 
-    // Map env value to correct type for sameSite
+    // 将环境变量值转换为 sameSite 所需的类型
     let cookieSameSite: boolean | 'lax' | 'strict' | 'none' | undefined = 'lax';
     const envSameSite = process.env.AUTH_COOKIE_SAMESITE?.toLowerCase();
     if (envSameSite === 'lax' || envSameSite === 'strict' || envSameSite === 'none') {

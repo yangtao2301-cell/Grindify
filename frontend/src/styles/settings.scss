@@ -1,7 +1,7 @@
 /**
  * src/styles/settings.scss
  *
- * Configures SASS variables and Vuetify overwrites
+* 配置 SASS 变量并覆盖 Vuetify 默认值
  */
 
 // https://vuetifyjs.com/features/sass-variables/`
@@ -9,7 +9,7 @@
 //   $color-pack: false
 // );
 
-// Ensure iOS viewport transitions never expose the browser's black backdrop.
+// 确保 iOS 视口过渡期间不会露出浏览器的黑色背景。
 html,
 body,
 #app {
@@ -27,15 +27,15 @@ body,
   background-color: rgb(var(--v-theme-background)) !important;
 }
 
-// Fullscreen dialog toolbars (ScheduleSession, AddPastSession, EditSet, Timer)
-// need top padding for the notch / status bar on iOS
+// 全屏对话框工具栏（ScheduleSession、AddPastSession、EditSet、Timer）
+// 在 iOS 上需要为刘海/状态栏预留顶部内边距
 .v-dialog--fullscreen .v-toolbar {
   padding-top: env(safe-area-inset-top, 0px) !important;
   height: calc(48px + env(safe-area-inset-top, 0px)) !important;
 }
 
-// iPhone/PWA fullscreen dialogs: force true edge-to-edge coverage and prevent
-// the bottom black strip / page peeking through during drag.
+// iPhone/PWA 全屏对话框：强制真正的边到边覆盖，防止拖动时
+// 底部出现黑条或露出页面内容。
 .v-overlay.v-dialog {
   z-index: 1300 !important;
 }
@@ -61,13 +61,12 @@ body,
   border-radius: 0 !important;
 }
 
-// v-main: shift content below the notch and extend Vuetify's auto layout padding
-// (--v-layout-bottom = bottom-nav height) with the iOS home indicator inset
-// and any extra bar (resume bar = --extra-pb).
-// NOTE: padding-top is applied here instead of .v-application so that the
-//       .v-overlay-container (used by v-select / v-menu) stays at the true
-//       viewport origin — preventing click targets from being offset by the
-//       safe-area amount and selecting the wrong item.
+// v-main：将内容下移到刘海下方，并在 Vuetify 自动布局内边距
+//（--v-layout-bottom = 底部导航高度）的基础上叠加 iOS 主屏幕指示条内边距
+// 和其他额外底栏（恢复栏 = --extra-pb）。
+// 注意：这里使用 padding-top，而不是 .v-application，这样
+// .v-overlay-container（v-select/v-menu 使用）仍位于真实的
+// 视口原点，避免点击目标因安全区偏移而选错项目。
 .v-main {
   padding-top: env(safe-area-inset-top, 0px) !important;
   padding-bottom: calc(
@@ -76,29 +75,28 @@ body,
   background-color: rgb(var(--v-theme-background)) !important;
 }
 
-// Grow the bottom nav bar so icons clear the home indicator
+// 增加底部导航栏高度，使图标避开主屏幕指示条
 .v-bottom-navigation {
   height: calc(56px + env(safe-area-inset-bottom, 0px)) !important;
   padding-bottom: env(safe-area-inset-bottom, 0px) !important;
 }
 
-// Remove Vuetify's square active-state overlay on bottom nav buttons (Instagram style)
+// 移除底部导航按钮上的 Vuetify 方形激活状态遮罩（Instagram 风格）
 .v-bottom-navigation .v-btn--active .v-btn__overlay {
   opacity: 0 !important;
 }
 
-// Hide bottom nav whenever any dialog is open.
-// `html.v-overlay-scroll-blocked` is added by Vuetify only while a dialog
-// with scrollStrategy="block" (the default) is actually active — it is
-// removed when the dialog closes, so this never fires on a dormant overlay
-// that is still mounted in the DOM.  This covers fullscreen AND non-fullscreen
-// dialogs, and works on iOS where :has()-on-body was unreliable.
+// 任意对话框打开时隐藏底部导航栏。
+// `html.v-overlay-scroll-blocked` 只有在 scrollStrategy="block”（默认值）的
+// 对话框确实处于活动状态时才会由 Vuetify 添加；对话框关闭后会移除，
+// 因此不会在仍挂载于 DOM 但未激活的遮罩上触发。此规则同时覆盖全屏和非全屏
+// 对话框，并适用于 :has()-on-body 在 iOS 上不稳定的情况。
 html.v-overlay-scroll-blocked .v-bottom-navigation {
   display: none !important;
 }
 
-// Remove v-main bottom padding while any dialog is open so the safe-area
-// gap doesn't peek through on iOS rubber-band / overscroll.
+// 任意对话框打开时移除 v-main 的底部内边距，避免 iOS 橡皮筋/过度滚动时
+// 露出安全区间隙。
 html.v-overlay-scroll-blocked .v-main {
   padding-bottom: 0 !important;
 }

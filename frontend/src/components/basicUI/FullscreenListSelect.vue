@@ -19,7 +19,7 @@
     :class="{ 'fullscreen-list-select--disabled': disabled }"
     @click="!disabled && (isOpen = true)"
   >
-    <!-- Multi mode: label above + chip container -->
+<!-- 多选模式：上方标签 + 标签容器 -->
     <template v-if="multiple">
       <p class="text-body-2 text-medium-emphasis mb-2">{{ label }}</p>
       <div class="chip-activator">
@@ -36,7 +36,7 @@
       </div>
     </template>
 
-    <!-- Single mode: text field -->
+<!-- 单选模式：文本字段 -->
     <v-text-field
       v-else
       :model-value="displayText"
@@ -49,7 +49,7 @@
       class="pointer-field"
     />
 
-    <!-- Full-screen dialog (inside root so inheritAttrs works) -->
+<!-- 全屏对话框（放在根节点内以使 inheritAttrs 生效） -->
     <v-dialog v-model="isOpen" fullscreen>
       <div class="d-flex flex-column fill-height bg-background">
         <BackHeader :title="label" :show-menu="false" @close="isOpen = false">
@@ -80,9 +80,9 @@
           </template>
         </BackHeader>
 
-        <!-- List -->
-        <!-- Note: do NOT add pa-0 or pt-0/px-0 via Vuetify helper classes as pa-0 uses !important
-             and will override the pb-safe env() value. Use px-0 pt-0 instead if padding removal needed. -->
+<!-- 列表 -->
+<!-- 注意：不要通过 Vuetify 辅助类添加 pa-0 或 pt-0/px-0，因为 pa-0 使用了 !important，
+会覆盖 pb-safe 的 env() 值。如果需要移除内边距，请改用 px-0 pt-0。 -->
         <v-list class="flex-grow-1 overflow-y-auto pb-safe px-0 pt-0 bg-background">
           <v-list-item
             v-for="item in props.items"

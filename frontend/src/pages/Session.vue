@@ -153,7 +153,7 @@ async function updateWorkoutSessionExercises(newExerciseIds: number[]) {
     }
 
     if (toAdd.length) {
-      // Use the live workout relation for default sets/reps/weight
+// 使用实时训练关联数据作为默认组数/次数/重量
       const workoutExById = new Map<
         number,
         {
@@ -268,7 +268,7 @@ function onAddSet(exerciseId: number) {
   workoutSessionStore.addSet(sessionId.value, exerciseId)
 }
 
-// Move exercise to top (temporary reordering, doesn't save to workout)
+// 将训练动作移到顶部（临时排序，不保存到训练模板）
 const onMoveToTop = (exerciseId: number) => {
   const currentIndex = processedExercises.value.findIndex(e => e.exerciseId === exerciseId)
   if (currentIndex > 0) {
@@ -349,7 +349,7 @@ const finnishSession = async () => {
       const durationSeconds = workoutSessionStore.secondsElapsed
       const result = await finishWorkoutSession(sessionId.value, finalPayload)
 
-      // Store summary for the post-workout summary page (ephemeral, not persisted)
+// 为训练结束摘要页保存摘要数据（临时数据，不持久化）
       workoutSessionStore.lastCompletedSummary = {
         session: result,
         durationSeconds,
@@ -378,7 +378,7 @@ watchEffect(async () => {
 
   const isFirstInit = workoutSessionStore.initLiveSessionFromSnapshot(s)
 
-  // Only apply previous-set data on first init — never on resume
+// 仅在首次初始化时应用上一组数据——恢复会话时不要应用
   if (isFirstInit) {
     fetchPreviousSets(s.id).then(data => {
       workoutSessionStore.applyPreviousSets(s.id, data)
@@ -393,7 +393,7 @@ watchEffect(async () => {
 
   let exerciseIds: number[]
   if (idsFromLive.length) {
-    // Sort live exercise IDs by workout exercise order
+// 按训练动作顺序排列实时训练动作 ID
     const workoutExercises = [...(s.workout?.exercises || [])].sort(
       (a, b) => (a.order ?? 0) - (b.order ?? 0)
     )
@@ -401,12 +401,12 @@ watchEffect(async () => {
       .map(b => b.exerciseId ?? b.exercise?.id)
       .filter((id): id is number => typeof id === 'number')
 
-    // Ordered IDs from workout first, then any extras added during session
+// 先使用训练中的有序 ID，再追加会话期间新增的项目
     const orderedSet = new Set(orderedIds)
     const extras = idsFromLive.filter(id => !orderedSet.has(id))
     exerciseIds = [...orderedIds.filter(id => idsFromLive.includes(id)), ...extras]
   } else {
-    // Use the live workout relation to get exercise IDs (sorted by order)
+// 使用实时训练关联数据获取训练动作 ID（按顺序排列）
     exerciseIds = [...(s.workout?.exercises || [])]
       .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
       .map(b => b.exerciseId ?? b.exercise?.id)

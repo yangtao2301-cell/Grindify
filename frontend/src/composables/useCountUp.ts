@@ -50,7 +50,7 @@ export function useCountUp(
       return
     }
 
-    // Use IntersectionObserver for scroll-triggered animation
+// 使用 IntersectionObserver 触发滚动动画
     const observer = new IntersectionObserver(
       entries => {
         for (const entry of entries) {

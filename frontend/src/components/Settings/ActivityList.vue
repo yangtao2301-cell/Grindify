@@ -87,7 +87,7 @@
       </div>
     </div>
 
-    <!-- Activity Details Dialog -->
+<!-- 活动详情对话框 -->
     <v-dialog v-model="isDetailsOpen" fullscreen>
       <ActivityDetails
         v-if="selectedActivity"
@@ -96,12 +96,12 @@
       />
     </v-dialog>
 
-    <!-- Create Activity Dialog -->
+<!-- 创建活动对话框 -->
     <v-dialog v-model="isCreateOpen" fullscreen>
       <CreateActivity @close="isCreateOpen = false" />
     </v-dialog>
 
-    <!-- Delete Confirmation Dialog -->
+<!-- 删除确认对话框 -->
     <v-dialog v-model="isDeleteDialogOpen" max-width="400">
       <v-card
         class="bg-cardBg rounded-lg"

@@ -34,7 +34,7 @@ export interface ExerciseSeedDef {
 }
 
 export const exercisesToSeed: ExerciseSeedDef[] = [
-  // ─── PUSH ────────────────────────────────────────────────
+// ─── 推（PUSH） ────────────────────────────────────────────────
   {
     i18nKey: 'exercise.bench_press',
     primaryMuscleGroup: 'chest',
@@ -186,7 +186,7 @@ export const exercisesToSeed: ExerciseSeedDef[] = [
     ],
   },
 
-  // ─── LEGS ────────────────────────────────────────────────
+// ─── 腿部（LEGS） ────────────────────────────────────────────────
   {
     i18nKey: 'exercise.back_squat',
     primaryMuscleGroup: 'quads',
@@ -339,7 +339,7 @@ export const exercisesToSeed: ExerciseSeedDef[] = [
     ],
   },
 
-  // ─── PUSH / SHOULDERS ────────────────────────────────────
+// ─── 推/肩部（PUSH / SHOULDERS） ────────────────────────────────────
   {
     i18nKey: 'exercise.standing_barbell_overhead_press',
     primaryMuscleGroup: 'shoulders',
@@ -488,7 +488,7 @@ export const exercisesToSeed: ExerciseSeedDef[] = [
     ],
   },
 
-  // ─── PULL ────────────────────────────────────────────────
+// ─── 拉（PULL） ────────────────────────────────────────────────
   {
     i18nKey: 'exercise.deadlift',
     primaryMuscleGroup: 'back',
@@ -600,7 +600,7 @@ export const exercisesToSeed: ExerciseSeedDef[] = [
     ],
   },
 
-  // ─── ABS / CORE ──────────────────────────────────────────
+// ─── 腹部/核心（ABS / CORE） ──────────────────────────────────────────
   {
     i18nKey: 'exercise.sit_up',
     primaryMuscleGroup: 'abs',

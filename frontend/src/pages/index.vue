@@ -16,7 +16,7 @@
 <template>
   <div class="pa-5 d-flex flex-column ga-5 bg-background" style="min-height: 100dvh">
     <HomeHeader :streak-info="streakInfo" />
-    <!-- Today's Schedule -->
+<!-- 今日计划 -->
     <div v-if="todaySchedule.length > 0" class="d-flex flex-column ga-2">
       <p class="text-caption text-uppercase font-weight-bold text-textSecondary">
         {{ $t('schedule.todaySchedule') }}
@@ -154,7 +154,7 @@ const scheduledSessionStore = useScheduledSessionStore()
 const streakInfo = ref<StreakInfo | null>(null)
 const isWeightLogDialogOpen = ref(false)
 
-// Get the start and end of the current week (Monday to Sunday)
+// 获取本周的开始和结束日期（周一至周日）
 const currentWeekRange = computed(() => {
   const now = new Date()
   const dayOfWeek = now.getDay()
@@ -170,7 +170,7 @@ const currentWeekRange = computed(() => {
   return { start: monday, end: sunday }
 })
 
-// Calculate total minutes for finished sessions this week
+// 计算本周已完成会话的总分钟数
 const totalMinutesThisWeek = computed(() => {
   const sessions = workoutSessionStore.workoutSessions as WorkoutSession[]
   const activityLogs = activityStore.activityLogs as ActivityLog[]
@@ -200,7 +200,7 @@ const totalMinutesThisWeek = computed(() => {
   return totalMinutes
 })
 
-// Load streak info
+// 加载连续打卡信息
 const loadStreakInfo = async () => {
   try {
     streakInfo.value = await getStreakInfo()
@@ -209,7 +209,7 @@ const loadStreakInfo = async () => {
   }
 }
 
-// Today's scheduled sessions
+// 今日计划会话
 function getTodayStr(): string {
   const now = new Date()
   const y = now.getFullYear()
@@ -243,7 +243,7 @@ onMounted(() => {
   scheduledSessionStore.fetchForDate(getTodayStr())
 })
 
-// Re-fetch when navigating back (e.g. after completing a session)
+// 返回此页面时重新获取数据（例如完成会话后）
 onActivated(() => {
   scheduledSessionStore.fetchForDate(getTodayStr())
 })

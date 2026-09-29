@@ -26,7 +26,7 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
       const body = await res.json()
       message = body?.message ?? message
     } catch {
-      // ignore parse error
+      // 忽略解析错误
     }
     throw new ApiError(res.status, message)
   }
@@ -46,7 +46,7 @@ export async function apiFetchBlob(path: string): Promise<{ blob: Blob; filename
       const body = await res.json()
       message = body?.message ?? message
     } catch {
-      // ignore parse error
+      // 忽略解析错误
     }
     throw new ApiError(res.status, message)
   }
@@ -63,7 +63,7 @@ export async function apiFetchForm<T>(path: string, formData: FormData, method =
     method,
     credentials: 'include',
     body: formData,
-    // Do NOT set Content-Type – browser sets it with boundary for multipart/form-data
+    // 不要设置 Content-Type——浏览器会为 multipart/form-data 携带 boundary
   })
 
   if (!res.ok) {
@@ -72,7 +72,7 @@ export async function apiFetchForm<T>(path: string, formData: FormData, method =
       const body = await res.json()
       message = body?.message ?? message
     } catch {
-      // ignore parse error
+      // 忽略解析错误
     }
     throw new ApiError(res.status, message)
   }

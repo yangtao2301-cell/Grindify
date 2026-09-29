@@ -21,7 +21,7 @@ export interface PerformedSet {
   setNumber: number
   weight?: number
   reps?: number
-  // Cardio fields
+// 有氧训练字段
   distance?: number
   duration?: number
   calories?: number

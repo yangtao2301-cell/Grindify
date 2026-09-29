@@ -22,7 +22,7 @@ export class MigrateEquipmentToI18n1769000000000 implements MigrationInterface {
     await queryRunner.query(
       `ALTER TABLE "exercise" RENAME COLUMN "equipment" TO "equipment_i18n"`,
     );
-    // Convert existing string[] to { default: string[] }
+    // 将现有 string[] 转换为 { default: string[] }
     await queryRunner.query(`
       UPDATE "exercise"
       SET "equipment_i18n" = jsonb_build_object('default', "equipment_i18n")
@@ -33,7 +33,7 @@ export class MigrateEquipmentToI18n1769000000000 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    // Convert { default: string[] } back to string[]
+    // 将 { default: string[] } 转换回 string[]
     await queryRunner.query(`
       UPDATE "exercise"
       SET "equipment_i18n" = "equipment_i18n"->'default'

@@ -155,7 +155,7 @@
       </v-btn>
     </div>
 
-    <!-- Account Edit Dialog -->
+<!-- 账号编辑对话框 -->
     <v-dialog v-model="isAccountDialogOpen" fullscreen transition="slide-y-transition" persistent>
       <AccountDialog
         :user="currentUser"
@@ -193,7 +193,7 @@
       <VersionHistoryDialog @close="isVersionHistoryOpen = false" />
     </v-dialog>
 
-    <!-- Goals Dialog -->
+<!-- 目标对话框 -->
     <v-dialog v-model="isGoalsDialogOpen" fullscreen transition="slide-y-transition" persistent>
       <GoalsDialog
         :user="currentUser"

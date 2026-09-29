@@ -59,7 +59,7 @@ const appStore = useAppStore()
 const theme = useTheme()
 const route = useRoute()
 
-// Initialize theme from persisted preference
+// 根据持久化的偏好设置初始化主题
 theme.global.name.value = appStore.darkMode ? 'dark' : 'light'
 
 const isActiveSession = computed(() => {

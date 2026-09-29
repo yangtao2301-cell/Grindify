@@ -149,8 +149,8 @@ const handleFileSelect = async (event: Event) => {
 };
 
 const compressImage = async (file: File): Promise<File> => {
-  // createImageBitmap with imageOrientation: 'from-image' correctly applies
-  // EXIF rotation data, which ctx.drawImage() would otherwise ignore.
+// 带有 imageOrientation: 'from-image' 的 createImageBitmap 会正确应用
+// EXIF 旋转信息，否则 ctx.drawImage() 会忽略该信息。
   const bmp = await createImageBitmap(file, { imageOrientation: 'from-image' });
 
   const canvas = document.createElement('canvas');

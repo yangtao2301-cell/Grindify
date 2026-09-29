@@ -24,7 +24,7 @@ export interface ScheduledSession {
   workout: Workout | null
   activity: Activity | null
   scheduledDate: string | null
-  dayOfWeek: number | null // 0=Mon, ..., 6=Sun
+  dayOfWeek: number | null // 0=周一，……，6=周日
   isRecurring: boolean
   recurringEndDate: string | null
   exceptionDates: string[]
@@ -71,7 +71,7 @@ export interface UpdateScheduledSessionDto {
 
 export interface DeleteScheduledSessionParams {
   deleteType: 'this' | 'all'
-  occurrenceDate?: string // YYYY-MM-DD, required when deleteType is 'this'
+  occurrenceDate?: string // YYYY-MM-DD；deleteType 为“this”时必填
 }
 
 export interface LogPastWorkoutSessionDto {

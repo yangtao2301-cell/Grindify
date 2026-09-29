@@ -13,7 +13,7 @@
  * <https://www.gnu.org/licenses/>.
  */
 
-// Utilities
+// 工具函数
 import { useRouter } from 'vue-router';
 import { defineStore } from 'pinia';
 import { toast } from 'vuetify-sonner';
@@ -66,7 +66,7 @@ export const useAuthStore = defineStore(
         applyUserLocale(data.user);
         token.value = '';
 
-        // Give the browser a tick to persist Set-Cookie before fetching protected resources.
+// 给浏览器一个事件循环周期来持久化 Set-Cookie，再获取受保护的资源。
         await new Promise((resolve) => setTimeout(resolve, 0));
 
         await useWorkoutStore().resetStore();
@@ -123,10 +123,10 @@ export const useAuthStore = defineStore(
         });
 
         if (registeredUser.emailVerified) {
-          // Email verification is disabled — auto-login
+// 邮箱验证已禁用——自动登录
           await login(registerData.email, registerData.password);
         } else {
-          // Email verification is required — redirect to verify page
+// 需要邮箱验证——重定向到验证页面
           router.push({ path: '/verify-email', query: { email: registerData.email } });
         }
         return true;

@@ -25,7 +25,7 @@ export const useProgressPhotoStore = defineStore('progressPhotoStore', () => {
   const photos = ref<ProgressPhoto[]>([])
   const isLoading = ref(false)
   const lastFetched = ref<number | null>(null)
-  const cacheDuration = 30 * 1000 // 30 seconds
+const cacheDuration = 30 * 1000 // 30 秒
 
   const fetchPhotos = async (reload = false) => {
     const now = Date.now()

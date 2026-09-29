@@ -74,9 +74,9 @@ export class User {
   @Column({ default: 0 })
   completedGoalWeeksCount: number;
 
-  // Onboarding & Preferences
+  // 新手引导与偏好设置
   @Column({ type: 'varchar', length: 20, nullable: true })
-  unitScale: string; // 'metric' or 'imperial'
+  unitScale: string; // “metric”或“imperial”
 
   @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true })
   weight: number;
@@ -106,7 +106,7 @@ export class User {
   weightGoalType: string | null;
 
   @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true })
-  startWeight: number; // in weeks
+  startWeight: number; // 单位：周
 
   @Column({ default: false })
   onboardingCompleted: boolean;

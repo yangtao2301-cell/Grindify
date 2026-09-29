@@ -52,7 +52,7 @@
     </v-avatar>
 
     <div class="mx-5 d-flex flex-column ga-4">
-      <!-- Title & Type -->
+<!-- 标题与类型 -->
       <div class="pt-4">
         <p v-if="exercise.exerciseType" class="text-primary text-body-1 text-capitalize">
           {{ exercise.exerciseType }}
@@ -69,7 +69,7 @@
         </v-chip>
       </div>
 
-      <!-- 7-day personalization banner -->
+<!-- 7 天个性化提示条 -->
       <v-alert
         v-if="showPersonalizedBanner"
         type="info"
@@ -81,7 +81,7 @@
         {{ $t('exercise.personalizedBanner') }}
       </v-alert>
 
-      <!-- Primary Muscle Card -->
+<!-- 主要肌群卡片 -->
       <div v-if="primaryMuscleName" class="d-flex ga-3">
         <v-card
           class="w-100 text-center pa-4 rounded-lg bg-cardBg"
@@ -93,13 +93,13 @@
         </v-card>
       </div>
 
-      <!-- About -->
+<!-- 关于 -->
       <div v-if="exerciseDescription">
         <h1 class="text-h6">{{ $t('exerciseDetails.about') }}</h1>
         <p class="text-body-1 text-textSecondary mt-1">{{ exerciseDescription }}</p>
       </div>
 
-      <!-- Target Muscles -->
+<!-- 目标肌群 -->
       <div v-if="exercise.muscleGroups && exercise.muscleGroups.length > 0">
         <h1 class="text-h6">{{ $t('exerciseDetails.targetMuscles') }}</h1>
         <div class="d-flex ga-3 mt-2 flex-wrap">
@@ -118,13 +118,13 @@
         </div>
       </div>
 
-      <!-- Equipment -->
+<!-- 器械 -->
       <div v-if="exercise.equipment && exercise.equipment.length > 0">
         <h1 class="text-h6">{{ $t('exerciseDetails.equipment') }}</h1>
         <p class="text-body-1 text-textSecondary mt-1">{{ exercise.equipment.join(', ') }}</p>
       </div>
 
-      <!-- Media -->
+<!-- 媒体 -->
       <div v-if="exercise.media && exercise.media.length > 0">
         <h1 class="text-h6">{{ $t('exerciseDetails.media') }}</h1>
         <div class="d-flex ga-2 mt-2 overflow-x-auto">
@@ -154,7 +154,7 @@
         </div>
       </div>
 
-      <!-- How to Perform -->
+<!-- 操作方法 -->
       <div v-if="resolvedInstructions.length > 0">
         <h1 class="text-h6">{{ $t('exerciseDetails.howToPerform') }}</h1>
         <div class="my-2 d-flex ga-4 flex-column">
@@ -167,7 +167,7 @@
         </div>
       </div>
 
-      <!-- Pro Tips -->
+<!-- 专业提示 -->
       <div v-if="resolvedProTips.length > 0">
         <h1 class="text-h6">{{ $t('exerciseDetails.proTips') }}</h1>
         <v-card
@@ -181,7 +181,7 @@
         </v-card>
       </div>
 
-      <!-- Avoid These Mistakes -->
+<!-- 避免这些错误 -->
       <div v-if="resolvedMistakes.length > 0">
         <h1 class="text-h6">{{ $t('exerciseDetails.mistakes') }}</h1>
         <v-card
@@ -197,12 +197,12 @@
     </div>
   </div>
 
-  <!-- Edit Dialog -->
+<!-- 编辑对话框 -->
   <v-dialog v-model="isEditOpen" fullscreen>
     <EditExercise :exercise="exercise" @close="onEditClose" @saved="onEditClose" />
   </v-dialog>
 
-  <!-- Personalize (duplicate) Dialog -->
+<!-- 个性化（复制）对话框 -->
   <DuplicateExerciseDialog
     v-model="isDuplicateDialogOpen"
     :exercise-id="exercise.id"
@@ -210,7 +210,7 @@
     @duplicated="emit('close')"
   />
 
-  <!-- Delete Confirmation Dialog -->
+<!-- 删除确认对话框 -->
   <v-dialog v-model="isDeleteDialogOpen" max-width="360">
     <v-card class="bg-cardBg rounded-lg" style="border: 1px solid rgb(var(--v-theme-borderColor))">
       <v-card-title class="text-h6 pt-5 px-5">{{ $t('exerciseForm.deleteTitle') }}</v-card-title>
@@ -266,7 +266,7 @@ const getMediaUrl = (url: string) => {
   return `${baseUrl}${url}`
 }
 
-// Keep exercise reactive from store
+// 保持训练动作与 store 的响应式同步
 const exercise = computed(() => {
   const fromStore = exerciseStore.exercises.find(ex => ex.id === props.selectedExercise?.id)
   return fromStore || props.selectedExercise!

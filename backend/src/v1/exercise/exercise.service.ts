@@ -101,7 +101,7 @@ export class ExerciseService {
       return this.toResponseList(exercises);
     }
 
-    // 'all': user's own exercises first, then globals
+    // “all”：先返回用户自己的训练动作，再返回全局训练动作
     const [userExercises, globalExercises] = await Promise.all([
       this.exerciseRepo.find({
         where: { createdBy: { id: userId }, isGlobal: false },
@@ -120,7 +120,7 @@ export class ExerciseService {
   async findOne(id: number, userId: number): Promise<ExerciseResponseDto> {
     const relations = ['muscleGroups', 'primaryMuscleGroups', 'media'];
 
-    // Finds if the exercise belongs to user OR is global
+    // 判断训练动作是否属于用户，或是否为全局训练动作
     const exercise = await this.exerciseRepo.findOne({
       where: [
         { id, createdBy: { id: userId } },
@@ -222,7 +222,7 @@ export class ExerciseService {
     if (!exercise) throw new NotFoundException('Global exercise not found');
 
     await this.dataSource.transaction(async (manager) => {
-      // Find all users with workout data referencing this exercise
+    // 查找训练数据引用此训练动作的所有用户
       const affectedUsers: { userId: number }[] = await manager.query(`
         SELECT DISTINCT ws."userId" AS "userId"
         FROM workout_session_exercise wse
@@ -240,7 +240,7 @@ export class ExerciseService {
       `, [id]);
 
       for (const { userId } of affectedUsers) {
-        // Create a personal copy for this user
+    // 为当前用户创建个人副本
         const copy = manager.create(Exercise, {
           title: exercise.title,
           descriptionI18n: exercise.descriptionI18n,
@@ -259,7 +259,7 @@ export class ExerciseService {
         });
         const saved = await manager.save(Exercise, copy);
 
-        // Redirect all FK references from global → user copy
+    // 将所有外键引用从全局记录改指向用户副本
         await manager.query(
           `UPDATE workout_session_exercise wse
            SET "exerciseId" = $1
@@ -282,7 +282,7 @@ export class ExerciseService {
         );
       }
 
-      // Soft-delete the global exercise — never hard-delete
+    // 软删除全局训练动作，不执行硬删除
       await manager.softRemove(Exercise, exercise);
     });
 
@@ -462,7 +462,7 @@ export class ExerciseService {
     return this.findOne(exerciseId, userId);
   }
 
-  // --- Admin-only: global exercise image/media methods ---
+  // --- 仅管理员可用：全局训练动作图片/媒体方法 ---
 
   async updateGlobalImage(id: number, imageUrl: string | null): Promise<ExerciseResponseDto> {
     const exercise = await this.exerciseRepo.findOne({

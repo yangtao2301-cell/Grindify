@@ -82,7 +82,7 @@ watch(
 const dragIndex = ref<number | null>(null)
 const dragOverIndex = ref<number | null>(null)
 
-// Touch drag state
+// 触摸拖动状态
 const touchStartY = ref(0)
 const touchCurrentElement = ref<Element | null>(null)
 
@@ -95,7 +95,7 @@ const updateItem = (index: number, value: string) => {
 const addItem = () => {
   emit('update:modelValue', [...localItems.value, ''])
   nextTick(() => {
-    // Focus the newly added text field
+// 聚焦新添加的文本字段
     const fields = document.querySelectorAll('.drag-item .v-text-field input')
     const lastField = fields[fields.length - 1] as HTMLInputElement
     lastField?.focus()
@@ -108,7 +108,7 @@ const removeItem = (index: number) => {
   emit('update:modelValue', updated)
 }
 
-/** Filter out empty strings — call from parent before saving */
+/** 过滤空字符串——由父组件在保存前调用。 */
 const getNonEmpty = () => localItems.value.filter(s => s.trim() !== '')
 
 const moveItem = (from: number, to: number) => {
@@ -119,7 +119,7 @@ const moveItem = (from: number, to: number) => {
   emit('update:modelValue', updated)
 }
 
-// --- HTML5 Drag & Drop (mouse) ---
+// --- HTML5 拖放（鼠标） ---
 const onDragStart = (index: number, e: DragEvent) => {
   dragIndex.value = index
   if (e.dataTransfer) {
@@ -149,7 +149,7 @@ const onDragEnd = () => {
   dragOverIndex.value = null
 }
 
-// --- Touch-based drag (mobile) ---
+// --- 触摸拖动（移动端） ---
 const onTouchStart = (index: number, e: TouchEvent) => {
   dragIndex.value = index
   touchStartY.value = e.touches[0].clientY

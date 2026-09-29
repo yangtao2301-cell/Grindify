@@ -34,7 +34,7 @@ import { ScheduledSession } from '../scheduledSession/scheduledSession.entity';
 import { Activity } from '../activity/activity.entity';
 import { ActivityLog } from '../activityLog/activityLog.entity';
 
-// Seeders
+  // 数据填充器
 import { seedUsers } from './seeders/users.seeder';
 import { seedMuscleGroups } from './seeders/muscleGroups.seeder';
 import { seedUserExercises } from './seeders/exercises.seeder';
@@ -61,8 +61,8 @@ const AppDataSource = new DataSource({
     Activity,
     ActivityLog,
   ],
-  // Keep in sync with app.module.ts (synchronize: true). This makes the seed script
-  // resilient when we add new entities.
+  // 与 app.module.ts（synchronize: true）保持同步。
+  // 这样新增实体时，填充脚本仍然可以正常工作。
   synchronize: true,
   logging: ['error', 'warn', 'query'],
 });
@@ -79,7 +79,7 @@ async function seed() {
   await queryRunner.startTransaction();
 
   try {
-    // Clear tables respecting FKs
+  // 按照外键依赖关系清空表
     await AppDataSource.query(
       `
       TRUNCATE TABLE
@@ -103,17 +103,17 @@ async function seed() {
 
     console.log('🧹 Cleared existing data');
 
-    // Seed users
+  // 填充用户
     const createdUsers = await seedUsers(AppDataSource);
     const mainUser = createdUsers[0];
 
-    // Seed muscle groups
+  // 填充肌群
     const mgMap = await seedMuscleGroups(AppDataSource);
 
-    // Seed default exercises for the test user
+  // 为测试用户填充默认训练动作
     await seedUserExercises(AppDataSource, mgMap, mainUser);
 
-    // Seed default activities for test user
+  // 为测试用户填充默认活动
     await seedActivities(AppDataSource, mainUser);
 
     await queryRunner.commitTransaction();

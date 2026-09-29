@@ -46,19 +46,19 @@ export class ActivityLog {
   date: Date;
 
   @Column()
-  duration: number; // in minutes
+  duration: number; // 单位：分钟
 
   @Column({ type: 'decimal', precision: 6, scale: 2, nullable: true })
-  distance?: number; // in kilometers
+  distance?: number; // 单位：千米
 
   @Column({ nullable: true })
-  pace?: string; // formatted as "5:30/km"
+  pace?: string; // 格式为“5:30/km”
 
   @Column({ type: 'decimal', precision: 6, scale: 2, nullable: true })
-  elevationGain?: number; // in meters
+  elevationGain?: number; // 单位：米
 
   @Column({ type: 'decimal', precision: 6, scale: 2, nullable: true })
-  maxElevation?: number; // in meters
+  maxElevation?: number; // 单位：米
 
   @Column({ nullable: true })
   calories?: number;

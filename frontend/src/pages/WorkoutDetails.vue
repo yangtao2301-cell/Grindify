@@ -23,7 +23,7 @@
       overscroll-behavior: none;
     "
   >
-    <!-- Header -->
+<!-- 标题 -->
     <BackHeader
       :title="workout?.title || ''"
       show-menu
@@ -48,7 +48,7 @@
       </template>
     </BackHeader>
 
-    <!-- Avatar -->
+<!-- 头像 -->
     <v-avatar size="70" tile color="avatarBg" class="mx-5 mb-3 mt-4 rounded-lg">
       <v-icon color="primary" size="35">mdi-dumbbell</v-icon>
     </v-avatar>
@@ -78,7 +78,7 @@
     </div>
 
     <div v-else class="mx-5 d-flex flex-column ga-4">
-      <!-- Title + Type badge -->
+<!-- 标题 + 类型标签 -->
       <div class="pt-4">
         <div class="d-flex align-center ga-2">
           <p class="text-primary text-body-1 text-capitalize">{{ $t('workout.workoutTitle') }}</p>
@@ -89,7 +89,7 @@
         <h1 class="text-h5 font-weight-bold">{{ workout?.title }}</h1>
       </div>
 
-      <!-- Stat Cards -->
+<!-- 统计卡片 -->
       <div class="d-flex w-100 ga-3" style="align-items: stretch">
         <v-card
           class="text-center pa-4 rounded-lg bg-cardBg"
@@ -136,13 +136,13 @@
         </v-card>
       </div>
 
-      <!-- About -->
+<!-- 关于 -->
       <div v-if="workout?.description">
         <h1 class="text-h6">{{ $t('exerciseDetails.about') }}</h1>
         <p class="text-body-1 text-textSecondary mt-1">{{ workout.description }}</p>
       </div>
 
-      <!-- Target Muscles -->
+<!-- 目标肌群 -->
       <div v-if="targetMuscleNames.length > 0">
         <h1 class="text-h6">{{ $t('exerciseDetails.targetMuscles') }}</h1>
         <div class="d-flex ga-2 mt-2 flex-wrap">
@@ -161,7 +161,7 @@
         </div>
       </div>
 
-      <!-- Exercises -->
+<!-- 训练动作 -->
       <div v-if="sortedExercises.length > 0">
         <h1 class="text-h6">{{ $t('workout.exercises') }}</h1>
         <div class="mt-2 d-flex flex-column ga-3">
@@ -215,7 +215,7 @@
         </div>
       </div>
 
-      <!-- Empty state -->
+<!-- 空状态 -->
       <div v-else class="text-center py-10">
         <v-icon size="48" color="textSecondary" class="mb-3">mdi-dumbbell</v-icon>
         <p class="text-subtitle-1 text-textSecondary mb-4">
@@ -227,7 +227,7 @@
       </div>
     </div>
 
-    <!-- Sticky Start Button -->
+<!-- 固定开始按钮 -->
     <div v-if="workout?.exercises && workout.exercises.length > 0" class="pa-5">
       <v-btn block color="primary" size="large" class="font-weight-bold" @click="startSession">
         {{ $t('workout.startSession') }}
@@ -235,7 +235,7 @@
     </div>
   </div>
 
-  <!-- Dialogs -->
+<!-- 对话框 -->
   <v-dialog v-model="isEditWorkoutOpen" fullscreen>
     <EditWorkout
       :workout="workout"
@@ -313,12 +313,12 @@ const totalSets = computed(
   () => workout.value?.exercises?.reduce((sum, ex) => sum + (ex.sets || 0), 0) ?? 0
 )
 
-// --- Target muscles from the workout's targetMuscleGroups ---
+// --- 来自训练 targetMuscleGroups 的目标肌群 ---
 const targetMuscleNames = computed<string[]>(() => {
   if (workout.value?.targetMuscleGroups?.length) {
     return workout.value.targetMuscleGroups.map(mg => mg.name)
   }
-  // Fallback: derive from exercises' muscle groups
+// 回退：根据训练动作的肌群推导
   if (!workout.value?.exercises?.length) return []
   const freq = new Map<string, number>()
   for (const ex of workout.value.exercises) {
@@ -331,7 +331,7 @@ const targetMuscleNames = computed<string[]>(() => {
     .map(([name]) => name)
 })
 
-// --- Helpers ---
+// --- 辅助方法 ---
 const displayName = (exercise: NonNullable<Exercise['exercise']>) =>
   displayExerciseName(exercise, lang.value)
 
@@ -396,7 +396,7 @@ const loadWorkout = async (workoutId: number | null) => {
 
 watch(effectiveWorkoutId, loadWorkout, { immediate: true })
 
-// --- Actions ---
+// --- 操作 ---
 const startSession = async () => {
   if (!workout.value) return
   try {

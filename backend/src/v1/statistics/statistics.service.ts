@@ -43,7 +43,7 @@ export class StatisticsService {
     private readonly userRepo: Repository<User>,
   ) {}
 
-  // ─── Exercise History ────────────────────────────────────
+// ─── 训练动作历史 ────────────────────────────────────
   async getExerciseHistory(
     userId: number,
     exerciseId: number,
@@ -93,7 +93,7 @@ export class StatisticsService {
     return { entries, total, page, limit };
   }
 
-  // ─── Exercise Records ────────────────────────────────────
+// ─── 训练动作记录 ────────────────────────────────────
   async getExerciseRecords(userId: number, exerciseId: number) {
     const records = await this.recordRepo.find({
       where: { user: { id: userId }, exercise: { id: exerciseId } },
@@ -139,7 +139,7 @@ export class StatisticsService {
     return result;
   }
 
-  // ─── Exercise Progress Chart Data ────────────────────────
+// ─── 训练动作进度图表数据 ────────────────────────
   async getExerciseProgress(
     userId: number,
     exerciseId: number,
@@ -191,7 +191,7 @@ export class StatisticsService {
     return dataPoints;
   }
 
-  // ─── Workout History ─────────────────────────────────────
+// ─── 训练历史 ─────────────────────────────────────
   async getWorkoutHistory(
     userId: number,
     workoutId: number,
@@ -226,7 +226,7 @@ export class StatisticsService {
       };
     });
 
-    // Overall summary across ALL sessions for this workout (not just the page)
+// 此训练的所有训练会话汇总（不只是当前页）
     const allSessions = await this.sessionRepo.find({
       where: {
         workout: { id: workoutId },
@@ -269,7 +269,7 @@ export class StatisticsService {
     return { sessions, summary, total, page, limit };
   }
 
-  // ─── Overview Statistics ─────────────────────────────────
+// ─── 概览统计 ─────────────────────────────────
   async getOverview(userId: number) {
     const [allSessions, activityLogs] = await Promise.all([
       this.sessionRepo.find({
@@ -319,7 +319,7 @@ export class StatisticsService {
           curr.count++;
           exerciseCount.set(ex.exercise.id, curr);
 
-          // Compute volume for this exercise across sets (approximate per muscle group)
+// 计算此训练动作所有组的训练量（按肌群估算）
           const exVolume = this.toNumber(s.totalWeight);
           const mgCount = (ex.exercise.muscleGroups ?? []).length || 1;
           const volPerMg = exVolume / mgCount;
@@ -347,7 +347,7 @@ export class StatisticsService {
       totalDuration += log.duration ?? 0;
     }
 
-    // Use the persisted user streak (same as home page) instead of computing our own
+// 使用持久化的用户连续打卡数据（与首页相同），而不是自行计算
     const user = await this.userRepo.findOne({ where: { id: userId } });
     const currentStreak = user?.currentStreak ?? 0;
     const { longestStreak } = this.computeStreaks(allSessions);
@@ -397,7 +397,7 @@ export class StatisticsService {
     };
   }
 
-  // ─── PR Computation & Upsert ─────────────────────────────
+// ─── 个人纪录计算与写入 ─────────────────────────────
   async computeAndUpsertRecords(
     userId: number,
     sessionId: number,
@@ -429,14 +429,14 @@ export class StatisticsService {
       const { exerciseId, sets } = ce;
       if (!sets || sets.length === 0) continue;
 
-      // Compute all metrics for this exercise in this session
+// 计算本次会话中此训练动作的所有指标
       const maxWeight = this.computeMaxWeight(sets as any);
       const maxReps = this.computeMaxReps(sets as any);
       const maxVolumeSet = this.computeMaxVolumeSet(sets as any);
       const totalVolume = this.computeTotalVolume(sets as any);
       const estimated1RM = this.computeBestEstimated1RM(sets as any);
 
-      // Find the set that achieved each record for setDetails
+// 找到创造每项纪录的训练组，用于 setDetails
       const maxWeightSet = sets.reduce((best, s) =>
         (s.weight ?? 0) > (best.weight ?? 0) ? s : best,
       );
@@ -550,11 +550,11 @@ export class StatisticsService {
     return newRecords;
   }
 
-  // ─── Compact history for exercise dialog ─────────────────
+// ─── 训练动作对话框的紧凑历史 ─────────────────
   async getExerciseQuickStats(userId: number, exerciseId: number) {
     const records = await this.getExerciseRecords(userId, exerciseId);
 
-    // Last 3 sessions
+// 最近 3 次会话
     const recent = await this.getExerciseHistory(userId, exerciseId, 1, 3);
 
     return {
@@ -564,7 +564,7 @@ export class StatisticsService {
     };
   }
 
-  // ─── Compact history for workout details ─────────────────
+// ─── 训练详情的紧凑历史 ─────────────────
   async getWorkoutQuickStats(userId: number, workoutId: number) {
     const allSessions = await this.sessionRepo.find({
       where: {
@@ -614,7 +614,7 @@ export class StatisticsService {
     };
   }
 
-  // ─── Helper Functions ────────────────────────────────────
+// ─── 辅助函数 ────────────────────────────────────
 
   private computeStreaks(sessions: WorkoutSession[]): {
     currentStreak: number;
@@ -622,7 +622,7 @@ export class StatisticsService {
   } {
     if (sessions.length === 0) return { currentStreak: 0, longestStreak: 0 };
 
-    // Get unique workout dates (YYYY-MM-DD) sorted descending
+// 获取去重后的训练日期（YYYY-MM-DD），按降序排列
     const dateSet = new Set<string>();
     for (const s of sessions) {
       const d = s.endedAt ?? s.startedAt;
@@ -631,7 +631,7 @@ export class StatisticsService {
         dateSet.add(dateStr);
       }
     }
-    const uniqueDates = [...dateSet].sort().reverse(); // most recent first
+const uniqueDates = [...dateSet].sort().reverse(); // 最新日期在前
 
     if (uniqueDates.length === 0) return { currentStreak: 0, longestStreak: 0 };
 
@@ -643,7 +643,7 @@ export class StatisticsService {
     const todayStr = today.toISOString().split('T')[0];
     const yesterdayStr = yesterday.toISOString().split('T')[0];
 
-    // Current streak: count consecutive days from today or yesterday backwards
+// 当前连续打卡：从今天或昨天开始向前统计连续天数
     let currentStreak = 0;
     if (uniqueDates[0] === todayStr || uniqueDates[0] === yesterdayStr) {
       const checkDate = new Date(uniqueDates[0]);
@@ -660,10 +660,10 @@ export class StatisticsService {
       }
     }
 
-    // Longest streak
+// 最长连续打卡
     let longestStreak = 1;
     let streak = 1;
-    const sorted = [...uniqueDates].sort(); // ascending
+const sorted = [...uniqueDates].sort(); // 升序
     for (let i = 1; i < sorted.length; i++) {
       const prev = new Date(sorted[i - 1]);
       const curr = new Date(sorted[i]);
@@ -681,7 +681,7 @@ export class StatisticsService {
     return { currentStreak, longestStreak };
   }
 
-  // ─── Weekly Trends ───────────────────────────────────────
+// ─── 每周趋势 ───────────────────────────────────────
   async getWeeklyTrends(userId: number, weeks: number = 12) {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - weeks * 7);
@@ -701,7 +701,7 @@ export class StatisticsService {
       }),
     ]);
 
-    // Build week buckets
+// 构建每周分组
     const weekBuckets = new Map<
       string,
       {
@@ -712,7 +712,7 @@ export class StatisticsService {
       }
     >();
 
-    // Initialize all weeks
+// 初始化所有周
     for (let i = 0; i < weeks; i++) {
       const d = new Date(startDate);
       d.setDate(d.getDate() + i * 7);
@@ -757,7 +757,7 @@ export class StatisticsService {
     );
   }
 
-  // ─── Comparison (This vs Last Week/Month) ────────────────
+// ─── 对比（本周/本月与上周/上月） ────────────────
   async getComparison(userId: number) {
     const now = new Date();
     const currentWeekStart = this.getStartOfWeek(now);
@@ -848,7 +848,7 @@ export class StatisticsService {
     };
   }
 
-  // ─── Activity Heatmap ────────────────────────────────────
+// ─── 活动热力图 ────────────────────────────────────
   async getActivityHeatmap(userId: number, weeks: number = 12) {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - weeks * 7);
@@ -932,7 +932,7 @@ export class StatisticsService {
   private getStartOfWeek(date: Date): Date {
     const d = new Date(date);
     const day = d.getDay();
-    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Monday
+const diff = d.getDate() - day + (day === 0 ? -6 : 1); // 周一
     d.setDate(diff);
     d.setHours(0, 0, 0, 0);
     return d;

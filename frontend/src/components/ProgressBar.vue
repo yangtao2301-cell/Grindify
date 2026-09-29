@@ -154,7 +154,7 @@ function getDayCardStyle(dayIndex: number): Record<string, string> {
   return { border: '1px solid transparent' }
 }
 
-// Scheduled days this week (days that have a scheduled session but no completed session)
+// 本周计划日期（有计划会话但尚未完成会话的日期）
 const scheduledDaysThisWeek = computed(() => {
   const scheduled = new Set<number>()
   const rangeCache = scheduledSessionStore.rangeCache
@@ -176,7 +176,7 @@ const scheduledDaysThisWeek = computed(() => {
   return scheduled
 })
 
-// Fetch scheduled sessions for the current week on mount
+// 挂载时获取本周的计划会话
 onMounted(async () => {
   const { start, end } = currentWeekRange.value
   const toStr = (d: Date) => {

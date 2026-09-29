@@ -318,7 +318,7 @@ export default {
     orContinueWith: 'or continue with',
     privacyPolicy: 'Privacy Policy',
 
-    // Email verification
+// 邮箱验证
     verifyYourEmail: 'Verify your email',
     verifyEmailSent: 'We sent a 6-digit code to',
     verifyEmail: 'Verify email',
@@ -333,7 +333,7 @@ export default {
     resendFailed: 'Failed to resend code. Please try again.',
     emailNotVerifiedToast: 'Please verify your email before logging in.',
 
-    // Forgot / reset password
+// 忘记/重置密码
     forgotPasswordTitle: 'Forgot password?',
     forgotPasswordSubtitle: "Enter your email and we'll send you a reset code.",
     sendResetCode: 'Send reset code',

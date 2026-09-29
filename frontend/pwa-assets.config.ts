@@ -32,7 +32,7 @@ export default defineConfig({
         includeId: false,
       },
       sizes: [
-        { width: 640, height: 1136, scaleFactor: 2 },   // iPhone SE 1st gen
+        { width: 640, height: 1136, scaleFactor: 2 },   // 第一代 iPhone SE
         { width: 750, height: 1334, scaleFactor: 2 },   // iPhone SE/6/7/8
         { width: 1242, height: 2208, scaleFactor: 3 },  // iPhone 6+/7+/8+
         { width: 1125, height: 2436, scaleFactor: 3 },  // iPhone X/XS/11 Pro

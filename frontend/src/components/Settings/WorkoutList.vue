@@ -216,7 +216,7 @@ const allMuscleGroups = computed<MuscleGroup[]>(() => {
 const filteredWorkouts = computed<Workout[]>(() => {
   let list = workouts.value
 
-  // Search by title, description, exercise names
+// 按标题、描述和训练动作名称搜索
   const q = search.value.trim().toLowerCase()
   if (q) {
     list = list.filter(w => {
@@ -259,7 +259,7 @@ const filteredWorkouts = computed<Workout[]>(() => {
 //   })
 
 //   const sorted = Array.from(counts.entries())
-//     .sort((a, b) => b[1] - a[1]) // descending by frequency
+//     .sort((a, b) => b[1] - a[1]) // 按频率降序排列
 //     .map(([name]) => name)
 
 //   return {
@@ -269,12 +269,12 @@ const filteredWorkouts = computed<Workout[]>(() => {
 // }
 
 function getWorkoutType(workout: Workout): string {
-  // Use the stored type if available
+// 如果有已存储的类型，则使用它
   if (workout.type) {
     return t(`editWorkout.types.${workout.type}`)
   }
 
-  // Fallback: determine from muscle groups distribution
+// 回退：根据肌群分布判断类型
   const muscleGroupMap = new Map<string, number>()
 
   workout.exercises.forEach(ex => {

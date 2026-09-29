@@ -17,7 +17,7 @@
   <div class="d-flex flex-column fill-height bg-background">
     <BackHeader :title="$t('sessionList.title')" @close="emit('close')" />
 
-    <!-- Search -->
+<!-- 搜索 -->
     <div class="mx-5 mt-2 mb-4">
       <v-text-field
         v-model="searchQuery"
@@ -30,7 +30,7 @@
       />
     </div>
 
-    <!-- List -->
+<!-- 列表 -->
     <div class="flex-grow-1 overflow-y-auto pb-5 d-flex ga-3 flex-column" style="overscroll-behavior-y: contain">
       <template v-if="sessions.length > 0">
         <div
@@ -102,7 +102,7 @@
         </div>
       </template>
 
-      <!-- Empty state -->
+<!-- 空状态 -->
       <div
         v-if="sessions.length === 0"
         class="d-flex flex-column align-center justify-center flex-grow-1 py-16"

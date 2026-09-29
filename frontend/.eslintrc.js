@@ -8,19 +8,19 @@ module.exports = {
     node: true,
   },
   extends: [
-    // Base ESLint recommended rules
+    // ESLint 基础推荐规则
     "eslint:recommended",
 
-    // TypeScript rules
+    // TypeScript 规则
     "plugin:@typescript-eslint/recommended",
 
-    // Vue 3 rules
+    // Vue 3 规则
     "plugin:vue/vue3-recommended",
 
-    // Vuetify rules
+    // Vuetify 规则
     "plugin:vuetify/recommended",
 
-    // Prettier integration
+    // Prettier 集成
     "eslint-config-prettier",
   ],
   parser: "vue-eslint-parser",

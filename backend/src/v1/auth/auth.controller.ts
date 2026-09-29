@@ -79,14 +79,14 @@ export class AuthController {
     let cookieDomain = process.env.AUTH_COOKIE_DOMAIN || undefined;
     let cookieSecure = process.env.AUTH_COOKIE_SECURE === 'true';
 
-    // Local dev (http://localhost:*): never set Domain or Secure, and avoid SameSite=None
+  // 本地开发（http://localhost:*）：不要设置 Domain 或 Secure，并避免使用 SameSite=None
     if (isLocalhost) {
       cookieDomain = undefined;
       cookieSecure = false;
       cookieSameSite = 'lax';
     }
 
-    // Browsers require Secure when SameSite=None
+  // 浏览器要求 SameSite=None 必须同时设置 Secure
     if (cookieSameSite === 'none') {
       cookieSecure = true;
     }
@@ -98,7 +98,7 @@ export class AuthController {
         sameSite: cookieSameSite,
         ...(cookieDomain ? { domain: cookieDomain } : {}),
         ...(cookiePath ? { path: cookiePath } : {}),
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 天
       });
       return { user };
     });
@@ -180,7 +180,7 @@ export class AuthController {
   @Get('github')
   @UseGuards(AuthGuard('github'))
   githubLogin() {
-    // Passport redirects to GitHub — no body needed
+    // Passport 会重定向到 GitHub，不需要响应正文
   }
 
   @Get('github/callback')
@@ -217,7 +217,7 @@ export class AuthController {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    // Pass user data to frontend via a short-lived query param (base64 encoded)
+    // 通过短时有效的查询参数将用户数据传给前端（Base64 编码）
     const userParam = Buffer.from(JSON.stringify(user)).toString('base64url');
     const redirect = isNew ? '/onboarding' : '/';
     res.redirect(`${frontendUrl}/oauth-callback?user=${userParam}&redirect=${redirect}`);
@@ -226,7 +226,7 @@ export class AuthController {
   @Get('google')
   @UseGuards(AuthGuard('google'))
   googleLogin() {
-    // Passport redirects to Google — no body needed
+    // Passport 会重定向到 Google，不需要响应正文
   }
 
   @Get('google/callback')
@@ -263,7 +263,7 @@ export class AuthController {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    // Pass user data to frontend via a short-lived query param (base64 encoded)
+    // 通过短时有效的查询参数将用户数据传给前端（Base64 编码）
     const userParam = Buffer.from(JSON.stringify(user)).toString('base64url');
     const redirect = isNew ? '/onboarding' : '/';
     res.redirect(`${frontendUrl}/oauth-callback?user=${userParam}&redirect=${redirect}`);

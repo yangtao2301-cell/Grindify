@@ -71,11 +71,11 @@ export interface ActivityLog {
   id: number
   activity: Activity
   date: string
-  duration: number // in minutes
-  distance?: number // in kilometers
-  pace?: string // formatted as "5:30/km"
-  elevationGain?: number // in meters
-  maxElevation?: number // in meters
+  duration: number // 单位：分钟
+  distance?: number // 单位：千米
+  pace?: string // 格式为“5:30/km”
+  elevationGain?: number // 单位：米
+  maxElevation?: number // 单位：米
   calories?: number
   notes?: string
   createdAt: string
@@ -83,7 +83,7 @@ export interface ActivityLog {
 
 export interface CreateActivityLogDto {
   activityId: number
-  date: string // YYYY-MM-DD format
+  date: string // YYYY-MM-DD 格式
   duration: number
   distance?: number
   elevationGain?: number

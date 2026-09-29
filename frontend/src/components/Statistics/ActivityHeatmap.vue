@@ -23,7 +23,7 @@
       class="bg-cardBg pa-4 rounded-lg"
       style="border: 1px solid rgb(var(--v-theme-borderColor)); box-shadow: none"
     >
-      <!-- Month labels -->
+<!-- 月份标签 -->
       <div
         class="heatmap-months mb-1"
         :style="{ marginLeft: '34px', gridTemplateColumns: `repeat(${weekCount}, 1fr)` }"
@@ -39,14 +39,14 @@
       </div>
 
       <div class="d-flex">
-        <!-- Day labels -->
+<!-- 星期标签 -->
         <div class="heatmap-day-labels mr-2">
           <span class="text-caption text-textSecondary">{{ $t('statistics.heatmap.mon') }}</span>
           <span class="text-caption text-textSecondary">{{ $t('statistics.heatmap.wed') }}</span>
           <span class="text-caption text-textSecondary">{{ $t('statistics.heatmap.fri') }}</span>
         </div>
 
-        <!-- Grid -->
+<!-- 网格 -->
         <div class="heatmap-grid" :style="{ gridTemplateColumns: `repeat(${weekCount}, 1fr)` }">
           <div
             v-for="(cell, idx) in heatmapCells"
@@ -60,7 +60,7 @@
         </div>
       </div>
 
-      <!-- Legend -->
+<!-- 图例 -->
       <div class="d-flex align-center justify-end ga-1 mt-3">
         <span class="text-caption text-textSecondary mr-1">{{
           $t('statistics.heatmap.less')
@@ -77,7 +77,7 @@
       </div>
     </v-card>
 
-    <!-- Tooltip -->
+<!-- 工具提示 -->
     <div
       v-if="tooltip.visible"
       class="heatmap-tooltip"
@@ -152,10 +152,10 @@ const heatmapCells = computed(() => {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
 
-  // Find the Monday of the earliest week
+// 查找最早一周的周一
   const startDate = new Date(today)
   startDate.setDate(startDate.getDate() - props.weeks * 7 + 1)
-  // Adjust to Monday
+// 调整到周一
   const dayOfWeek = startDate.getDay()
   const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek
   startDate.setDate(startDate.getDate() + mondayOffset)
@@ -197,7 +197,7 @@ const monthLabels = computed(() => {
   let lastMonth = -1
 
   for (let weekIdx = 0; weekIdx < weekCount.value; weekIdx++) {
-    const cellIdx = weekIdx * 7 // First day of the week (Monday)
+const cellIdx = weekIdx * 7 // 一周的第一天（周一）
     if (cellIdx < heatmapCells.value.length) {
       const cell = heatmapCells.value[cellIdx]
       const date = new Date(cell.date)

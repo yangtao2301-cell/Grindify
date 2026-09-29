@@ -72,8 +72,8 @@ export const useWorkoutSessionStore = defineStore(
     }
 
     const liveSessions = ref<Record<number, LiveSessionState>>({})
-    // Ephemeral summary data populated right before navigating to the post-workout summary page.
-    // Not persisted — used only during the navigation transition.
+// 在跳转到训练结束摘要页之前填充的临时摘要数据。
+// 不持久化，仅用于导航过渡期间。
     const lastCompletedSummary = ref<CompletedSessionSummary | null>(null)
 
     async function setWorkoutSessions(reload = false) {
@@ -159,11 +159,10 @@ export const useWorkoutSessionStore = defineStore(
       if (typeof sessionId === 'undefined') return false
       if (liveSessions.value[sessionId]) return false
 
-      // Treat exercises as "from server" only when at least one exercise has
-      // recorded sets (i.e. a finished / resumed session).  A freshly-created
-      // session has exercises pre-populated but with empty sets arrays — in that
-      // case we must fall through to the workout-template branch so the UI gets
-      // the planned sets/reps/weight.
+// 只有至少一个训练动作包含已记录训练组时，才将训练动作视为“来自服务器”
+//（即已完成或已恢复的会话）。新创建的会话虽然预先填充了训练动作，
+// 但其训练组数组为空——此时必须继续走训练模板分支，
+// 以便界面获取计划的组数/次数/重量。
       const fromServer =
         Array.isArray(session.exercises) &&
         session.exercises.length > 0 &&
@@ -206,7 +205,7 @@ export const useWorkoutSessionStore = defineStore(
           }
         }
       } else {
-        // Use the live workout relation to populate initial sets (sorted by order)
+// 使用实时训练关联数据填充初始训练组（按顺序排列）
         if (session.workout && Array.isArray(session.workout.exercises)) {
           const sorted = [...session.workout.exercises].sort(
             (a, b) => (a.order ?? 0) - (b.order ?? 0)
@@ -293,10 +292,10 @@ export const useWorkoutSessionStore = defineStore(
         const liveEx = liveSession.exercises[item.exerciseId]
         if (!liveEx) continue
 
-        // Match by array index — both sides are ordered by set number ascending
+// 按数组索引匹配——两边都按训练组编号升序排列
         for (let i = 0; i < liveEx.sets.length; i++) {
           const prevSet = item.sets[i]
-          if (!prevSet) break // No more previous sets; remaining stay 'N/A'
+if (!prevSet) break // 没有更多上一组数据，剩余项目保持为“N/A”
           const w = prevSet.weight ?? 0
           const r = prevSet.reps ?? 0
           liveEx.sets[i].previous = `${w} × ${r}`
@@ -317,7 +316,7 @@ export const useWorkoutSessionStore = defineStore(
 
         for (let i = 0; i < liveEx.sets.length; i++) {
           const prevSet = item.sets[i]
-          if (!prevSet) break // Previous had fewer sets — leave rest as template defaults
+if (!prevSet) break // 上一次训练的训练组更少，剩余项目保留模板默认值
           if (prevSet.weight !== null) liveEx.sets[i].weight = prevSet.weight
           if (prevSet.reps !== null) liveEx.sets[i].reps = prevSet.reps
         }

@@ -1,7 +1,7 @@
 /**
  * .eslint.js
  *
- * ESLint configuration file.
+ * ESLint 配置文件。
  */
 
 import pluginVue from 'eslint-plugin-vue'

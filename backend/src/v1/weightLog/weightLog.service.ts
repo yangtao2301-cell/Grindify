@@ -72,10 +72,10 @@ export class WeightLogService {
     });
     const saved = await this.weightLogRepo.save(log);
 
-    // Update user's current weight to the latest entry
+  // 将用户当前体重更新为最新记录
     user.weight = dto.weight;
 
-    // If this is the first weight log, set startWeight
+  // 如果这是第一条体重记录，则设置 startWeight
     if (!user.startWeight) {
       user.startWeight = dto.weight;
     }
@@ -100,7 +100,7 @@ export class WeightLogService {
 
     const updated = await this.weightLogRepo.save(log);
 
-    // If this was the most recent log, update user.weight
+  // 如果这是最新记录，则更新 user.weight
     await this.syncUserCurrentWeight(userId);
 
     return this.toResponseDto(updated);
@@ -114,7 +114,7 @@ export class WeightLogService {
 
     await this.weightLogRepo.remove(log);
 
-    // Recalculate user.weight from the latest remaining log
+  // 根据剩余的最新记录重新计算 user.weight
     await this.syncUserCurrentWeight(userId);
   }
 
@@ -122,7 +122,7 @@ export class WeightLogService {
     const user = await this.userRepo.findOne({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
 
-    // Get all logs ordered by date desc
+  // 获取所有日志，并按日期降序排列
     const logs = await this.weightLogRepo.find({
       where: { user: { id: userId } },
       order: { date: 'DESC', createdAt: 'DESC' },
@@ -158,7 +158,7 @@ export class WeightLogService {
   }
 
   /**
-   * After editing or deleting a log, sync user.weight to the latest remaining log.
+ * 编辑或删除日志后，将 user.weight 同步为剩余日志中的最新记录。
    */
   private async syncUserCurrentWeight(userId: number): Promise<void> {
     const latestLog = await this.weightLogRepo.findOne({
@@ -172,7 +172,7 @@ export class WeightLogService {
     if (latestLog) {
       user.weight = Number(latestLog.weight);
     }
-    // If no logs remain, we leave user.weight as-is (don't null it out)
+  // 如果没有剩余日志，则保留 user.weight 的当前值（不将其设为 null）
 
     await this.userRepo.save(user);
   }

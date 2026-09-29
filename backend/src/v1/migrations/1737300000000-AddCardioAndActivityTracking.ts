@@ -26,7 +26,7 @@ export class AddCardioAndActivityTracking1737300000000
   implements MigrationInterface
 {
   public async up(queryRunner: QueryRunner): Promise<void> {
-    // 1. Add trackingMode and defaultDistance to exercise table
+    // 1. 向 exercise 表添加 trackingMode 和 defaultDistance
     await queryRunner.addColumn(
       'exercise',
       new TableColumn({
@@ -48,7 +48,7 @@ export class AddCardioAndActivityTracking1737300000000
       }),
     );
 
-    // 3. Add distance to workout_exercise table
+    // 3. 向 workout_exercise 表添加 distance
     await queryRunner.addColumn(
       'workout_exercise',
       new TableColumn({
@@ -60,7 +60,7 @@ export class AddCardioAndActivityTracking1737300000000
       }),
     );
 
-    // 4. Make weight and reps nullable, add distance, duration, calories to workout_session_set table
+    // 4. 将 weight 和 reps 改为可空，并向 workout_session_set 表添加 distance、duration、calories
     await queryRunner.changeColumn(
       'workout_session_set',
       'weight',
@@ -110,7 +110,7 @@ export class AddCardioAndActivityTracking1737300000000
       }),
     );
 
-    // 5. Create activity table
+    // 5. 创建 activity 表
     await queryRunner.createTable(
       new Table({
         name: 'activity',
@@ -194,7 +194,7 @@ export class AddCardioAndActivityTracking1737300000000
       true,
     );
 
-    // Add foreign key for activity.createdBy
+    // 为 activity.createdBy 添加外键
     await queryRunner.createForeignKey(
       'activity',
       new TableForeignKey({
@@ -205,7 +205,7 @@ export class AddCardioAndActivityTracking1737300000000
       }),
     );
 
-    // Add unique constraint for activity name per user
+    // 为每个用户的活动名称添加唯一约束
     await queryRunner.createUniqueConstraint(
       'activity',
       new TableUnique({
@@ -214,7 +214,7 @@ export class AddCardioAndActivityTracking1737300000000
       }),
     );
 
-    // 6. Create activity_log table
+    // 6. 创建 activity_log 表
     await queryRunner.createTable(
       new Table({
         name: 'activity_log',
@@ -288,7 +288,7 @@ export class AddCardioAndActivityTracking1737300000000
       true,
     );
 
-    // Add foreign keys for activity_log
+    // 为 activity_log 添加外键
     await queryRunner.createForeignKey(
       'activity_log',
       new TableForeignKey({
@@ -311,13 +311,13 @@ export class AddCardioAndActivityTracking1737300000000
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    // Drop activity_log table
+    // 删除 activity_log 表
     await queryRunner.dropTable('activity_log');
 
-    // Drop activity table
+    // 删除 activity 表
     await queryRunner.dropTable('activity');
 
-    // Remove columns from workout_session_set
+    // 从 workout_session_set 中删除列
     await queryRunner.dropColumn('workout_session_set', 'calories');
     await queryRunner.dropColumn('workout_session_set', 'duration');
     await queryRunner.dropColumn('workout_session_set', 'distance');
@@ -342,10 +342,10 @@ export class AddCardioAndActivityTracking1737300000000
       }),
     );
 
-    // Remove distance from workout_exercise
+    // 从 workout_exercise 中删除 distance
     await queryRunner.dropColumn('workout_exercise', 'distance');
 
-    // Remove columns from exercise
+    // 从 exercise 中删除列
     await queryRunner.dropColumn('exercise', 'defaultDistance');
     await queryRunner.dropColumn('exercise', 'trackingMode');
   }

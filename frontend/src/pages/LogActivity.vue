@@ -18,7 +18,7 @@
     <BackHeader :title="$t('activity.logActivity')" route-to="/" />
 
     <div class="px-5 py-4">
-      <!-- Activity cards grid -->
+<!-- 活动卡片网格 -->
       <div v-if="activityStore.isLoadingActivities" class="d-flex justify-center py-10">
         <v-progress-circular indeterminate color="primary" />
       </div>
@@ -54,7 +54,7 @@
         </v-card>
       </div>
 
-      <!-- Create new activity button -->
+<!-- 创建新活动按钮 -->
       <v-btn
         color="primary"
         variant="outlined"
@@ -68,7 +68,7 @@
       </v-btn>
     </div>
 
-    <!-- Log Activity Dialog -->
+<!-- 记录活动对话框 -->
     <v-dialog v-model="isLogDialogOpen" max-width="500" :fullscreen="$vuetify.display.smAndDown">
       <v-card class="bg-background">
         <div class="d-flex justify-space-between align-center px-5 py-3 border-b-sm">
@@ -81,7 +81,7 @@
 
         <div class="px-5 py-4">
           <v-form ref="formRef" @submit.prevent="handleSubmit">
-            <!-- Date Picker -->
+<!-- 日期选择器 -->
             <v-text-field
               v-model="formData.date"
               :label="$t('activity.date')"
@@ -91,7 +91,7 @@
               class="mb-4"
             />
 
-            <!-- Duration (required) -->
+<!-- 时长（必填） -->
             <v-text-field
               :model-value="durationStr"
               :label="$t('activity.duration')"
@@ -104,9 +104,9 @@
               @update:model-value="durationStr = normalizeDecimalStr($event)"
             />
 
-            <!-- Conditional fields based on selected activity -->
+<!-- 根据所选活动显示的条件字段 -->
             <template v-if="selectedActivity">
-              <!-- Distance -->
+<!-- 距离 -->
               <v-text-field
                 v-if="selectedActivity.trackDistance"
                 :model-value="distanceStr"
@@ -119,7 +119,7 @@
                 @update:model-value="distanceStr = normalizeDecimalStr($event)"
               />
 
-              <!-- Calculated Pace (read-only) -->
+<!-- 计算出的配速（只读） -->
               <v-text-field
                 v-if="selectedActivity.trackPace && calculatedPace"
                 :model-value="calculatedPace"
@@ -130,7 +130,7 @@
                 class="mb-4"
               />
 
-              <!-- Elevation Gain -->
+<!-- 爬升高度 -->
               <v-text-field
                 v-if="selectedActivity.trackElevation"
                 :model-value="elevationGainStr"
@@ -143,7 +143,7 @@
                 @update:model-value="elevationGainStr = normalizeDecimalStr($event)"
               />
 
-              <!-- Max Elevation -->
+<!-- 最高海拔 -->
               <v-text-field
                 v-if="selectedActivity.trackElevation"
                 :model-value="maxElevationStr"
@@ -156,7 +156,7 @@
                 @update:model-value="maxElevationStr = normalizeDecimalStr($event)"
               />
 
-              <!-- Calories -->
+<!-- 卡路里 -->
               <v-text-field
                 v-if="selectedActivity.trackCalories"
                 :model-value="caloriesStr"
@@ -170,7 +170,7 @@
               />
             </template>
 
-            <!-- Notes -->
+<!-- 备注 -->
             <v-textarea
               v-model="formData.notes"
               :label="$t('activity.notes')"
@@ -179,7 +179,7 @@
               class="mb-4"
             />
 
-            <!-- Submit Button -->
+<!-- 提交按钮 -->
             <v-btn :loading="isSubmitting" type="submit" size="large" color="primary" block>
               {{ $t('activity.save') }}
             </v-btn>
@@ -188,7 +188,7 @@
       </v-card>
     </v-dialog>
 
-    <!-- Create Activity Dialog (full-screen) -->
+<!-- 创建活动对话框（全屏） -->
     <v-dialog v-model="isCreateOpen" fullscreen transition="dialog-bottom-transition">
       <CreateActivity @close="onCreateClose" />
     </v-dialog>
@@ -235,7 +235,7 @@ const formData = ref<CreateActivityLogDto>({
 
 const isSubmitting = ref(false)
 
-// String refs for decimal fields
+// 小数输入字段的字符串引用
 const durationStr = ref('')
 const distanceStr = ref('')
 const elevationGainStr = ref('')
@@ -276,7 +276,7 @@ function closeLogDialog() {
   selectedActivity.value = null
 }
 
-// Calculate pace from duration and distance string refs
+// 根据时长和距离字符串引用计算配速
 const calculatedPace = computed(() => {
   const dur = parseDecimalInput(durationStr.value)
   const dist = parseDecimalInput(distanceStr.value)
@@ -291,7 +291,7 @@ async function handleSubmit() {
   const { valid } = await formRef.value.validate()
   if (!valid) return
 
-  // Parse string refs to numbers before submitting
+// 提交前将字符串引用解析为数字
   formData.value.duration = parseDecimalInput(durationStr.value)
   formData.value.distance = distanceStr.value ? parseDecimalInput(distanceStr.value) : undefined
   formData.value.elevationGain = elevationGainStr.value ? parseDecimalInput(elevationGainStr.value) : undefined
@@ -319,7 +319,7 @@ async function onCreateClose() {
   await activityStore.fetchActivities(true)
 }
 
-// If navigated with activityId query param, auto-open the dialog
+// 如果通过 activityId 查询参数进入，则自动打开对话框
 if (route.query.activityId) {
   const preselected = activityStore.activities.find(a => a.id === Number(route.query.activityId))
   if (preselected) {

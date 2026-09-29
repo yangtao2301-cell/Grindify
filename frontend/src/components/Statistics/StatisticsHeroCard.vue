@@ -23,7 +23,7 @@
         'linear-gradient(135deg, rgba(171, 255, 26, 0.06) 0%, rgb(var(--v-theme-cardBg)) 50%, rgba(171, 255, 26, 0.03) 100%)',
     }"
   >
-    <!-- Empty state -->
+<!-- 空状态 -->
     <div v-if="!overview || overview.totalWorkouts === 0" class="text-center py-4">
       <v-icon size="40" color="primary" class="mb-2 hero-icon-pulse">mdi-chart-areaspline</v-icon>
       <p class="text-body-2 text-textSecondary mb-3">{{ $t('statistics.heroEmpty') }}</p>
@@ -32,7 +32,7 @@
       </v-btn>
     </div>
 
-    <!-- Hero stats - single row with compact items -->
+<!-- 主要统计——紧凑项目的单行布局 -->
     <div v-else class="hero-stats-row">
       <div v-for="stat in heroStats" :key="stat.key" class="hero-stat">
         <div class="d-flex align-center ga-1 mb-1">

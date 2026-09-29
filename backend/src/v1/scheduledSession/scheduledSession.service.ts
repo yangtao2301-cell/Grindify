@@ -41,7 +41,7 @@ export interface ScheduledSessionForDate {
   dayOfWeek: number | null;
   isRecurring: boolean;
   notes: string | null;
-  resolvedDate: string; // the actual date this occurrence falls on
+  resolvedDate: string; // 此次事件实际对应的日期
   isCompleted: boolean;
   linkedSessionId: number | null;
 }
@@ -65,7 +65,7 @@ export class ScheduledSessionService {
     userId: number,
     dto: CreateScheduledSessionDto,
   ): Promise<ScheduledSession> {
-    // Validate references
+    // 验证关联记录
     if (dto.type === ScheduledSessionType.WORKOUT) {
       if (!dto.workoutId) {
         throw new BadRequestException('workoutId is required for workout type');
@@ -131,13 +131,13 @@ export class ScheduledSessionService {
   ): Promise<ScheduledSessionForDate[]> {
     const dayOfWeek = this.getDayOfWeek(dateStr);
 
-    // Get all scheduled sessions for this user
+    // 获取当前用户的所有计划训练
     const allScheduled = await this.scheduledRepo.find({
       where: { user: { id: userId } },
       relations: ['workout', 'activity'],
     });
 
-    // Filter: one-time matching this date OR recurring matching this dayOfWeek (not in exceptions)
+    // 筛选：一次性事件匹配此日期，或重复事件匹配此星期几（且不在例外日期中）
     const matching = allScheduled.filter((s) => {
       if (s.isRecurring) {
         if (s.dayOfWeek !== dayOfWeek) return false;
@@ -155,7 +155,7 @@ export class ScheduledSessionService {
       }
     });
 
-    // Check completion status for each
+    // 检查每个事件的完成状态
     return Promise.all(
       matching.map((s) => this.enrichWithCompletionStatus(s, dateStr, userId)),
     );
@@ -251,7 +251,7 @@ export class ScheduledSessionService {
         ? new Date(dto.recurringEndDate)
         : null;
     }
-    // If isRecurring is being set to false, clear recurringEndDate
+      // 如果将 isRecurring 设置为 false，则清除 recurringEndDate
     if (dto.isRecurring === false) {
       scheduled.recurringEndDate = null;
     }
@@ -273,7 +273,7 @@ export class ScheduledSessionService {
           'occurrenceDate is required when deleting a single occurrence',
         );
       }
-      // Add the date to exception list
+    // 将日期加入例外列表
       if (!scheduled.exceptionDates.includes(occurrenceDate)) {
         scheduled.exceptionDates = [
           ...scheduled.exceptionDates,
@@ -284,12 +284,12 @@ export class ScheduledSessionService {
       return { message: 'Occurrence removed' };
     }
 
-    // Delete all (or one-time)
+    // 删除全部事件（或删除一次性事件）
     await this.scheduledRepo.remove(scheduled);
     return { message: 'Scheduled session deleted' };
   }
 
-  // --- Private helpers ---
+  // --- 私有辅助方法 ---
 
   private async enrichWithCompletionStatus(
     scheduled: ScheduledSession,
@@ -300,7 +300,7 @@ export class ScheduledSessionService {
     let linkedSessionId: number | null = null;
 
     if (scheduled.type === ScheduledSessionType.WORKOUT) {
-      // First: check by direct FK link
+      // 首先通过直接外键关联检查
       const linked = await this.workoutSessionRepo.findOne({
         where: {
           scheduledSession: { id: scheduled.id },
@@ -317,7 +317,7 @@ export class ScheduledSessionService {
         }
       }
 
-      // Fallback: check if the user finished the same workout on this date (without FK link)
+      // 回退检查：判断用户是否在此日期完成了同一训练（没有外键关联）
       if (!isCompleted && scheduled.workout?.id) {
         const byWorkout = await this.workoutSessionRepo.findOne({
           where: {
@@ -337,8 +337,8 @@ export class ScheduledSessionService {
         }
       }
     } else {
-      // First: check by direct FK link
-      // Use query builder with string date to avoid timezone issues with PostgreSQL date columns
+      // 首先通过直接外键关联检查
+      // 使用字符串日期构建查询，避免 PostgreSQL date 列的时区问题
       const linked = await this.activityLogRepo
         .createQueryBuilder('log')
         .where('log.scheduledSessionId = :scheduledId', {
@@ -351,7 +351,7 @@ export class ScheduledSessionService {
         linkedSessionId = linked.id;
       }
 
-      // Fallback: check if the user logged the same activity on this date (without FK link)
+      // 回退检查：判断用户是否在此日期记录了同一活动（没有外键关联）
       if (!isCompleted && scheduled.activity?.id) {
         const byActivity = await this.activityLogRepo
           .createQueryBuilder('log')
@@ -385,8 +385,8 @@ export class ScheduledSessionService {
 
   private getDayOfWeek(dateStr: string): number {
     const d = new Date(dateStr + 'T12:00:00');
-    const jsDay = d.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
-    return jsDay === 0 ? 6 : jsDay - 1; // Convert to 0=Mon, ..., 6=Sun
+    const jsDay = d.getDay(); // 0=周日，1=周一，……，6=周六
+    return jsDay === 0 ? 6 : jsDay - 1; // 转换为 0=周一，……，6=周日
   }
 
   private toDateString(date: Date | null): string | null {

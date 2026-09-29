@@ -21,7 +21,7 @@
       class="flex-grow-1 overflow-y-auto"
       style="padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px))"
     >
-      <!-- Avatar Section -->
+<!-- 头像区域 -->
       <div class="d-flex flex-column align-center pt-6 pb-4">
         <div class="avatar-wrapper">
           <v-avatar class="mb-2" size="100" color="primary">
@@ -61,7 +61,7 @@
         />
       </div>
 
-      <!-- Personal Information Section -->
+<!-- 个人信息区域 -->
       <div class="px-5 mb-6">
         <div class="d-flex justify-space-between align-center mb-3">
           <h2 class="text-h6">{{ $t('settings.personalInformation') }}</h2>
@@ -134,7 +134,7 @@
         </v-card>
       </div>
 
-      <!-- Danger Zone -->
+<!-- 危险区域 -->
       <div class="px-5 mb-6">
         <h2 class="text-h6 text-textPrimary mb-3">{{ $t('settings.dangerZone') }}</h2>
         <v-card
@@ -151,7 +151,7 @@
       </div>
     </div>
 
-    <!-- Edit Personal Info Dialog -->
+<!-- 编辑个人信息对话框 -->
     <v-dialog v-model="isEditOpen" fullscreen transition="slide-y-transition" persistent>
       <EditPersonalInfoDialog
         v-if="currentUser"
@@ -161,7 +161,7 @@
       />
     </v-dialog>
 
-    <!-- Change Password Bottom Sheet -->
+<!-- 修改密码底部抽屉 -->
     <v-dialog v-model="isPasswordSheetOpen" max-width="500">
       <v-card
         class="bg-cardBg rounded-lg"
@@ -217,7 +217,7 @@
       </v-card>
     </v-dialog>
 
-    <!-- Delete Confirmation Dialog -->
+<!-- 删除确认对话框 -->
     <v-dialog v-model="isDeleteDialogOpen" max-width="360">
       <v-card
         class="bg-cardBg rounded-lg"
@@ -272,7 +272,7 @@ const getImageUrl = (imagePath: string) => {
   return `${baseUrl}${imagePath}`
 }
 
-// Reactive user from props
+// 从 props 获取响应式用户数据
 const currentUser = computed(() => props.user)
 
 const isImperial = computed(() => currentUser.value?.unitScale === 'imperial')
@@ -293,7 +293,7 @@ const fromCm = (val: number | undefined | null): string => {
   return `${converted} ${heightUnit.value}`
 }
 
-// Display values
+// 展示值
 const displayName = computed(() => {
   const u = currentUser.value
   if (!u) return '—'
@@ -307,7 +307,7 @@ const displayDateOfBirth = computed(() => {
 const displayWeight = computed(() => fromKg(currentUser.value?.weight))
 const displayHeight = computed(() => fromCm(currentUser.value?.height))
 
-// Photo upload
+// 照片上传
 const fileInput = ref<HTMLInputElement | null>(null)
 const isUploadingPhoto = ref(false)
 
@@ -330,19 +330,19 @@ const handlePhotoSelect = async (event: Event) => {
     toast.error(t('settings.failedToUploadAvatar'), { progressBar: true, duration: 1000 })
   } finally {
     isUploadingPhoto.value = false
-    // Reset input so same file can be re-selected
+// 重置输入，使同一个文件可以再次选择
     if (fileInput.value) fileInput.value.value = ''
   }
 }
 
-// Edit personal info dialog
+// 编辑个人信息对话框
 const isEditOpen = ref(false)
 
 const onPersonalInfoUpdated = (updated: User) => {
   emit('updated', updated)
 }
 
-// Password change
+// 修改密码
 const isPasswordSheetOpen = ref(false)
 const isSavingPassword = ref(false)
 const passwordForm = ref<VForm | null>(null)
@@ -398,7 +398,7 @@ const savePassword = async () => {
   }
 }
 
-// Delete account
+// 删除账号
 const isDeleteDialogOpen = ref(false)
 const isDeleting = ref(false)
 

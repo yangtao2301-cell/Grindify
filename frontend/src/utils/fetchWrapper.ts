@@ -36,11 +36,11 @@ const isLocalDevelopmentHost = (hostname: string) =>
   isLoopbackHost(hostname) || isPrivateIpv4(hostname);
 
 /**
- * Keep local development requests on the same host as the page.
+ * 让本地开发请求与页面使用相同的主机。
  *
- * The auth token is an httpOnly, host-only cookie. When the app is opened at
- * localhost but VITE_API_URL points to a LAN IP (or the reverse), browsers
- * treat the request as cross-site and do not send that cookie with SameSite=Lax.
+ * 身份验证令牌是 httpOnly、仅限当前主机的 Cookie。当应用从 localhost 打开，
+ * 但 VITE_API_URL 指向局域网 IP（或反过来）时，浏览器会将请求视为跨站请求，
+ * 并且在 SameSite=Lax 下不会发送该 Cookie。
  */
 const resolveRequestUrl = (url: string) => {
   if (typeof window === 'undefined') return url;
@@ -98,7 +98,7 @@ export const fetchWrapper = async <T = unknown>(
     if (!response.ok) {
       const errorText = await response.text();
       
-      // Check for 404 User not found error
+// 检查是否为 404 用户不存在错误
       if (response.status === 404) {
         try {
           const errorBody = JSON.parse(errorText);
@@ -107,7 +107,7 @@ export const fetchWrapper = async <T = unknown>(
             return Promise.reject('User not found - logged out');
           }
         } catch {
-          // Not JSON or different error, continue with normal error handling
+// 不是 JSON 或属于其他错误，继续正常的错误处理
         }
       }
       

@@ -17,7 +17,7 @@ import { MigrationInterface, QueryRunner, TableColumn } from 'typeorm';
 
 export class AddStreakFreezesToUser1775000000000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
-    // Add streakFreezes column — users start with 1 freeze
+    // 添加 streakFreezes 列——用户初始拥有 1 次冻结机会
     await queryRunner.addColumn(
       'user',
       new TableColumn({
@@ -27,7 +27,7 @@ export class AddStreakFreezesToUser1775000000000 implements MigrationInterface {
       }),
     );
 
-    // Add streakFreezeUsedWeek column — ISO week key e.g. "2026-W18"
+    // 添加 streakFreezeUsedWeek 列——ISO 周键，例如“2026-W18”
     await queryRunner.addColumn(
       'user',
       new TableColumn({
@@ -38,7 +38,7 @@ export class AddStreakFreezesToUser1775000000000 implements MigrationInterface {
       }),
     );
 
-    // Add completedGoalWeeksCount — tracks how many goal-weeks have been completed
+    // 添加 completedGoalWeeksCount——记录已完成目标周的数量
     await queryRunner.addColumn(
       'user',
       new TableColumn({

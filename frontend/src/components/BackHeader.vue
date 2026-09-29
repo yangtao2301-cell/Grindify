@@ -55,7 +55,7 @@
       >
         <v-icon>mdi-menu</v-icon>
         <v-menu activator="parent">
-          <!-- A slot to use in other pages -->
+<!-- 供其他页面使用的插槽 -->
           <template v-if="$slots.menuAppend">
             <slot name="menuAppend" />
           </template>

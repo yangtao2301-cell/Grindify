@@ -16,7 +16,7 @@
 <template>
   <v-dialog v-model="dialogOpen" fullscreen :scrim="false" transition="dialog-bottom-transition">
     <v-card class="bg-background">
-      <!-- Header -->
+<!-- 标题 -->
       <BackHeader
         :title="$t('schedule.title')"
         :show-menu="false"
@@ -27,7 +27,7 @@
       />
 
       <div class="pa-5 d-flex flex-column ga-5">
-        <!-- Type toggle: Workout or Activity -->
+<!-- 类型切换：训练或活动 -->
         <div>
           <p class="text-caption text-uppercase font-weight-bold text-textSecondary mb-2">
             {{ $t('schedule.selectType') }}
@@ -50,7 +50,7 @@
           </v-btn-toggle>
         </div>
 
-        <!-- Select workout or activity -->
+<!-- 选择训练或活动 -->
         <div>
           <p class="text-caption text-uppercase font-weight-bold text-textSecondary mb-2">
             {{
@@ -100,7 +100,7 @@
           </v-card>
         </div>
 
-        <!-- Scheduling mode: One-time or Recurring -->
+<!-- 计划模式：一次性或重复 -->
         <div>
           <p class="text-caption text-uppercase font-weight-bold text-textSecondary mb-2">
             {{ $t('schedule.title') }}
@@ -123,7 +123,7 @@
           </v-btn-toggle>
         </div>
 
-        <!-- One-time: Date picker -->
+<!-- 一次性：日期选择器 -->
         <div v-if="scheduleMode === 'one-time'">
           <p class="text-caption text-uppercase font-weight-bold text-textSecondary mb-2">
             {{ $t('schedule.pickDate') }}
@@ -139,7 +139,7 @@
           />
         </div>
 
-        <!-- Recurring: Day of week picker -->
+<!-- 重复：星期选择器 -->
         <div v-if="scheduleMode === 'recurring'">
           <p class="text-caption text-uppercase font-weight-bold text-textSecondary mb-2">
             {{ $t('schedule.pickDays') }}
@@ -177,7 +177,7 @@
           </div>
         </div>
 
-        <!-- Notes -->
+<!-- 备注 -->
         <div>
           <p class="text-caption text-uppercase font-weight-bold text-textSecondary mb-2">
             {{ $t('schedule.notes') }}
@@ -268,7 +268,7 @@ const canSubmit = computed(() => {
   return true
 })
 
-// Reset form when dialog opens
+// 对话框打开时重置表单
 watch(dialogOpen, async open => {
   if (open) {
     sessionType.value = 'workout'
@@ -283,7 +283,7 @@ watch(dialogOpen, async open => {
   }
 })
 
-// Reset selected item when type changes
+// 类型改变时重置选中项目
 watch(sessionType, () => {
   selectedItemId.value = null
 })
@@ -302,7 +302,7 @@ async function submit() {
 
   try {
     if (scheduleMode.value === 'recurring') {
-      // Create one scheduled session per selected day
+// 每个选中的日期创建一个计划会话
       const promises = selectedDays.value.map(dayOfWeek =>
         scheduledSessionStore.create({
           type: sessionType.value,

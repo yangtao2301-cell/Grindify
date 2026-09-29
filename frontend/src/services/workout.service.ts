@@ -13,7 +13,7 @@
  * <https://www.gnu.org/licenses/>.
  */
 
-// services/workout.service.ts
+// services/workout.service.ts（训练服务）
 import type {
   CreateWorkout,
   UpdateWorkout,
@@ -74,7 +74,7 @@ export const updateWorkout = async (id: number, workout: UpdateWorkout) => {
 
 export const deleteWorkout = async (id: number) => {
   try {
-    // If your API returns 204 No Content, fetchWrapper will still resolve (no body).
+// 如果 API 返回 204 No Content，fetchWrapper 仍会正常解析（没有响应正文）。
     await fetchWrapper<void>(`${apiUrl}/workouts/${id}`, {
       method: 'DELETE',
     });

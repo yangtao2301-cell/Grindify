@@ -77,7 +77,7 @@ export const deleteMuscleGroup = async (id: number) => {
     await fetchWrapper<void>(`${apiUrl}/muscleGroups/${id}`, {
       method: 'DELETE',
     });
-    return true; // success
+    return true; // 成功
   } catch (error) {
     console.error('Error deleting muscle group:', error);
     throw new Error('Failed to delete muscle group');

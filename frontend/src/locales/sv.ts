@@ -314,7 +314,7 @@ export default {
     orContinueWith: 'eller fortsätt med',
     privacyPolicy: 'Integritetspolicy',
 
-    // E-postverifiering
+// 邮箱验证
     verifyYourEmail: 'Verifiera din e-post',
     verifyEmailSent: 'Vi skickade en 6-siffrig kod till',
     verifyEmail: 'Verifiera e-post',
@@ -329,7 +329,7 @@ export default {
     resendFailed: 'Det gick inte att skicka koden. Försök igen.',
     emailNotVerifiedToast: 'Verifiera din e-post innan du loggar in.',
 
-    // Glömt / återställ lösenord
+// 忘记/重置密码
     forgotPasswordTitle: 'Glömt lösenord?',
     forgotPasswordSubtitle: 'Ange din e-post så skickar vi en återställningskod.',
     sendResetCode: 'Skicka återställningskod',

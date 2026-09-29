@@ -13,7 +13,7 @@
  * <https://www.gnu.org/licenses/>.
  */
 
-/** Names used for the built-in Chinese (Simplified) catalog translation. */
+/** 内置简体中文目录翻译所使用的名称。 */
 export const chineseExerciseNames: Record<string, string> = {
   'Bench Press': '杠铃卧推',
   'Incline Dumbbell Press': '上斜哑铃卧推',

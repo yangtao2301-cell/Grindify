@@ -75,7 +75,7 @@ export class WorkoutService {
       }),
     );
     await this.workoutExerciseRepo.save(newExercises);
-    // Reload the workout to get the full updated entity
+    // 重新加载训练，以获取完整的更新后实体
     const updatedWorkout = await this.getWorkout(workoutId, userId);
     return updatedWorkout;
   }
@@ -112,7 +112,7 @@ export class WorkoutService {
   ): Promise<WorkoutResponseDto> {
     const workout = await this.findWorkoutForUser(workoutId, userId);
 
-    // Update each exercise's order
+    // 更新每个训练动作的顺序
     for (const exerciseOrder of exercises) {
       await this.workoutExerciseRepo.update(
         {
@@ -147,7 +147,7 @@ export class WorkoutService {
 
     Object.assign(workoutExercise, dto);
 
-    // Keep `weight` in sync with the first set's weight when setWeights is provided
+    // 提供 setWeights 时，使 `weight` 与第一组的重量保持同步
     if (dto.setWeights && dto.setWeights.length > 0) {
       workoutExercise.weight = dto.setWeights[0];
     }
@@ -173,7 +173,7 @@ export class WorkoutService {
     if (!workout) throw new NotFoundException('Workout not found');
     return this.toResponseDto(workout);
   }
-  // ... rest of the service code
+    // ……服务代码的其余部分
   async getWorkoutList(userId: number): Promise<WorkoutResponseDto[]> {
     const workouts = await this.workoutRepo.find({
       where: { createdBy: { id: userId } },

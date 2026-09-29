@@ -23,7 +23,7 @@ import { ExerciseMedia } from './exerciseMedia.entity';
 import { MuscleGroupService } from '../muscleGroup/muscleGroup.service';
 import { UploadService } from '../upload/upload.service';
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
+  // ── 辅助方法 ──────────────────────────────────────────────────────────────────
 
 function makeExercise(overrides: Partial<Exercise> = {}): Exercise {
   return {
@@ -71,7 +71,7 @@ function makeMockManager(affectedUsers: { userId: number }[] = [], copyId = 200)
   };
 }
 
-// ── Test suite ────────────────────────────────────────────────────────────────
+  // ── 测试套件 ────────────────────────────────────────────────────────────────
 
 describe('ExerciseService', () => {
   let service: ExerciseService;
@@ -115,7 +115,7 @@ describe('ExerciseService', () => {
     service = module.get<ExerciseService>(ExerciseService);
   });
 
-  // ── findAll ────────────────────────────────────────────────────────────────
+  // ── 查找全部（findAll） ────────────────────────────────────────────────────────────────
 
   describe('findAll', () => {
     it('filter=mine returns only user exercises', async () => {
@@ -167,7 +167,7 @@ describe('ExerciseService', () => {
     });
   });
 
-  // ── findOne ────────────────────────────────────────────────────────────────
+  // ── 查找单个（findOne） ────────────────────────────────────────────────────────────────
 
   describe('findOne', () => {
     it('returns exercise owned by user', async () => {
@@ -219,7 +219,7 @@ describe('ExerciseService', () => {
     });
   });
 
-  // ── create ─────────────────────────────────────────────────────────────────
+  // ── 创建（create） ─────────────────────────────────────────────────────────────────
 
   describe('create', () => {
     beforeEach(() => {
@@ -259,7 +259,7 @@ describe('ExerciseService', () => {
     });
   });
 
-  // ── update ─────────────────────────────────────────────────────────────────
+  // ── 更新（update） ─────────────────────────────────────────────────────────────────
 
   describe('update', () => {
     it('updates title.default when name is provided', async () => {
@@ -292,7 +292,7 @@ describe('ExerciseService', () => {
     });
   });
 
-  // ── remove ─────────────────────────────────────────────────────────────────
+  // ── 删除（remove） ─────────────────────────────────────────────────────────────────
 
   describe('remove', () => {
     it('soft-deletes the user-owned exercise', async () => {
@@ -323,7 +323,7 @@ describe('ExerciseService', () => {
     });
   });
 
-  // ── deleteGlobal ──────────────────────────────────────────────────────────
+  // ── 删除全局记录（deleteGlobal） ──────────────────────────────────────────────────────────
 
   describe('deleteGlobal', () => {
     it('throws NotFoundException when global exercise does not exist', async () => {
@@ -348,7 +348,7 @@ describe('ExerciseService', () => {
       const globalEx = makeGlobalExercise({ id: 100 });
       exerciseRepo.findOne.mockResolvedValue(globalEx);
 
-      const manager = makeMockManager([]); // no affected users
+    const manager = makeMockManager([]); // 没有受影响的用户
       dataSource.transaction.mockImplementation(async (cb: any) => cb(manager));
 
       await service.deleteGlobal(100);
@@ -421,10 +421,10 @@ describe('ExerciseService', () => {
 
       await service.deleteGlobal(100);
 
-      // query calls: 1 (affected users) + 3 (FK updates for user 7) = 4
+    // 查询调用：1 次（受影响的用户）+ 3 次（用户 7 的外键更新）= 4 次
       expect(manager.query).toHaveBeenCalledTimes(4);
 
-      // All FK updates pass [newCopyId=200, globalId=100, userId=7]
+    // 所有外键更新都传入 [newCopyId=200, globalId=100, userId=7]
       const fkCalls = manager.query.mock.calls.slice(1);
       fkCalls.forEach((call: any[]) => {
         expect(call[1]).toEqual([200, 100, 7]);
@@ -444,7 +444,7 @@ describe('ExerciseService', () => {
     });
   });
 
-  // ── duplicateGlobalExercise ───────────────────────────────────────────────
+  // ── 复制全局训练动作（duplicateGlobalExercise） ───────────────────────────────────────────────
 
   describe('duplicateGlobalExercise', () => {
     function makeManagerForDuplicate(copyId = 200, globalEx: Exercise) {
@@ -517,7 +517,7 @@ describe('ExerciseService', () => {
 
       expect(manager.query).toHaveBeenCalledTimes(3);
       manager.query.mock.calls.forEach((call: any[]) => {
-        expect(call[1]).toEqual([200, 100, 1]); // [newCopyId, globalId, userId]
+    expect(call[1]).toEqual([200, 100, 1]); // [新副本 ID、全局 ID、用户 ID]
       });
     });
 
@@ -547,7 +547,7 @@ describe('ExerciseService', () => {
     });
   });
 
-  // ── serialization: I18nString fields don't crash ──────────────────────────
+  // ── 序列化：I18nString 字段不会导致异常 ──────────────────────────
 
   describe('toResponseDto (I18nString serialization)', () => {
     it('maps multilingual title correctly', async () => {
@@ -633,7 +633,7 @@ describe('ExerciseService', () => {
     });
   });
 
-  // ── createGlobal / updateGlobal ───────────────────────────────────────────
+  // ── 创建/更新全局记录（createGlobal / updateGlobal） ───────────────────────────────────────────
 
   describe('createGlobal', () => {
     it('creates with isGlobal=true and createdBy=null', async () => {

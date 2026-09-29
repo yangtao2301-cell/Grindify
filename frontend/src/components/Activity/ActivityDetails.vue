@@ -23,7 +23,7 @@
       overscroll-behavior: none;
     "
   >
-    <!-- Header -->
+<!-- 标题 -->
     <BackHeader :title="activityName" show-menu @close="emit('close')">
       <template #menuAppend>
         <v-list
@@ -50,13 +50,13 @@
       </template>
     </BackHeader>
 
-    <!-- Avatar -->
+<!-- 头像 -->
     <v-avatar size="70" tile color="avatarBg" class="mx-5 mb-3 mt-4 rounded-lg">
       <v-icon color="primary" size="35">mdi-{{ activity.icon }}</v-icon>
     </v-avatar>
 
     <div class="mx-5 d-flex flex-column ga-4">
-      <!-- Label + Title -->
+<!-- 标签 + 标题 -->
       <div class="pt-4">
         <p class="text-primary text-body-1 text-capitalize">{{ $t('settings.activities') }}</p>
         <h1 class="text-h5 font-weight-bold">{{ activityName }}</h1>
@@ -68,7 +68,7 @@
         </v-chip>
       </div>
 
-      <!-- Stat Cards -->
+<!-- 统计卡片 -->
       <div class="d-flex w-100 ga-3" style="align-items: stretch">
         <v-card
           class="text-center pa-3 rounded-lg bg-cardBg"
@@ -111,13 +111,13 @@
         </v-card>
       </div>
 
-      <!-- About -->
+<!-- 关于 -->
       <div v-if="activityDescription">
         <h2 class="text-h6">{{ $t('exerciseDetails.about') }}</h2>
         <p class="text-body-1 text-textSecondary mt-1">{{ activityDescription }}</p>
       </div>
 
-      <!-- Tracked Metrics -->
+<!-- 已跟踪指标 -->
       <div v-if="trackedMetrics.length > 0">
         <h2 class="text-h6">{{ $t('activity.trackedMetrics') }}</h2>
         <div class="d-flex ga-2 mt-2 flex-wrap">
@@ -133,7 +133,7 @@
         </div>
       </div>
 
-      <!-- Equipment -->
+<!-- 器械 -->
       <div v-if="activity.equipment && activity.equipment.length > 0">
         <h2 class="text-h6">{{ $t('activity.equipment') }}</h2>
         <div class="d-flex ga-2 mt-2 flex-wrap">
@@ -149,7 +149,7 @@
         </div>
       </div>
 
-      <!-- Your Stats -->
+<!-- 你的统计 -->
       <div>
         <h2 class="text-h6">{{ $t('activity.yourStats') }}</h2>
         <v-card
@@ -188,7 +188,7 @@
         </v-card>
       </div>
 
-      <!-- Recent Sessions -->
+<!-- 最近会话 -->
       <div>
         <h2 class="text-h6">{{ $t('activity.recentSessions') }}</h2>
         <div v-if="recentLogs.length === 0" class="text-center py-6">
@@ -234,12 +234,12 @@
     </div>
   </div>
 
-  <!-- Edit Activity Dialog -->
+<!-- 编辑活动对话框 -->
   <v-dialog v-model="isEditOpen" fullscreen>
     <EditActivity :activity="activity" @close="onEditClose" @deleted="emit('close')" />
   </v-dialog>
 
-  <!-- Edit Log Dialog -->
+<!-- 编辑日志对话框 -->
   <v-dialog v-model="isEditLogOpen" fullscreen>
     <EditActivityLog
       v-if="selectedLog"
@@ -249,7 +249,7 @@
     />
   </v-dialog>
 
-  <!-- Personalize (duplicate) Dialog -->
+<!-- 个性化（复制）对话框 -->
   <DuplicateActivityDialog
     v-model="isDuplicateDialogOpen"
     :activity-id="activity.id"
@@ -257,7 +257,7 @@
     @duplicated="emit('close')"
   />
 
-  <!-- Delete Confirmation -->
+<!-- 删除确认 -->
   <AcceptDialog
     v-model="isDeleteDialogOpen"
     :title="$t('activity.deleteActivity')"
@@ -302,7 +302,7 @@ const isDuplicateDialogOpen = ref(false)
 const selectedLog = ref<ActivityLog | null>(null)
 
 
-// Logs for this activity
+// 此活动的日志
 const activityLogs = computed(() =>
   activityStore.activityLogs.filter(l => l.activity?.id === props.activity.id)
 )
@@ -313,7 +313,7 @@ const recentLogs = computed(() =>
     .slice(0, 5)
 )
 
-// Stat computations
+// 统计计算
 const sessionCount = computed(() => activityLogs.value.length)
 
 const avgDurationLabel = computed(() => {
@@ -340,7 +340,7 @@ const totalDistanceLabel = computed(() => {
   return total > 0 ? `${total.toFixed(1)} km` : '—'
 })
 
-// Tracked metrics chips
+// 已跟踪指标标签
 const trackedMetrics = computed(() => {
   const metrics: string[] = []
   if (activity.value.trackDistance) metrics.push(t('activity.trackDistance'))
@@ -350,7 +350,7 @@ const trackedMetrics = computed(() => {
   return metrics
 })
 
-// Date formatting
+// 日期格式化
 function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString(undefined, {
     year: 'numeric',

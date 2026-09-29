@@ -1,4 +1,4 @@
-// One-time bootstrap for a new database. Existing databases are refused.
+// 仅用于初始化新数据库；已有数据的数据库会被拒绝执行。
 const { AppDataSource } = require('/app/dist/dataSource');
 
 async function main() {

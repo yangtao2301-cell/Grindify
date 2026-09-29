@@ -64,12 +64,12 @@ const getImageUrl = (imagePath: string) => {
   if (imagePath.startsWith('http')) {
     return imagePath
   }
-  // Remove /v1 from API URL for static assets
+// 从 API URL 中移除 /v1，以便访问静态资源
   const baseUrl = apiUrl.replace('/v1', '')
   return `${baseUrl}${imagePath}`
 }
 
-// Refresh user data when component mounts to get latest avatar
+// 组件挂载时刷新用户数据，以获取最新头像
 onMounted(async () => {
   try {
     await authStore.refreshUser()

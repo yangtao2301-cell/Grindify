@@ -83,7 +83,7 @@ export const useScheduledSessionStore = defineStore('scheduledSessionStore', () 
     try {
       const created = await scheduledService.createScheduledSession(dto)
       scheduledSessions.value.push(created)
-      lastFetched.value = null // invalidate cache
+lastFetched.value = null // 使缓存失效
       return created
     } catch (error) {
       console.error('Error creating scheduled session:', error)

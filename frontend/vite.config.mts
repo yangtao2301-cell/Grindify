@@ -1,6 +1,6 @@
 /// <reference types="vitest/config" />
 
-// Plugins
+// 插件
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import Fonts from 'unplugin-fonts/vite'
@@ -11,7 +11,7 @@ import { VueRouterAutoImports } from 'unplugin-vue-router'
 import Vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
 import { VitePWA } from 'vite-plugin-pwa'
 
-// Utilities
+// 工具函数
 import { defineConfig, type Plugin } from 'vite'
 import { fileURLToPath, URL } from 'node:url'
 
@@ -119,7 +119,7 @@ export default defineConfig({
         ],
       },
       workbox: {
-        // Keep API, admin, and uploaded-file routes out of the main app's SPA fallback.
+        // 将 API、管理后台和上传文件路由排除在主应用的 SPA 回退之外。
         navigateFallbackDenylist: [/^\/(?:api|v1|admin|uploads)(?:\/|$)/],
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         runtimeCaching: [
@@ -130,7 +130,7 @@ export default defineConfig({
               cacheName: 'api-cache',
               expiration: {
                 maxEntries: 200,
-                maxAgeSeconds: 60 * 60 * 24, // 24 hours
+                maxAgeSeconds: 60 * 60 * 24, // 24 小时
               },
               cacheableResponse: {
                 statuses: [0, 200],
@@ -144,7 +144,7 @@ export default defineConfig({
               cacheName: 'upload-cache',
               expiration: {
                 maxEntries: 200,
-                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 天
               },
               cacheableResponse: {
                 statuses: [0, 200],
@@ -158,7 +158,7 @@ export default defineConfig({
               cacheName: 'font-cache',
               expiration: {
                 maxEntries: 30,
-                maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
+                maxAgeSeconds: 60 * 60 * 24 * 365, // 1 年
               },
               cacheableResponse: {
                 statuses: [0, 200],
@@ -193,7 +193,7 @@ export default defineConfig({
     extensions: ['.js', '.json', '.jsx', '.mjs', '.ts', '.tsx', '.vue'],
   },
   server: {
-    host: true, // bind to 0.0.0.0 so external devices can connect
+    host: true, // 绑定到 0.0.0.0，使外部设备可以连接
     allowedHosts: process.env.VITE_ALLOWED_HOSTS
       ? process.env.VITE_ALLOWED_HOSTS.split(',').map(h => h.trim())
       : undefined,

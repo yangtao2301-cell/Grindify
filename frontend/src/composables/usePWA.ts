@@ -16,7 +16,7 @@
 import { useRegisterSW } from 'virtual:pwa-register/vue'
 import { shallowRef } from 'vue'
 
-const UPDATE_INTERVAL_MS = 60 * 60 * 1000 // Check for updates every 60 minutes
+const UPDATE_INTERVAL_MS = 60 * 60 * 1000 // 每 60 分钟检查一次更新
 
 let swUrlRef = ''
 let updateIntervalId: number | null = null

@@ -14,8 +14,8 @@
  */
 
 /**
- * Helper function to construct full image URLs from relative paths
- * Handles the /v1 prefix issue with static assets
+ * 根据相对路径构造完整图片 URL 的辅助函数。
+ * 处理静态资源的 /v1 前缀问题。
  */
 export const getImageUrl = (imagePath: string | null | undefined): string | null => {
   if (!imagePath) return null;
@@ -25,7 +25,7 @@ export const getImageUrl = (imagePath: string | null | undefined): string | null
   }
   
   const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:1337/v1';
-  // Remove /v1 from API URL for static assets
+// 从 API URL 中移除 /v1，以便访问静态资源
   const baseUrl = apiUrl.replace('/v1', '');
   return `${baseUrl}${imagePath}`;
 };

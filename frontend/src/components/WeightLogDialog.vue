@@ -18,7 +18,7 @@
     <v-card class="d-flex flex-column bg-background" style="height: 100dvh; overflow: hidden">
       <BackHeader :title="$t('weightLog.title')" @close="close" />
 
-      <!-- First-time setup: no startWeight set yet -->
+<!-- 首次设置：尚未设置 startWeight -->
       <template v-if="showFirstTimeSetup">
         <v-card-text class="pa-5 flex-grow-1 d-flex flex-column ga-4">
           <div class="text-center mb-2">
@@ -102,10 +102,10 @@
         </v-card-text>
       </template>
 
-      <!-- Main weight log view -->
+<!-- 主体重日志视图 -->
       <template v-else>
         <div class="d-flex flex-column" style="flex: 1 1 0; min-height: 0; overflow: hidden">
-          <!-- Tab header -->
+<!-- 标签页标题 -->
           <v-tabs v-model="activeTab" color="primary" grow style="flex: 0 0 auto">
             <v-tab value="log">{{ $t('progressPhotos.logTab') }}</v-tab>
             <v-tab value="photos">{{ $t('progressPhotos.tab') }}</v-tab>
@@ -113,10 +113,10 @@
           <v-divider style="flex: 0 0 auto" />
 
           <v-tabs-window v-model="activeTab" style="flex: 1 1 0; min-height: 0; overflow: hidden">
-            <!-- Log tab -->
+<!-- 日志标签页 -->
             <v-tabs-window-item value="log">
               <div class="pa-5">
-                <!-- Stats summary cards -->
+<!-- 统计摘要卡片 -->
                 <div class="d-flex ga-3 mb-5">
                   <v-card
                     class="flex-grow-1 bg-cardBg py-3 d-flex flex-column align-center rounded-lg"
@@ -168,7 +168,7 @@
                   </v-card>
                 </div>
 
-                <!-- Target weight indicator -->
+<!-- 目标体重指示器 -->
                 <v-card
                   v-if="stats?.targetWeight"
                   class="bg-cardBg pa-3 mb-5 rounded-lg d-flex align-center ga-3"
@@ -191,7 +191,7 @@
                   </div>
                 </v-card>
 
-                <!-- Goal progress card -->
+<!-- 目标进度卡片 -->
                 <v-card
                   v-if="goalProgress"
                   class="bg-cardBg pa-3 mb-5 rounded-lg"
@@ -227,7 +227,7 @@
                   </div>
                 </v-card>
 
-                <!-- Chart -->
+<!-- 图表 -->
                 <v-card
                   class="bg-cardBg pa-4 mb-5 rounded-lg"
                   style="border: 1px solid rgb(var(--v-theme-borderColor)); box-shadow: none"
@@ -245,7 +245,7 @@
                   >
                     <p class="text-body-2">{{ $t('weightLog.needMoreData') }}</p>
                   </div>
-                  <!-- Chart legend -->
+<!-- 图表图例 -->
                   <div v-if="chartData && sortedLogs.length > 1" class="d-flex flex-wrap ga-3 mt-3">
                     <div class="d-flex align-center ga-1">
                       <div
@@ -274,7 +274,7 @@
                   </div>
                 </v-card>
 
-                <!-- History table -->
+<!-- 历史记录表 -->
                 <div class="d-flex justify-space-between align-center mb-3">
                   <h3 class="text-subtitle-1 text-textPrimary">{{ $t('weightLog.history') }}</h3>
                   <v-btn
@@ -298,7 +298,7 @@
                 </v-card>
 
                 <div v-else class="d-flex flex-column ga-2">
-                  <!-- Table header -->
+<!-- 表头 -->
                   <div
                     class="d-flex px-3 py-2"
                     style="font-size: 11px; text-transform: uppercase; color: #9e9e9e"
@@ -310,7 +310,7 @@
                     <div style="width: 36px"></div>
                   </div>
 
-                  <!-- Table rows -->
+<!-- 表格行 -->
                   <v-card
                     v-for="(entry, index) in sortedLogs"
                     :key="entry.id"
@@ -357,7 +357,7 @@
               </div>
             </v-tabs-window-item>
 
-            <!-- Photos tab -->
+<!-- 照片标签页 -->
             <v-tabs-window-item value="photos">
               <ProgressPhotosPanel />
             </v-tabs-window-item>
@@ -367,7 +367,7 @@
     </v-card>
   </v-dialog>
 
-  <!-- Add / Edit weight entry dialog -->
+<!-- 添加/编辑体重记录对话框 -->
   <v-dialog v-model="entryDialogOpen" max-width="400" persistent>
     <v-card class="bg-cardBg rounded-lg" style="border: 1px solid rgb(var(--v-theme-borderColor))">
       <v-card-title class="text-h6 pa-4">
@@ -415,7 +415,7 @@
     </v-card>
   </v-dialog>
 
-  <!-- Delete confirmation dialog -->
+<!-- 删除确认对话框 -->
   <v-dialog v-model="deleteDialogOpen" max-width="360">
     <v-card class="bg-cardBg rounded-lg" style="border: 1px solid rgb(var(--v-theme-borderColor))">
       <v-card-title class="text-h6 pa-4">{{ $t('weightLog.deleteEntry') }}</v-card-title>
@@ -476,7 +476,7 @@ const authStore = useAuthStore()
 const weightLogStore = useWeightLogStore()
 const photoStore = useProgressPhotoStore()
 
-// Active tab
+// 当前标签页
 const activeTab = ref<'log' | 'photos'>('log')
 
 const dialogOpen = computed({
@@ -486,7 +486,7 @@ const dialogOpen = computed({
 
 const stats = computed(() => weightLogStore.stats)
 const sortedLogs = computed(() => {
-  // Already sorted DESC from API — newest first
+// API 已按降序返回，最新记录在前
   return [...weightLogStore.weightLogs]
 })
 
@@ -494,7 +494,7 @@ const currentUser = computed(() => authStore.user)
 const isImperial = computed(() => currentUser.value?.unitScale === 'imperial')
 const weightUnit = computed(() => (isImperial.value ? 'lbs' : 'kg'))
 
-// First-time setup
+// 首次设置
 const showFirstTimeSetup = computed(() => {
   return (
     currentUser.value?.showWeightTracking &&
@@ -507,7 +507,7 @@ const showFirstTimeSetup = computed(() => {
 const setupWeight = ref<number | null>(null)
 const setupTargetWeight = ref<number | null>(null)
 
-// String refs for decimal fields
+// 小数输入字段的字符串引用
 const setupWeightStr = ref('')
 const setupTargetWeightStr = ref('')
 const entryWeightStr = ref('')
@@ -516,7 +516,7 @@ const setupGoalDurationValue = ref<number | undefined>(undefined)
 const setupGoalDurationUnit = ref<'weeks' | 'months'>('weeks')
 const isSavingSetup = ref(false)
 
-// Goal settings panel
+// 目标设置面板
 const goalSettingsTargetWeight = ref<number | null>(null)
 const goalSettingsGoalType = ref<string | null>(null)
 const goalSettingsDurationValue = ref<number | undefined>(undefined)
@@ -528,7 +528,7 @@ const goalTypeItems = computed(() => [
   { title: t('weightLog.goalMaintain'), value: 'maintain' },
 ])
 
-// Convert display weight to kg for storage
+// 将显示体重转换为千克后存储
 const toKg = (val: number) => (isImperial.value ? Number(val) / 2.20462 : Number(val))
 const fromKg = (val: number) => (isImperial.value ? Number(val) * 2.20462 : Number(val))
 
@@ -558,7 +558,7 @@ const formatDate = (dateStr: string) => {
   return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
-// Result: difference from the *next* (earlier) entry in the sorted (desc) list
+// 结果：与降序列表中“下一条”（更早记录）的差值
 const getResult = (index: number) => {
   if (index >= sortedLogs.value.length - 1) return undefined
   const current = Number(sortedLogs.value[index].weight)
@@ -566,13 +566,13 @@ const getResult = (index: number) => {
   return Number((current - previous).toFixed(2))
 }
 
-// Total: difference from start weight
+// 总计：与起始体重的差值
 const getTotal = (entry: WeightLog) => {
   if (!stats.value?.startWeight) return undefined
   return Number((Number(entry.weight) - stats.value.startWeight).toFixed(2))
 }
 
-// Goal pace data — only valid when startWeight + targetWeight + goalTimeframe all set
+// 目标进度数据——只有 startWeight、targetWeight、goalTimeframe 都已设置时才有效
 const goalPaceData = computed(() => {
   const sw = stats.value?.startWeight
   const tw = stats.value?.targetWeight
@@ -589,7 +589,7 @@ const goalPaceData = computed(() => {
   return { sw, tw, gtf, goalStartDate, goalEndDate, totalDays }
 })
 
-// Goal progress — today's ideal weight and pace badge
+// 目标进度——今天的理想体重和进度标签
 const goalProgress = computed(() => {
   const pace = goalPaceData.value
   if (!pace) return null
@@ -633,7 +633,7 @@ const goalProgress = computed(() => {
   return { idealWeightKg, badge, badgeColor, goalEndDateFormatted }
 })
 
-// Chart
+// 图表
 const chartData = computed((): ChartData<'line'> | null => {
   if (sortedLogs.value.length < 2) return null
 
@@ -652,7 +652,7 @@ const chartData = computed((): ChartData<'line'> | null => {
     actualWeight: fromKg(Number(log.weight)),
   }))
 
-  // Extend x-axis to goal end date so the ideal pace line shows future target
+// 将 X 轴延伸到目标结束日期，以便理想进度线显示未来目标
   if (pace) {
     const lastLogDate = points[points.length - 1].date
     lastLogDate.setHours(0, 0, 0, 0)
@@ -685,7 +685,7 @@ const chartData = computed((): ChartData<'line'> | null => {
     },
   ]
 
-  // Target weight flat dashed line
+// 目标体重水平虚线
   if (stats.value?.targetWeight) {
     const targetVal = fromKg(stats.value.targetWeight)
     datasets.push({
@@ -699,7 +699,7 @@ const chartData = computed((): ChartData<'line'> | null => {
     })
   }
 
-  // Ideal pace diagonal line
+// 理想进度斜线
   if (pace) {
     const idealData = points.map(p => {
       const daysSinceStart =
@@ -749,7 +749,7 @@ const chartOptions = computed(
   })
 )
 
-// Entry dialog
+// 记录对话框
 const entryDialogOpen = ref(false)
 const editingEntry = ref<WeightLog | null>(null)
 const isSavingEntry = ref(false)
@@ -819,7 +819,7 @@ const saveEntry = async () => {
   }
 }
 
-// Delete
+// 删除
 const deleteDialogOpen = ref(false)
 const deletingEntry = ref<WeightLog | null>(null)
 const isDeleting = ref(false)
@@ -848,7 +848,7 @@ const doDelete = async () => {
   }
 }
 
-// First-time setup save
+// 保存首次设置
 const saveFirstTimeSetup = async () => {
   setupWeight.value = parseDecimalInput(setupWeightStr.value) || null
   setupTargetWeight.value = parseDecimalInput(setupTargetWeightStr.value) || null
@@ -858,13 +858,13 @@ const saveFirstTimeSetup = async () => {
   try {
     const weightInKg = Number(toKg(setupWeight.value).toFixed(2))
 
-    // Create the first weight log
+// 创建第一条体重日志
     await weightLogService.createWeightLog({
       date: new Date().toISOString().split('T')[0],
       weight: weightInKg,
     })
 
-    // Update user preferences
+// 更新用户偏好设置
     const prefs: Record<string, unknown> = {}
     if (setupTargetWeight.value && setupTargetWeight.value > 0) {
       prefs.targetWeight = Number(toKg(setupTargetWeight.value).toFixed(2))
@@ -898,14 +898,14 @@ const close = () => {
   dialogOpen.value = false
 }
 
-// Load data when dialog opens
+// 对话框打开时加载数据
 watch(dialogOpen, async open => {
   if (open) {
     activeTab.value = 'log'
     await weightLogStore.refreshAll()
     await photoStore.fetchPhotos()
 
-    // Populate goal settings panel from current user data
+// 根据当前用户数据填充目标设置面板
     const user = authStore.user
     if (user) {
       goalSettingsTargetWeight.value = user.targetWeight
@@ -915,7 +915,7 @@ watch(dialogOpen, async open => {
 
       const gtf = user.goalTimeframe
       if (gtf) {
-        // Try to display as months if evenly divisible
+// 如果可以整除，则尝试以月为单位显示
         if (gtf % 4 === 0 && gtf >= 4) {
           goalSettingsDurationValue.value = gtf / 4
           goalSettingsDurationUnit.value = 'months'
@@ -935,12 +935,12 @@ watch(dialogOpen, async open => {
 </script>
 
 <style scoped>
-/* Prevent Vuetify tabs bar from growing beyond its natural height */
+/* 防止 Vuetify 标签栏超过其自然高度 */
 :deep(.v-tabs) {
   flex: 0 0 auto !important;
   height: auto !important;
 }
-/* Make the tabs-window fill remaining card height and allow each item to scroll */
+/* 让 tabs-window 填满卡片剩余高度，并允许每个项目滚动 */
 :deep(.v-window__container) {
   height: 100%;
   min-height: 0;

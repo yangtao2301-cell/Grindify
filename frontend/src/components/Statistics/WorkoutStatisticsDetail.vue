@@ -17,7 +17,7 @@
   <v-dialog v-model="dialogModel" fullscreen transition="dialog-bottom-transition">
     <v-card class="bg-background">
       <div class="pa-5 d-flex flex-column ga-4">
-        <!-- Header -->
+<!-- 标题 -->
         <BackHeader :title="workout?.title ?? ''" @close="dialogModel = false" />
 
         <div class="mt-4">
@@ -27,7 +27,7 @@
           </p>
         </div>
 
-        <!-- Summary Cards -->
+<!-- 摘要卡片 -->
         <div v-if="statisticsStore.workoutHistory" class="d-flex flex-wrap ga-2">
           <v-card
             v-for="card in summaryCards"
@@ -44,7 +44,7 @@
           </v-card>
         </div>
 
-        <!-- Volume Chart -->
+<!-- 训练量图表 -->
         <div v-if="chartPoints.length > 1">
           <p class="text-caption text-uppercase font-weight-bold text-textSecondary mb-2">
             {{ $t('statistics.volumeOverTime') }}
@@ -57,7 +57,7 @@
           </v-card>
         </div>
 
-        <!-- Session History -->
+<!-- 会话历史 -->
         <div>
           <p class="text-caption text-uppercase font-weight-bold text-textSecondary mb-2">
             {{ $t('statistics.sessionHistory') }}
@@ -110,7 +110,7 @@
               </div>
             </v-card>
 
-            <!-- Load More -->
+<!-- 加载更多 -->
             <v-btn
               v-if="hasMoreHistory"
               variant="text"
@@ -271,7 +271,7 @@ function loadMore() {
   }
 }
 
-// Load data when dialog opens
+// 对话框打开时加载数据
 watch(dialogModel, async open => {
   if (open && props.workout) {
     await statisticsStore.fetchWorkoutHistory(props.workout.id)

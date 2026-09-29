@@ -37,9 +37,8 @@ export class MuscleGroupService implements OnModuleInit {
   ) {}
 
   /**
-   * Automatically seed the default muscle groups when the application starts
-   * if the table is empty. This ensures muscle groups are always available
-   * without requiring a manual seed step.
+ * 如果表为空，则在应用启动时自动填充默认肌群。
+ * 这样可以确保肌群始终可用，无需手动执行填充步骤。
    */
   async onModuleInit(): Promise<void> {
     const count = await this.muscleGroupRepo.count();
@@ -49,7 +48,7 @@ export class MuscleGroupService implements OnModuleInit {
       this.logger.log(`Seeded ${muscleGroupsToSeed.length} muscle group(s)`);
       return;
     }
-    // Backfill nameI18n for muscle groups that don't have it yet (migration may have added the column)
+  // 为尚未拥有 nameI18n 的肌群补填数据（迁移脚本可能已经添加了该列）
     const missing = await this.muscleGroupRepo
       .createQueryBuilder('mg')
       .where('mg.nameI18n IS NULL')
@@ -78,9 +77,9 @@ export class MuscleGroupService implements OnModuleInit {
   }
 
   /**
-   * Finds multiple MuscleGroup entities by their IDs.
-   * @param ids - An array of muscle group IDs.
-   * @returns A promise that resolves to an array of MuscleGroup entities.
+ * 根据 ID 查找多个 MuscleGroup 实体。
+ * @param ids - 肌群 ID 数组。
+ * @returns 一个解析为 MuscleGroup 实体数组的 Promise。
    */
   async findByIds(ids: number[]): Promise<MuscleGroup[]> {
     if (!ids || ids.length === 0) {

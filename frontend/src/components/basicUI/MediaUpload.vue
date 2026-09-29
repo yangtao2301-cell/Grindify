@@ -167,7 +167,7 @@ const removeItem = (index: number) => {
   } else {
     const newIndex = index - existingItems.value.length
     const updated = [...props.modelValue]
-    // Revoke object URL to prevent memory leak
+// 释放对象 URL，避免内存泄漏
     if (updated[newIndex]?.preview) {
       URL.revokeObjectURL(updated[newIndex].preview)
     }
@@ -177,7 +177,7 @@ const removeItem = (index: number) => {
 }
 
 const moveItem = (from: number, to: number) => {
-  // Only support reordering among new items for simplicity
+// 为简化处理，只支持在新项目之间重新排序
   const existingCount = existingItems.value.length
   if (from < existingCount || to < existingCount) return
 

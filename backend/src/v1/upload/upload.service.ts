@@ -47,8 +47,8 @@ export class UploadService {
   }
 
   /**
-   * Process and optimize an exercise image
-   * Optimized for mobile - smaller dimensions and size
+ * 处理并优化训练动作图片。
+ * 针对移动端优化，使用更小的尺寸和文件大小。
    */
   async processExerciseImage(
     file: Express.Multer.File,
@@ -56,7 +56,7 @@ export class UploadService {
     const filename = `${randomBytes(16).toString('hex')}.webp`;
     const filepath = path.join(this.exercisesDir, filename);
 
-    // Optimize for mobile: max 800px width, high compression
+  // 针对移动端优化：最大宽度 800px，并使用高压缩率
     const info = await sharp(file.buffer)
       .rotate()
       .resize(800, 800, {
@@ -70,14 +70,14 @@ export class UploadService {
   }
 
   /**
-   * Process and optimize an avatar image
-   * Smaller dimensions for profile pictures
+ * 处理并优化头像图片。
+ * 头像使用更小的尺寸。
    */
   async processAvatarImage(file: Express.Multer.File): Promise<string> {
     const filename = `${randomBytes(16).toString('hex')}.webp`;
     const filepath = path.join(this.avatarsDir, filename);
 
-    // Avatar optimized: 400x400px, circular crop friendly
+  // 头像优化为 400x400px，适合圆形裁剪
     await sharp(file.buffer)
       .rotate()
       .resize(400, 400, {
@@ -91,8 +91,8 @@ export class UploadService {
   }
 
   /**
-   * Process exercise media (image or video).
-   * Images are converted to WebP; videos are stored as-is.
+ * 处理训练动作媒体（图片或视频）。
+ * 图片会转换为 WebP，视频保持原格式存储。
    */
   async processExerciseMedia(
     file: Express.Multer.File,
@@ -106,7 +106,7 @@ export class UploadService {
       return { url: `/uploads/exercises/media/${filename}`, type: 'video' };
     }
 
-    // Image processing
+  // 图片处理
     const filename = `${randomBytes(16).toString('hex')}.webp`;
     const filepath = path.join(this.mediaDir, filename);
     await sharp(file.buffer)
@@ -143,7 +143,7 @@ export class UploadService {
   }
 
   /**
-   * Delete an image file from the filesystem
+ * 从文件系统删除图片文件。
    */
   async deleteImage(imageUrl: string): Promise<void> {
     if (!imageUrl) return;
@@ -152,14 +152,14 @@ export class UploadService {
       const filepath = path.join(process.cwd(), imageUrl);
       await fs.unlink(filepath);
     } catch (error) {
-      // File might not exist, which is fine
+  // 文件可能不存在，这种情况可以忽略
       console.log('Image deletion failed (file may not exist):', error.message);
     }
   }
 
   /**
-   * Process and optimize a progress photo
-   * Max 1080px wide, preserves portrait aspect ratio
+ * 处理并优化进度照片。
+ * 最大宽度为 1080px，并保持纵向宽高比。
    */
   async processProgressPhoto(file: Express.Multer.File): Promise<string> {
     const filename = `${randomBytes(16).toString('hex')}.webp`;
@@ -178,13 +178,13 @@ export class UploadService {
   }
 
   /**
-   * Validate uploaded file (images only)
+ * 验证上传的文件（仅限图片）。
    */
   validateImageFile(file: Express.Multer.File): {
     valid: boolean;
     error?: string;
   } {
-    const maxSize = 10 * 1024 * 1024; // 10MB
+  const maxSize = 10 * 1024 * 1024; // 10MB
     const allowedMimeTypes = [
       'image/jpeg',
       'image/png',
@@ -211,13 +211,13 @@ export class UploadService {
   }
 
   /**
-   * Validate uploaded media file (images + video)
+ * 验证上传的媒体文件（图片和视频）。
    */
   validateMediaFile(file: Express.Multer.File): {
     valid: boolean;
     error?: string;
   } {
-    const maxSize = 50 * 1024 * 1024; // 50MB for video
+  const maxSize = 50 * 1024 * 1024; // 视频最大 50MB
     const allowedMimeTypes = [
       'image/jpeg',
       'image/png',

@@ -32,7 +32,7 @@ function resolveUrl(url: string) {
   return BASE_URL.replace('/v1', '') + url
 }
 
-// ─── State ────────────────────────────────────────────────────────────────────
+// ─── 状态 ────────────────────────────────────────────────────────────────────
 
 const loading = ref(true)
 const error = ref<string | null>(null)
@@ -51,15 +51,15 @@ const activeLang = ref<Lang>('default')
 const deleteConfirmId = ref<number | null>(null)
 const deleting = ref(false)
 
-// Image picker
+// 图片选择器
 const imagePickerOpen = ref(false)
 
-// Media (only in edit mode)
+// 媒体（仅编辑模式）
 const currentMedia = ref<ExerciseMediaItem[]>([])
 const uploadingMedia = ref(false)
 const mediaError = ref<string | null>(null)
 
-// ─── Form ─────────────────────────────────────────────────────────────────────
+// ─── 表单 ─────────────────────────────────────────────────────────────────────
 
 const emptyForm = (): CreateGlobalExercisePayload => ({
   title: { default: '' },
@@ -76,7 +76,7 @@ const emptyForm = (): CreateGlobalExercisePayload => ({
 
 const form = ref<CreateGlobalExercisePayload>(emptyForm())
 
-// ─── Fetch ────────────────────────────────────────────────────────────────────
+// ─── 获取数据 ────────────────────────────────────────────────────────────────────
 
 async function fetchAll() {
   loading.value = true
@@ -95,7 +95,7 @@ async function fetchAll() {
 
 onMounted(fetchAll)
 
-// ─── Filtering ────────────────────────────────────────────────────────────────
+// ─── 筛选 ────────────────────────────────────────────────────────────────
 
 const filteredExercises = computed(() => {
   let list = exercises.value
@@ -113,7 +113,7 @@ const filteredExercises = computed(() => {
   return list
 })
 
-// ─── Dialog open/close ────────────────────────────────────────────────────────
+// ─── 打开/关闭对话框 ────────────────────────────────────────────────────────
 
 function openCreate() {
   form.value = emptyForm()
@@ -148,7 +148,7 @@ function openEdit(ex: GlobalExercise) {
   dialogOpen.value = true
 }
 
-// ─── Save / Delete ───────────────────────────────────────────────────────────
+// ─── 保存/删除 ───────────────────────────────────────────────────────────
 
 async function save() {
   saving.value = true
@@ -181,14 +181,14 @@ async function confirmDelete(id: number) {
   }
 }
 
-// ─── Image picker ─────────────────────────────────────────────────────────────
+// ─── 图片选择器 ─────────────────────────────────────────────────────────────
 
 function onImagePicked(img: ExerciseImage) {
   form.value.imageUrl = img.url
   imagePickerOpen.value = false
 }
 
-// ─── Media management (edit mode only) ───────────────────────────────────────
+// ─── 媒体管理（仅编辑模式） ───────────────────────────────────────
 
 async function uploadMedia(file: File) {
   if (!editingId.value) return
@@ -197,7 +197,7 @@ async function uploadMedia(file: File) {
   try {
     const updated = await adminApi.uploadGlobalExerciseMedia(editingId.value, file)
     currentMedia.value = updated.media ?? []
-    // Also update the exercises list so the table stays fresh
+// 同时更新训练动作列表，使表格保持最新
     exercises.value = exercises.value.map(ex =>
       ex.id === editingId.value ? { ...ex, media: updated.media } : ex
     )
@@ -231,7 +231,7 @@ async function moveMedia(mediaId: number, direction: -1 | 1) {
   const idx = sorted.findIndex(m => m.id === mediaId)
   const swapIdx = idx + direction
   if (swapIdx < 0 || swapIdx >= sorted.length) return
-  // Swap in local list optimistically
+// 先乐观地替换本地列表
   ;[sorted[idx], sorted[swapIdx]] = [sorted[swapIdx], sorted[idx]]
   currentMedia.value = sorted
   try {
@@ -242,7 +242,7 @@ async function moveMedia(mediaId: number, direction: -1 | 1) {
   }
 }
 
-// ─── i18n helpers ────────────────────────────────────────────────────────────
+// ─── i18n 辅助方法 ────────────────────────────────────────────────────────────
 
 function i18nGet(obj: I18nString | undefined, lang: Lang): string {
   if (!obj) return ''
@@ -270,7 +270,7 @@ function coverageFor(ex: GlobalExercise): string {
   return langs.length ? langs.join(', ') : 'default only'
 }
 
-// ─── Muscle group toggle helpers ──────────────────────────────────────────────
+// ─── 肌群切换辅助方法 ──────────────────────────────────────────────
 
 function toggleMuscleGroup(id: number) {
   const list = form.value.muscleGroupIds ?? []
@@ -303,7 +303,7 @@ function mgName(mg: AdminMuscleGroup): string {
     </button>
   </div>
 
-  <!-- Filters -->
+<!-- 筛选器 -->
   <div class="flex gap-2 mb-3.5">
     <div class="relative w-[260px]">
       <Search :size="14" class="absolute left-2.5 top-1/2 -translate-y-1/2 text-faint pointer-events-none" />
@@ -377,7 +377,7 @@ function mgName(mg: AdminMuscleGroup): string {
     </table>
   </div>
 
-  <!-- ── Create/Edit Dialog ─────────────────────────────────────────────────── -->
+<!-- ── 创建/编辑对话框 ─────────────────────────────────────────────────── -->
   <div v-if="dialogOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" @click.self="dialogOpen = false">
     <div class="bg-surface border border-border rounded-card w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
       <div class="flex items-center justify-between px-5 py-4 border-b border-border">
@@ -385,7 +385,7 @@ function mgName(mg: AdminMuscleGroup): string {
         <button class="text-mute hover:text-text transition-colors" @click="dialogOpen = false">✕</button>
       </div>
 
-      <!-- Language tabs -->
+<!-- 语言标签页 -->
       <div class="flex border-b border-border px-5">
         <button v-for="lang in LANGS" :key="lang.key"
           class="px-3 py-2.5 text-[12.5px] font-medium border-b-2 transition-colors mr-1"
@@ -396,7 +396,7 @@ function mgName(mg: AdminMuscleGroup): string {
       </div>
 
       <div class="p-5 flex flex-col gap-4">
-        <!-- Title -->
+<!-- 标题 -->
         <div>
           <label class="block text-[11.5px] font-bold uppercase tracking-widest text-dim mb-1.5">Title *</label>
           <input type="text"
@@ -405,7 +405,7 @@ function mgName(mg: AdminMuscleGroup): string {
             class="w-full px-3 py-2 bg-surface-2 border border-border-2 rounded-chip text-[13px] text-text outline-none focus:border-border-strong" />
         </div>
 
-        <!-- Description -->
+<!-- 描述 -->
         <div>
           <label class="block text-[11.5px] font-bold uppercase tracking-widest text-dim mb-1.5">Description</label>
           <textarea
@@ -415,7 +415,7 @@ function mgName(mg: AdminMuscleGroup): string {
             class="w-full px-3 py-2 bg-surface-2 border border-border-2 rounded-chip text-[13px] text-text outline-none focus:border-border-strong resize-none" />
         </div>
 
-        <!-- Instructions -->
+<!-- 操作说明 -->
         <div>
           <label class="block text-[11.5px] font-bold uppercase tracking-widest text-dim mb-1.5">Instructions (one per line)</label>
           <textarea
@@ -425,7 +425,7 @@ function mgName(mg: AdminMuscleGroup): string {
             class="w-full px-3 py-2 bg-surface-2 border border-border-2 rounded-chip text-[13px] text-text outline-none focus:border-border-strong resize-none" />
         </div>
 
-        <!-- Pro Tips -->
+<!-- 专业提示 -->
         <div>
           <label class="block text-[11.5px] font-bold uppercase tracking-widest text-dim mb-1.5">Pro Tips (one per line)</label>
           <textarea
@@ -435,7 +435,7 @@ function mgName(mg: AdminMuscleGroup): string {
             class="w-full px-3 py-2 bg-surface-2 border border-border-2 rounded-chip text-[13px] text-text outline-none focus:border-border-strong resize-none" />
         </div>
 
-        <!-- Mistakes -->
+<!-- 错误提示 -->
         <div>
           <label class="block text-[11.5px] font-bold uppercase tracking-widest text-dim mb-1.5">Common Mistakes (one per line)</label>
           <textarea
@@ -445,7 +445,7 @@ function mgName(mg: AdminMuscleGroup): string {
             class="w-full px-3 py-2 bg-surface-2 border border-border-2 rounded-chip text-[13px] text-text outline-none focus:border-border-strong resize-none" />
         </div>
 
-        <!-- Equipment (per language) -->
+<!-- 器械（按语言） -->
         <div>
           <label class="block text-[11.5px] font-bold uppercase tracking-widest text-dim mb-1.5">Equipment (one per line)</label>
           <textarea
@@ -456,9 +456,9 @@ function mgName(mg: AdminMuscleGroup): string {
             class="w-full px-3 py-2 bg-surface-2 border border-border-2 rounded-chip text-[13px] text-text outline-none focus:border-border-strong resize-none placeholder:text-faint" />
         </div>
 
-        <!-- Fields only on default tab -->
+<!-- 仅默认标签页显示的字段 -->
         <template v-if="activeLang === 'default'">
-          <!-- Exercise Type -->
+<!-- 训练动作类型 -->
           <div>
             <label class="block text-[11.5px] font-bold uppercase tracking-widest text-dim mb-1.5">Exercise Type</label>
             <select v-model="form.exerciseType"
@@ -470,7 +470,7 @@ function mgName(mg: AdminMuscleGroup): string {
             </select>
           </div>
 
-          <!-- Thumbnail image -->
+<!-- 缩略图 -->
           <div>
             <label class="block text-[11.5px] font-bold uppercase tracking-widest text-dim mb-1.5">Thumbnail Image</label>
             <div class="flex items-start gap-3">
@@ -499,7 +499,7 @@ function mgName(mg: AdminMuscleGroup): string {
             </div>
           </div>
 
-          <!-- Primary Muscle Groups -->
+<!-- 主要肌群 -->
           <div>
             <label class="block text-[11.5px] font-bold uppercase tracking-widest text-dim mb-1.5">Primary Muscle Groups</label>
             <div class="flex flex-wrap gap-1.5">
@@ -518,7 +518,7 @@ function mgName(mg: AdminMuscleGroup): string {
             </div>
           </div>
 
-          <!-- Muscle Groups -->
+<!-- 肌群 -->
           <div>
             <label class="block text-[11.5px] font-bold uppercase tracking-widest text-dim mb-1.5">Muscle Groups (secondary)</label>
             <div class="flex flex-wrap gap-1.5">
@@ -537,7 +537,7 @@ function mgName(mg: AdminMuscleGroup): string {
             </div>
           </div>
 
-          <!-- Instructional Media (edit mode only) -->
+<!-- 教学媒体（仅编辑模式） -->
           <div v-if="dialogMode === 'edit'">
             <label class="block text-[11.5px] font-bold uppercase tracking-widest text-dim mb-1.5">Instructional Media</label>
 
@@ -546,7 +546,7 @@ function mgName(mg: AdminMuscleGroup): string {
               <span>{{ mediaError }}</span>
             </div>
 
-            <!-- Existing media -->
+<!-- 现有媒体 -->
             <div v-if="currentMedia.length > 0" class="flex flex-wrap gap-2 mb-2">
               <div
                 v-for="(item, idx) in [...currentMedia].sort((a, b) => a.order - b.order)"
@@ -589,7 +589,7 @@ function mgName(mg: AdminMuscleGroup): string {
               </div>
             </div>
 
-            <!-- Add media button -->
+<!-- 添加媒体按钮 -->
             <label class="inline-flex items-center gap-1.5 cursor-pointer px-3 py-1.5 border border-border-2 rounded-chip text-[12.5px] text-mute hover:border-border-strong hover:text-text transition-colors">
               <Loader2 v-if="uploadingMedia" :size="13" class="animate-spin" />
               <Upload v-else :size="13" />
@@ -616,7 +616,7 @@ function mgName(mg: AdminMuscleGroup): string {
     </div>
   </div>
 
-  <!-- ── Image Picker Dialog ────────────────────────────────────────────────── -->
+<!-- ── 图片选择器对话框 ────────────────────────────────────────────────── -->
   <div v-if="imagePickerOpen" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4" @click.self="imagePickerOpen = false">
     <div class="bg-surface border border-border rounded-card w-full max-w-3xl max-h-[85vh] overflow-hidden shadow-2xl flex flex-col">
       <div class="flex items-center justify-between px-5 py-4 border-b border-border shrink-0">
@@ -629,7 +629,7 @@ function mgName(mg: AdminMuscleGroup): string {
     </div>
   </div>
 
-  <!-- ── Delete Confirmation ────────────────────────────────────────────────── -->
+<!-- ── 删除确认 ────────────────────────────────────────────────── -->
   <div v-if="deleteConfirmId !== null" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" @click.self="deleteConfirmId = null">
     <div class="bg-surface border border-border rounded-card w-full max-w-sm p-6 shadow-2xl">
       <h2 class="text-[15px] font-semibold text-text mb-2">Delete Exercise?</h2>

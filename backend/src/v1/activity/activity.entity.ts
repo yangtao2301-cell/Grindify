@@ -49,9 +49,9 @@ export enum ActivityIcon {
   OTHER = 'dots-horizontal',
 }
 
-// Partial unique indexes (not decorator) handle uniqueness:
-// - Global activities: UNIQUE (name) WHERE createdById IS NULL
-// - User activities:   UNIQUE (name, createdById) WHERE createdById IS NOT NULL
+  // 部分唯一索引（不是装饰器）负责处理唯一性：
+  // - 全局活动：UNIQUE (name) WHERE createdById IS NULL
+  // - 用户活动：UNIQUE (name, createdById) WHERE createdById IS NOT NULL
 @Entity()
 export class Activity {
   @PrimaryGeneratedColumn()

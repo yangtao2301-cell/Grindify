@@ -27,7 +27,7 @@ import { Request, Response, NextFunction } from 'express';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  // Read allowed origins from env (comma-separated)
+  // 从环境变量读取允许的来源（用逗号分隔）
   const allowedOrigins = process.env.ALLOWED_ORIGINS
     ? process.env.ALLOWED_ORIGINS.split(',').map((o) => o.trim())
     : ['http://localhost:3000'];
@@ -51,7 +51,7 @@ async function bootstrap() {
   );
 
 
-  // Cache-control and no-store headers
+  // 缓存控制和 no-store 响应头
   app.use((req: Request, res: Response, next: NextFunction) => {
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
     res.setHeader('Pragma', 'no-cache');
@@ -73,7 +73,7 @@ async function bootstrap() {
 
   app.setGlobalPrefix('v1');
 
-  // Serve static files from the uploads directory (after setting global prefix)
+  // 提供 uploads 目录中的静态文件（设置全局前缀之后）
   app.useStaticAssets(join(process.cwd(), 'uploads'), {
     prefix: '/uploads/',
   });

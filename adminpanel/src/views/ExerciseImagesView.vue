@@ -37,7 +37,7 @@ function formatExt(url: string): string {
 
 function fileName(url: string): string {
   const part = url.split('/').pop() ?? url
-  // Strip extension and truncate hex filenames to something readable
+// 去除扩展名，并截断十六进制文件名以便阅读
   return part.replace(/\.[^.]+$/, '').substring(0, 16)
 }
 
@@ -64,7 +64,7 @@ const filteredImages = computed(() => {
   )
 })
 
-// Stats
+// 统计
 const totalImages = computed(() => images.value.length)
 const totalStorage = computed(() => {
   const sum = images.value.reduce((acc, img) => acc + (img.fileSize ?? 0), 0)
@@ -152,7 +152,7 @@ function formatDate(dateStr: string) {
 
 <template>
   <div>
-    <!-- Page header (full mode only) -->
+<!-- 页面标题（仅完整模式） -->
     <div v-if="!pickerMode" class="page-head">
       <div class="titles">
         <h1>Exercise Images</h1>
@@ -169,9 +169,9 @@ function formatDate(dateStr: string) {
       </div>
     </div>
 
-    <!-- Stats cards (full mode only) -->
+<!-- 统计卡片（仅完整模式） -->
     <div v-if="!pickerMode" class="grid grid-cols-3 gap-3 mb-5">
-      <!-- Total images -->
+<!-- 图片总数 -->
       <div class="flex items-center gap-3.5 px-4 py-3.5 bg-[--surface] border border-[--border] rounded-[--r-card]">
         <div class="flex items-center justify-center w-9 h-9 rounded-[--r-chip] bg-[--lime-soft] text-[--lime] shrink-0">
           <Image :size="16" />
@@ -181,7 +181,7 @@ function formatDate(dateStr: string) {
           <div class="text-[22px] font-semibold tracking-tight leading-tight text-[--text]">{{ totalImages }}</div>
         </div>
       </div>
-      <!-- Storage -->
+<!-- 存储空间 -->
       <div class="flex items-center gap-3.5 px-4 py-3.5 bg-[--surface] border border-[--border] rounded-[--r-card]">
         <div class="flex items-center justify-center w-9 h-9 rounded-[--r-chip] bg-[--surface-3] text-[--mute] shrink-0">
           <HardDrive :size="16" />
@@ -191,7 +191,7 @@ function formatDate(dateStr: string) {
           <div class="text-[22px] font-semibold tracking-tight leading-tight text-[--text]">{{ totalStorage }}</div>
         </div>
       </div>
-      <!-- Avg size -->
+<!-- 平均大小 -->
       <div class="flex items-center gap-3.5 px-4 py-3.5 bg-[--surface] border border-[--border] rounded-[--r-card]">
         <div class="flex items-center justify-center w-9 h-9 rounded-[--r-chip] bg-[--surface-3] text-[--mute] shrink-0">
           <Zap :size="16" />
@@ -203,7 +203,7 @@ function formatDate(dateStr: string) {
       </div>
     </div>
 
-    <!-- Search (picker mode) / toolbar (full mode) -->
+<!-- 搜索（选择器模式）/工具栏（完整模式） -->
     <div class="flex items-center gap-2 mb-4">
       <div class="flex items-center gap-2 flex-1 px-3 py-2 bg-[--surface-2] border border-[--border-2] rounded-[--r-chip] focus-within:border-[--border-strong] transition-colors">
         <svg class="text-[--faint] shrink-0" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
@@ -217,7 +217,7 @@ function formatDate(dateStr: string) {
       <span class="text-[11px] text-[--dim] font-mono shrink-0">{{ filteredImages.length }} shown</span>
     </div>
 
-    <!-- Upload zone (compact row) -->
+<!-- 上传区域（紧凑行） -->
     <div
       class="flex items-center gap-3 px-4 py-3 mb-4 border border-dashed rounded-[--r-card] transition-colors cursor-pointer relative"
       :class="dragOver
@@ -247,26 +247,26 @@ function formatDate(dateStr: string) {
       </template>
     </div>
 
-    <!-- Upload error -->
+<!-- 上传错误 -->
     <div v-if="uploadError" class="flex items-center gap-2 mb-4 px-3 py-2 bg-[--red-soft] border border-[--red]/30 rounded-[--r-chip] text-[--red] text-[13px]">
       <AlertCircle :size="14" class="shrink-0" />
       <span class="flex-1">{{ uploadError }}</span>
       <button class="text-[--red]/60 hover:text-[--red] transition-colors" @click="uploadError = null"><X :size="13" /></button>
     </div>
 
-    <!-- Error state -->
+<!-- 错误状态 -->
     <div v-if="error" class="flex items-center gap-2.5 p-6 text-[--red] text-sm">
       <AlertCircle :size="18" />
       <span>{{ error }}</span>
     </div>
 
-    <!-- Loading state -->
+<!-- 加载状态 -->
     <div v-else-if="loading" class="flex items-center gap-2.5 text-[--mute] text-[13px] py-12 justify-center">
       <Loader2 :size="18" class="animate-spin" />
       <span>Loading images…</span>
     </div>
 
-    <!-- Empty state -->
+<!-- 空状态 -->
     <div v-else-if="filteredImages.length === 0" class="flex flex-col items-center gap-3 py-20 text-center">
       <div class="flex items-center justify-center w-12 h-12 rounded-[--r-inner] bg-[--surface-2] border border-[--border-2]">
         <ImageIcon :size="22" class="text-[--faint]" />
@@ -277,9 +277,9 @@ function formatDate(dateStr: string) {
       </div>
     </div>
 
-    <!-- Gallery -->
+<!-- 图片库 -->
     <div v-else class="bg-[--surface] border border-[--border] rounded-[--r-card] overflow-hidden">
-      <!-- Gallery header -->
+<!-- 图片库标题 -->
       <div class="flex items-center justify-between px-4 py-3 border-b border-[--border]">
         <div class="flex items-center gap-2 text-[13.5px] font-semibold text-[--text]">
           <ImageIcon :size="14" class="text-[--lime]" />
@@ -288,7 +288,7 @@ function formatDate(dateStr: string) {
         <span class="text-[11px] text-[--dim] font-mono">{{ filteredImages.length }} images</span>
       </div>
 
-      <!-- Image grid -->
+<!-- 图片网格 -->
       <div class="p-3" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px;">
         <div
           v-for="img in filteredImages"
@@ -297,7 +297,7 @@ function formatDate(dateStr: string) {
           :class="pickerMode ? 'cursor-pointer hover:border-[--lime]' : 'cursor-default'"
           @click="handleImageClick(img)"
         >
-          <!-- Image (4:3 aspect ratio) -->
+<!-- 图片（4:3 宽高比） -->
           <div class="relative" style="aspect-ratio: 4/3;">
             <img
               :src="imageUrl(img.url)"
@@ -306,12 +306,12 @@ function formatDate(dateStr: string) {
               loading="lazy"
             />
 
-            <!-- Thumbnail chip top-left -->
+<!-- 左上角缩略图标签 -->
             <span class="absolute top-1.5 left-1.5 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide bg-black/60 text-white rounded-[5px] backdrop-blur-sm">
               thumbnail
             </span>
 
-            <!-- Picker hover overlay -->
+<!-- 选择器悬停遮罩 -->
             <div
               v-if="pickerMode"
               class="absolute inset-0 bg-[--lime]/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
@@ -321,7 +321,7 @@ function formatDate(dateStr: string) {
               </div>
             </div>
 
-            <!-- Delete button (non-picker mode) -->
+<!-- 删除按钮（非选择器模式） -->
             <button
               v-if="!pickerMode"
               class="absolute top-1.5 right-1.5 p-1 bg-black/60 rounded opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[--red]/80 text-white"
@@ -332,7 +332,7 @@ function formatDate(dateStr: string) {
             </button>
           </div>
 
-          <!-- Card info -->
+<!-- 卡片信息 -->
           <div class="px-2.5 py-2">
             <div
               class="text-[11.5px] font-medium truncate"
@@ -357,7 +357,7 @@ function formatDate(dateStr: string) {
       </div>
     </div>
 
-    <!-- Delete confirmation dialog -->
+<!-- 删除确认对话框 -->
     <div
       v-if="deleteConfirmId !== null"
       class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"

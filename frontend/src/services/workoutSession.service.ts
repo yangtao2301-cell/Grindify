@@ -13,7 +13,7 @@
  * <https://www.gnu.org/licenses/>.
  */
 
-// services/workoutSession.service.ts
+// services/workoutSession.service.ts（训练会话服务）
 import { fetchWrapper } from '@/utils/fetchWrapper'
 import type {
   FinishSessionPayload,

@@ -29,7 +29,7 @@ const githubStrategyProvider = {
   useFactory: (configService: ConfigService, authService: AuthService) => {
     const clientId = configService.get<string>('GITHUB_CLIENT_ID');
     const clientSecret = configService.get<string>('GITHUB_CLIENT_SECRET');
-    if (!clientId || !clientSecret) return null; // skip if not configured
+  if (!clientId || !clientSecret) return null; // 未配置时跳过
     return new GithubStrategy(configService, authService);
   },
   inject: [ConfigService, AuthService],
@@ -40,7 +40,7 @@ const googleStrategyProvider = {
   useFactory: (configService: ConfigService, authService: AuthService) => {
     const clientId = configService.get<string>('GOOGLE_CLIENT_ID');
     const clientSecret = configService.get<string>('GOOGLE_CLIENT_SECRET');
-    if (!clientId || !clientSecret) return null; // skip if not configured
+  if (!clientId || !clientSecret) return null; // 未配置时跳过
     return new GoogleStrategy(configService, authService);
   },
   inject: [ConfigService, AuthService],

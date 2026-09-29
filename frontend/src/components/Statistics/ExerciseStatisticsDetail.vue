@@ -17,7 +17,7 @@
   <v-dialog v-model="dialogModel" fullscreen transition="dialog-bottom-transition">
     <v-card class="bg-background">
       <div class="pa-5 d-flex flex-column ga-4">
-        <!-- Header -->
+<!-- 标题 -->
         <BackHeader
           :title="exercise ? displayExerciseName(exercise, lang) : ''"
           :subtitle="
@@ -41,7 +41,7 @@
           </v-chip>
         </div>
 
-        <!-- Personal Records -->
+<!-- 个人纪录 -->
         <div v-if="hasRecords">
           <p class="text-caption text-uppercase font-weight-bold text-textSecondary mb-2">
             {{ $t('statistics.personalRecords') }}
@@ -70,7 +70,7 @@
           </div>
         </div>
 
-        <!-- Progress Chart -->
+<!-- 进度图表 -->
         <div v-if="statisticsStore.exerciseProgress.length > 1">
           <div class="d-flex align-center justify-space-between mb-2">
             <p class="text-caption text-uppercase font-weight-bold text-textSecondary">
@@ -111,7 +111,7 @@
           </v-card>
         </div>
 
-        <!-- History -->
+<!-- 历史记录 -->
         <div>
           <p class="text-caption text-uppercase font-weight-bold text-textSecondary mb-2">
             {{ $t('statistics.history') }}
@@ -159,7 +159,7 @@
                 </v-icon>
               </div>
 
-              <!-- Expanded set details -->
+<!-- 展开的训练组详情 -->
               <v-expand-transition>
                 <div v-if="expandedEntries.has(idx)" class="mt-2">
                   <v-table density="compact" class="bg-transparent">
@@ -186,7 +186,7 @@
               </v-expand-transition>
             </v-card>
 
-            <!-- Load More -->
+<!-- 加载更多 -->
             <v-btn
               v-if="hasMoreHistory"
               variant="text"
@@ -421,7 +421,7 @@ function loadMore() {
   }
 }
 
-// Load data when dialog opens
+// 对话框打开时加载数据
 watch(dialogModel, async open => {
   if (open && props.exercise) {
     expandedEntries.value = new Set()

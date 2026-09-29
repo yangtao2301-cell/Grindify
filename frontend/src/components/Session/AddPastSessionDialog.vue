@@ -16,7 +16,7 @@
 <template>
   <v-dialog v-model="dialogOpen" fullscreen :scrim="false" transition="dialog-bottom-transition">
     <v-card class="bg-background d-flex flex-column" style="height: 100dvh">
-      <!-- Header -->
+<!-- 标题 -->
       <BackHeader
         :title="$t('schedule.registerWorkout')"
         :show-menu="false"
@@ -27,7 +27,7 @@
       />
 
       <div class="pa-5" style="flex: 1 1 auto; overflow-y: auto; -webkit-overflow-scrolling: touch">
-        <!-- Date display -->
+<!-- 日期显示 -->
         <v-card
           class="bg-cardBg rounded-lg pa-4 mb-5"
           style="border: 1px solid rgb(var(--v-theme-borderColor)); height: fit-content !important"
@@ -41,7 +41,7 @@
           </div>
         </v-card>
 
-        <!-- Type toggle: Workout or Activity -->
+<!-- 类型切换：训练或活动 -->
         <div class="mb-5">
           <p class="text-caption text-uppercase font-weight-bold text-textSecondary mb-2">
             {{ $t('schedule.selectType') }}
@@ -64,7 +64,7 @@
           </v-btn-toggle>
         </div>
 
-        <!-- ==================== WORKOUT MODE ==================== -->
+<!-- ==================== 训练模式 ==================== -->
         <template v-if="sessionType === 'workout'">
           <div class="mb-5">
             <p class="text-caption text-uppercase font-weight-bold text-textSecondary mb-2">
@@ -95,7 +95,7 @@
             </v-list>
           </div>
 
-          <!-- Time fields -->
+<!-- 时间字段 -->
           <div class="d-flex ga-3 mb-5">
             <v-text-field
               v-model="startTime"
@@ -117,7 +117,7 @@
             />
           </div>
 
-          <!-- Exercise cards with inline sets -->
+<!-- 带内嵌训练组的训练动作卡片 -->
           <div v-if="selectedWorkout" class="mb-5">
             <p class="text-caption text-uppercase font-weight-bold text-textSecondary mb-2">
               {{ $t('schedule.exercises') }}
@@ -130,7 +130,7 @@
             >
               <p class="text-body-1 font-weight-bold mb-3">{{ ex.exercise ? displayExerciseName(ex.exercise, lang) : '' }}</p>
 
-              <!-- Set header row -->
+<!-- 训练组标题行 -->
               <div class="d-flex align-center ga-2 mb-1 text-caption text-textSecondary">
                 <span style="width: 40px">{{ $t('schedule.setLabel') }}</span>
                 <span class="flex-grow-1">{{ $t('schedule.weight') }} (kg)</span>
@@ -141,7 +141,7 @@
                 <span style="width: 28px"></span>
               </div>
 
-              <!-- Set rows -->
+<!-- 训练组行 -->
               <div
                 v-for="(s, idx) in exerciseSets[ex.id]"
                 :key="`${ex.id}-${idx}`"
@@ -187,7 +187,7 @@
                 </v-btn>
               </div>
 
-              <!-- Add set button -->
+<!-- 添加训练组按钮 -->
               <v-btn
                 variant="text"
                 color="primary"
@@ -202,7 +202,7 @@
           </div>
         </template>
 
-        <!-- ==================== ACTIVITY MODE ==================== -->
+<!-- ==================== 活动模式 ==================== -->
         <template v-if="sessionType === 'activity'">
           <div class="mb-5">
             <p class="text-caption text-uppercase font-weight-bold text-textSecondary mb-2">
@@ -233,7 +233,7 @@
             </v-list>
           </div>
 
-          <!-- Duration (always shown) -->
+<!-- 时长（始终显示） -->
           <v-text-field
             :model-value="activityDurationStr"
             type="text"
@@ -247,9 +247,9 @@
             @update:model-value="activityDurationStr = normalizeDecimalStr($event)"
           />
 
-          <!-- Conditional tracking fields based on selected activity -->
+<!-- 根据所选活动显示的条件跟踪字段 -->
           <template v-if="selectedActivity">
-            <!-- Distance -->
+<!-- 距离 -->
             <v-text-field
               v-if="selectedActivity.trackDistance"
               :model-value="activityDistanceStr"
@@ -264,7 +264,7 @@
               @update:model-value="activityDistanceStr = normalizeDecimalStr($event)"
             />
 
-            <!-- Calculated Pace (read-only) -->
+<!-- 计算出的配速（只读） -->
             <v-text-field
               v-if="selectedActivity.trackPace && calculatedPace"
               :model-value="calculatedPace"
@@ -277,7 +277,7 @@
               class="bg-cardBg rounded-lg mb-4"
             />
 
-            <!-- Elevation Gain -->
+<!-- 爬升高度 -->
             <v-text-field
               v-if="selectedActivity.trackElevation"
               :model-value="activityElevationGainStr"
@@ -292,7 +292,7 @@
               @update:model-value="activityElevationGainStr = normalizeDecimalStr($event)"
             />
 
-            <!-- Max Elevation -->
+<!-- 最高海拔 -->
             <v-text-field
               v-if="selectedActivity.trackElevation"
               :model-value="activityMaxElevationStr"
@@ -307,7 +307,7 @@
               @update:model-value="activityMaxElevationStr = normalizeDecimalStr($event)"
             />
 
-            <!-- Calories -->
+<!-- 卡路里 -->
             <v-text-field
               v-if="selectedActivity.trackCalories"
               :model-value="activityCaloriesStr"
@@ -324,7 +324,7 @@
           </template>
         </template>
 
-        <!-- Notes (shared) -->
+<!-- 备注（共享） -->
         <div class="pb-6">
           <p class="text-caption text-uppercase font-weight-bold text-textSecondary mb-2">
             {{ $t('schedule.notes') }}
@@ -341,7 +341,7 @@
         </div>
       </div>
 
-      <!-- Weight propagation dialog -->
+<!-- 体重同步对话框 -->
       <v-dialog v-model="showPropagateDialog" max-width="500" persistent>
         <v-card>
           <v-card-title>{{ $t('session.updateSubsequentSets') }}</v-card-title>
@@ -383,14 +383,14 @@ import { useUserLanguage } from '@/composables/useUserLanguage'
 
 interface InlineSet {
   set: number
-  weight: string // stored as string to allow decimal input like "90." mid-typing
+weight: string // 以字符串存储，以支持输入中的小数形式，例如“90.”
   reps: number
   done: boolean
 }
 
 const props = defineProps<{
   modelValue: boolean
-  date: string // YYYY-MM-DD
+date: string // YYYY-MM-DD
   preselectedType?: 'workout' | 'activity'
   preselectedWorkoutId?: number | null
   preselectedActivityId?: number | null
@@ -413,18 +413,18 @@ const { lang } = useUserLanguage()
 const workoutStore = useWorkoutStore()
 const activityStore = useActivityStore()
 
-// --- shared state ---
+// --- 共享状态 ---
 const sessionType = ref<'workout' | 'activity'>('workout')
 const notesText = ref('')
 const isSubmitting = ref(false)
 
-// --- workout state ---
+// --- 训练状态 ---
 const selectedWorkoutId = ref<number | null>(null)
 const startTime = ref('09:00')
 const endTime = ref('10:00')
 const exerciseSets = reactive<Record<number, InlineSet[]>>({})
 
-// --- weight propagation state ---
+// --- 体重同步状态 ---
 const showPropagateDialog = ref(false)
 const pendingExId = ref<number | null>(null)
 const pendingSetIndex = ref<number | null>(null)
@@ -441,7 +441,7 @@ const propagateSetsLabel = computed(() => {
   return indices.join(', ') + ' & ' + last
 })
 
-// --- activity state ---
+// --- 活动状态 ---
 const selectedActivityId = ref<number | null>(null)
 const activityDuration = ref(30)
 const activityDistance = ref<number | undefined>(undefined)
@@ -449,14 +449,14 @@ const activityElevationGain = ref<number | undefined>(undefined)
 const activityMaxElevation = ref<number | undefined>(undefined)
 const activityCalories = ref<number | undefined>(undefined)
 
-// String refs for activity decimal fields
+// 活动小数输入字段的字符串引用
 const activityDurationStr = ref('30')
 const activityDistanceStr = ref('')
 const activityElevationGainStr = ref('')
 const activityMaxElevationStr = ref('')
 const activityCaloriesStr = ref('')
 
-// --- computeds ---
+// --- 计算属性 ---
 const formattedDate = computed(() => {
   const d = new Date(props.date + 'T12:00:00')
   return d.toLocaleDateString(locale.value, {
@@ -496,7 +496,7 @@ const canSubmit = computed(() => {
   }
 })
 
-// --- watchers ---
+// --- 监听器 ---
 watch(dialogOpen, async open => {
   if (open) {
     sessionType.value = props.preselectedType || 'workout'
@@ -515,12 +515,12 @@ watch(dialogOpen, async open => {
     activityMaxElevationStr.value = ''
     activityCaloriesStr.value = ''
     notesText.value = ''
-    // Clear exerciseSets
+// 清空 exerciseSets
     Object.keys(exerciseSets).forEach(k => delete exerciseSets[Number(k)])
 
     await Promise.all([workoutStore.setWorkouts(), activityStore.fetchActivities()])
 
-    // Re-apply preselected IDs after store data is loaded (watch triggers populate sets)
+// store 数据加载后重新应用预选 ID（监听器会触发训练组填充）
     if (props.preselectedType === 'workout' && props.preselectedWorkoutId) {
       selectedWorkoutId.value = props.preselectedWorkoutId
     } else if (props.preselectedType === 'activity' && props.preselectedActivityId) {
@@ -537,10 +537,10 @@ watch(sessionType, () => {
   Object.keys(exerciseSets).forEach(k => delete exerciseSets[Number(k)])
 })
 
-// Populate inline sets from workout template when a workout is selected
+// 选择训练后，根据训练模板填充内嵌训练组
 watch(selectedWorkoutId, () => {
   const workout = selectedWorkout.value
-  // Clear old sets
+// 清除旧训练组
   Object.keys(exerciseSets).forEach(k => delete exerciseSets[Number(k)])
   if (!workout) return
   for (const ex of workout.exercises) {
@@ -557,7 +557,7 @@ watch(selectedWorkoutId, () => {
   }
 })
 
-// Reset tracking fields when activity changes
+// 活动改变时重置跟踪字段
 watch(selectedActivityId, () => {
   activityDistance.value = undefined
   activityElevationGain.value = undefined
@@ -627,7 +627,7 @@ async function submit() {
       const startedAt = new Date(`${props.date}T${startTime.value}:00`).toISOString()
       const endedAt = new Date(`${props.date}T${endTime.value}:00`).toISOString()
 
-      // Build completedExercises from done sets
+// 根据已完成的训练组构建 completedExercises
       const completedExercises: {
         exerciseId: number
         sets: { setNumber: number; weight: number; reps: number }[]

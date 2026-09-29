@@ -40,7 +40,7 @@ export class ActivityLogService {
   ) {}
 
   /**
-   * Calculate pace in "min:sec/km" format from duration and distance
+ * 根据时长和距离计算“分钟:秒/千米”格式的配速。
    */
   private calculatePace(
     durationMinutes: number,
@@ -116,7 +116,7 @@ export class ActivityLogService {
     dto: CreateActivityLogDto,
     userId: number,
   ): Promise<ActivityLogResponseDto> {
-    // Verify activity exists and belongs to user
+    // 验证活动存在且属于当前用户
     const activity = await this.activityRepo.findOne({
       where: { id: dto.activityId, createdBy: { id: userId } },
     });
@@ -125,7 +125,7 @@ export class ActivityLogService {
       throw new NotFoundException('Activity not found');
     }
 
-    // Calculate pace if distance and duration are provided
+    // 如果提供了距离和时长，则计算配速
     const pace =
       dto.distance && dto.duration
         ? this.calculatePace(dto.duration, dto.distance)
@@ -149,10 +149,10 @@ export class ActivityLogService {
 
     const saved = await this.activityLogRepo.save(log);
 
-    // Update user's streak and weekly workout count
+    // 更新用户的连续打卡天数和本周训练次数
     await this.userService.updateStreakOnActivityLog(userId);
 
-    // Fetch with relations for response
+    // 加载关联数据，用于构造响应
     const withRelations = await this.activityLogRepo.findOne({
       where: { id: saved.id },
       relations: ['activity'],
@@ -200,7 +200,7 @@ export class ActivityLogService {
     if (dto.calories !== undefined) log.calories = dto.calories;
     if (dto.notes !== undefined) log.notes = dto.notes;
 
-    // Recalculate pace if distance or duration changed
+    // 如果距离或时长发生变化，则重新计算配速
     if (log.distance && log.duration) {
       log.pace = this.calculatePace(log.duration, log.distance) ?? undefined;
     }
@@ -217,8 +217,8 @@ export class ActivityLogService {
   }
 
   /**
-   * Get count of activity logs per day for a user within a date range
-   * Used for streak calculation
+ * 获取指定用户在日期范围内每天的活动日志数量。
+ * 用于计算连续打卡天数。
    */
   async getActivityLogCountsByDay(
     userId: number,

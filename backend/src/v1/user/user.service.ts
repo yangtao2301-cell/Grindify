@@ -136,7 +136,7 @@ export class UserService {
       user.password = await bcrypt.hash(dto.newPassword, 10);
     }
 
-    // Destructure to exclude sensitive fields before saving
+    // 解构时排除敏感字段，再保存数据
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { currentPassword, newPassword, email, dateOfBirth, ...safeDto } =
       dto;
@@ -156,7 +156,7 @@ export class UserService {
       throw new NotFoundException('User not found');
     }
 
-    // Delete related data (sessions first to avoid FK violations from workout_session_exercise)
+    // 删除关联数据（先删除会话，避免 workout_session_exercise 产生外键冲突）
     await this.sessionRepo.delete({ user: { id: userId } });
     await this.exerciseRepo.delete({ createdBy: { id: userId } });
     await this.workoutRepo.delete({ createdBy: { id: userId } });
@@ -176,7 +176,7 @@ export class UserService {
       throw new NotFoundException('User not found');
     }
 
-    // Delete old avatar if exists
+    // 如果存在旧头像，则删除
     if (user.avatar) {
       await this.uploadService.deleteImage(user.avatar);
     }
@@ -188,8 +188,8 @@ export class UserService {
   }
 
   /**
-   * Update streak and weekly workout count when a workout is completed
-   * Should be called after finishing a workout session
+ * 训练完成时更新连续打卡天数和本周训练次数。
+ * 应在完成训练会话后调用。
    */
   async updateStreakOnWorkoutCompletion(userId: number): Promise<void> {
     const user = await this.userRepo.findOne({ where: { id: userId } });
@@ -197,13 +197,13 @@ export class UserService {
 
     const now = new Date();
 
-    // Check if we need to reset for a new week
+    // 检查是否需要为新的一周重置数据
     await this.checkAndResetWeeklyProgress(user, now);
 
-    // Increment current week workouts
+    // 增加本周训练次数
     user.currentWeekWorkouts += 1;
 
-    // Increment streak by 1 for every workout
+    // 每次训练都将连续打卡天数加 1
     user.currentStreak += 1;
 
     user.lastStreakCheckDate = now;
@@ -211,15 +211,15 @@ export class UserService {
   }
 
   /**
-   * Check if we're in a new week and reset/update streak accordingly
-   * Counts both workout sessions and activity logs
+ * 检查是否进入新的一周，并据此重置或更新连续打卡数据。
+ * 训练会话和活动日志都会计入统计。
    */
   private async checkAndResetWeeklyProgress(
     user: User,
     now: Date,
   ): Promise<void> {
     if (!user.lastStreakCheckDate) {
-      // First time tracking - reset counters
+    // 首次开始跟踪，重置计数器
       user.currentWeekWorkouts = 0;
       user.currentStreak = 0;
       return;
@@ -227,11 +227,11 @@ export class UserService {
 
     const lastCheck = new Date(user.lastStreakCheckDate);
 
-    // Get the Monday of each week (ISO week starts on Monday)
+    // 获取每周的周一（ISO 周从周一开始）
     const getMondayOfWeek = (date: Date): Date => {
       const d = new Date(date);
       const day = d.getDay();
-      const diff = day === 0 ? -6 : 1 - day; // Adjust when day is Sunday
+    const diff = day === 0 ? -6 : 1 - day; // 周日时进行调整
       d.setDate(d.getDate() + diff);
       d.setHours(0, 0, 0, 0);
       return d;
@@ -240,15 +240,15 @@ export class UserService {
     const lastWeekMonday = getMondayOfWeek(lastCheck);
     const currentWeekMonday = getMondayOfWeek(now);
 
-    // If we're in a new week
+    // 如果进入了新的一周
     if (currentWeekMonday > lastWeekMonday) {
-      // Calculate how many weeks have passed
+    // 计算经过了多少周
       const weeksPassed = Math.floor(
         (currentWeekMonday.getTime() - lastWeekMonday.getTime()) /
           (7 * 24 * 60 * 60 * 1000),
       );
 
-      // Count total sessions with activities (sessions OR logs) in the previous week
+    // 统计上一周的总活动次数（训练会话或活动日志）
       const lastWeekSunday = new Date(currentWeekMonday);
       lastWeekSunday.setDate(lastWeekSunday.getDate() - 1);
       lastWeekSunday.setHours(23, 59, 59, 999);
@@ -259,26 +259,26 @@ export class UserService {
         lastWeekSunday,
       );
 
-      // Get the ISO week key of the previous week for freeze checking
+    // 获取上一周的 ISO 周键，用于检查冻结状态
       const prevWeekKey = this.getISOWeekKey(lastWeekMonday);
 
-      // Check if user met their goal in the previous week
+    // 检查用户是否完成了上一周的目标
       if (workoutDays < user.weeklyWorkoutGoal) {
-        // Didn't meet goal — check if a freeze protects this week
+    // 未完成目标——检查冻结机会是否能保护本周连续打卡
         if (user.streakFreezeUsedWeek === prevWeekKey) {
-          // Freeze consumed — streak survives
+    // 冻结机会已使用，连续打卡得以保留
           user.streakFreezeUsedWeek = null;
         } else {
           user.currentStreak = 0;
         }
       } else if (weeksPassed > 1) {
-        // More than one week passed (means they didn't workout at all in between)
-        // Even if they met the goal in the last tracked week, they missed weeks in between
+    // 已经过了一周以上（表示期间完全没有训练）
+    // 即使上一周完成了目标，中间仍有漏掉的周
         user.currentStreak = 0;
-        // Clear any stale freeze
+    // 清除过期的冻结机会
         user.streakFreezeUsedWeek = null;
       } else {
-        // Goal met for exactly last week — award a freeze if earned
+    // 恰好完成了上一周的目标——如果达到条件则奖励一次冻结机会
         user.completedGoalWeeksCount = (user.completedGoalWeeksCount || 0) + 1;
         if (
           user.completedGoalWeeksCount % 2 === 0 &&
@@ -287,20 +287,19 @@ export class UserService {
           user.streakFreezes = (user.streakFreezes || 0) + 1;
         }
       }
-      // If they met the goal and it's been exactly 1 week, streak continues
+    // 如果完成了目标且恰好只经过 1 周，则连续打卡继续
 
-      // Reset weekly workout count for the new week
+    // 重置新一周的训练次数
       user.currentWeekWorkouts = 0;
 
-      // Update lastStreakCheckDate to the start of the current week so that
-      // repeated calls (e.g. from getStreakInfo) don't re-run the rollover
-      // logic and incorrectly increment completedGoalWeeksCount again.
+    // 将 lastStreakCheckDate 更新为本周开始日期，避免重复调用（例如 getStreakInfo）
+    // 再次执行周切换逻辑，导致 completedGoalWeeksCount 被错误地重复增加。
       user.lastStreakCheckDate = currentWeekMonday;
     }
   }
 
   /**
-   * Returns the ISO week key for a given date, e.g. "2026-W18"
+ * 返回指定日期对应的 ISO 周键，例如“2026-W18”。
    */
   private getISOWeekKey(date: Date): string {
     const d = new Date(
@@ -316,14 +315,14 @@ export class UserService {
   }
 
   /**
-   * Count total sessions with either workout sessions or activity logs in a date range
+ * 统计日期范围内的训练会话和活动日志总数。
    */
   private async countTotalSessionsWithActivity(
     userId: number,
     startDate: Date,
     endDate: Date,
   ): Promise<number> {
-    // Get all workout sessions
+    // 获取所有训练会话
     const sessions = await this.sessionRepo.find({
       where: {
         user: { id: userId },
@@ -332,7 +331,7 @@ export class UserService {
       select: ['startedAt'],
     });
 
-    // Get all activity logs
+    // 获取所有活动日志
     const activityLogs = await this.activityLogRepo.find({
       where: {
         user: { id: userId },
@@ -360,7 +359,7 @@ export class UserService {
   }
 
   /**
-   * Decrement streak when a finished session or activity log is deleted
+ * 删除已完成的训练会话或活动日志时减少连续打卡天数。
    */
   async decrementStreakOnDeletion(userId: number): Promise<void> {
     const user = await this.userRepo.findOne({ where: { id: userId } });
@@ -372,8 +371,8 @@ export class UserService {
   }
 
   /**
-   * Update streak and weekly workout count when an activity log is created
-   * Should be called after logging an activity
+ * 创建活动日志时更新连续打卡天数和本周训练次数。
+ * 应在记录活动后调用。
    */
   async updateStreakOnActivityLog(userId: number): Promise<void> {
     const user = await this.userRepo.findOne({ where: { id: userId } });
@@ -381,13 +380,13 @@ export class UserService {
 
     const now = new Date();
 
-    // Check if we need to reset for a new week
+    // 检查是否需要为新的一周重置数据
     await this.checkAndResetWeeklyProgress(user, now);
 
-    // Increment current week workouts
+    // 增加本周训练次数
     user.currentWeekWorkouts += 1;
 
-    // Increment streak by 1 for every activity
+    // 每次活动都将连续打卡天数加 1
     user.currentStreak += 1;
 
     user.lastStreakCheckDate = now;
@@ -395,7 +394,7 @@ export class UserService {
   }
 
   /**
-   * Use a streak freeze to protect the current week from a streak reset
+ * 使用连续打卡冻结机会，避免本周连续打卡被重置。
    */
   async useStreakFreeze(
     userId: number,
@@ -441,7 +440,7 @@ export class UserService {
   }
 
   /**
-   * Get user's current streak information
+ * 获取用户当前的连续打卡信息。
    */
   async getStreakInfo(userId: number): Promise<{
     currentStreak: number;
@@ -457,11 +456,11 @@ export class UserService {
       throw new NotFoundException('User not found');
     }
 
-    // Check if we need to update streak for new week
+    // 检查是否需要为新的一周更新连续打卡数据
     const now = new Date();
     await this.checkAndResetWeeklyProgress(user, now);
 
-    // Recalculate current week workouts based on actual activity
+    // 根据实际活动重新计算本周训练次数
     const getMondayOfWeek = (date: Date): Date => {
       const d = new Date(date);
       const day = d.getDay();
@@ -506,7 +505,7 @@ export class UserService {
   }
 
   /**
-   * Update user's weekly workout goal
+ * 更新用户的每周训练目标。
    */
   async updateWeeklyWorkoutGoal(
     userId: number,
@@ -530,7 +529,7 @@ export class UserService {
   }
 
   /**
-   * Export all user data for GDPR Art. 20 data portability
+ * 导出用户的全部数据，以满足 GDPR 第 20 条的数据可携带权。
    */
   async exportUserData(userId: number): Promise<object> {
     const user = await this.userRepo.findOne({ where: { id: userId } });
@@ -599,7 +598,7 @@ export class UserService {
   }
 
   /**
-   * Update user preferences (onboarding data)
+ * 更新用户偏好设置（新手引导数据）。
    */
   async updateUserPreferences(
     userId: number,
@@ -610,7 +609,7 @@ export class UserService {
       throw new NotFoundException('User not found');
     }
 
-    // Update all provided fields
+    // 更新所有已提供的字段
     if (dto.unitScale !== undefined) user.unitScale = dto.unitScale;
     if (dto.weight !== undefined) user.weight = dto.weight;
     if (dto.height !== undefined) user.height = dto.height;

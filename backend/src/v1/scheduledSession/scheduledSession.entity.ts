@@ -62,13 +62,13 @@ export class ScheduledSession {
   scheduledDate: Date | null;
 
   @Column({ type: 'int', nullable: true })
-  dayOfWeek: number | null; // 0=Mon, 1=Tue, ..., 6=Sun
+  dayOfWeek: number | null; // 0=周一，1=周二，……，6=周日
 
   @Column({ default: false })
   isRecurring: boolean;
 
   @Column({ type: 'jsonb', default: '[]' })
-  exceptionDates: string[]; // YYYY-MM-DD strings for skipped recurring occurrences
+  exceptionDates: string[]; // 被跳过的重复事件日期，格式为 YYYY-MM-DD
 
   @Column({ type: 'text', nullable: true })
   notes: string | null;

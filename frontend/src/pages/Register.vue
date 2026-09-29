@@ -106,7 +106,7 @@
         </div>
       </div>
 
-      <!-- Consent checkboxes -->
+<!-- 同意复选框 -->
       <div class="mb-2">
         <v-checkbox
           v-model="termsAccepted"
@@ -226,8 +226,8 @@ const handleCreateAccount = async () => {
       email: email.value,
       password: password_new.value,
     })
-    // Navigation is handled inside authStore.createAccount
-    // (verify-email page when verification is required, or auto-login to onboarding)
+// 导航由 authStore.createAccount 内部处理
+//（需要验证时进入邮箱验证页面，否则自动登录并进入新手引导）
   }
 }
 

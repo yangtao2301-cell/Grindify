@@ -28,7 +28,7 @@ export const useWeightLogStore = defineStore('weightLogStore', () => {
   const isLoadingStats = ref<boolean>(false)
   const lastFetchedLogs = ref<number | null>(null)
   const lastFetchedStats = ref<number | null>(null)
-  const cacheDuration = 10 * 1000 // 10 seconds
+const cacheDuration = 10 * 1000 // 10 秒
 
   const fetchWeightLogs = async (reload = false) => {
     const now = Date.now()

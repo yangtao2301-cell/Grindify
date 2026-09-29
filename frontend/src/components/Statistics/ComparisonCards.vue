@@ -24,7 +24,7 @@
     </div>
 
     <div v-else class="d-flex flex-column ga-3">
-      <!-- Weekly comparison -->
+<!-- 每周对比 -->
       <v-card
         class="bg-cardBg pa-4 rounded-lg comparison-card"
         style="border: 1px solid rgb(var(--v-theme-borderColor)); box-shadow: none"
@@ -37,7 +37,7 @@
         </div>
 
         <div class="d-flex ga-3">
-          <!-- Current week - highlighted -->
+<!-- 当前周——高亮显示 -->
           <div class="flex-grow-1 comparison-period current-period pa-3 rounded-lg">
             <p class="text-caption font-weight-bold text-primary mb-2">
               {{ $t('statistics.comparison.thisWeek') }}
@@ -59,14 +59,14 @@
             </div>
           </div>
 
-          <!-- VS divider -->
+<!-- VS 分隔线 -->
           <div class="d-flex flex-column align-center justify-center">
             <div class="vs-divider" />
             <span class="vs-label text-caption font-weight-black">VS</span>
             <div class="vs-divider" />
           </div>
 
-          <!-- Previous week -->
+<!-- 上一周 -->
           <div class="flex-grow-1 comparison-period pa-3 rounded-lg text-right">
             <p class="text-caption text-textSecondary mb-2">
               {{ $t('statistics.comparison.lastWeek') }}
@@ -89,7 +89,7 @@
           </div>
         </div>
 
-        <!-- Delta chips row -->
+<!-- 变化标签行 -->
         <div class="d-flex justify-center ga-2 mt-3">
           <DeltaChip
             :current="comparison.weekly.current.workouts"
@@ -104,7 +104,7 @@
         </div>
       </v-card>
 
-      <!-- Monthly comparison -->
+<!-- 每月对比 -->
       <v-card
         class="bg-cardBg pa-4 rounded-lg comparison-card"
         style="border: 1px solid rgb(var(--v-theme-borderColor)); box-shadow: none"
@@ -212,7 +212,7 @@ function formatDuration(minutes: number): string {
   return `${mins} min`
 }
 
-// Inline functional subcomponents
+// 内联功能子组件
 const ComparisonMetric: FunctionalComponent<{
   icon?: string
   value: string | number

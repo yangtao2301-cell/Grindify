@@ -83,11 +83,11 @@ export class WorkoutSessionService {
 
     if (!session) throw new NotFoundException('Workout session not found');
 
-    // Sort session exercises by order
+    // 按顺序排列会话中的训练动作
     if (session.exercises) {
       session.exercises.sort((a, b) => a.order - b.order);
     }
-    // Sort workout exercises by order
+    // 按顺序排列训练中的训练动作
     if (session.workout?.exercises) {
       session.workout.exercises.sort((a, b) => a.order - b.order);
     }
@@ -122,7 +122,7 @@ export class WorkoutSessionService {
     for (const exerciseId of targetExerciseIds) {
       let previousEx: WorkoutSessionExercise | null = null;
 
-      // Prefer: last finished session with same workout template
+    // 优先使用：同一训练模板最近完成的会话
       if (workoutId) {
         previousEx = await this.sessionExerciseRepo
           .createQueryBuilder('se')
@@ -138,7 +138,7 @@ export class WorkoutSessionService {
           .getOne();
       }
 
-      // Fallback: last finished session (any workout) with this exercise
+    // 回退使用：最近完成且包含此训练动作的会话（不限训练模板）
       if (!previousEx) {
         previousEx = await this.sessionExerciseRepo
           .createQueryBuilder('se')
@@ -182,12 +182,12 @@ export class WorkoutSessionService {
 
     if (!workout) throw new NotFoundException('Workout not found');
 
-    // Sort workout exercises by order
+    // 按顺序排列训练中的训练动作
     const sortedExercises = [...(workout.exercises || [])].sort(
       (a, b) => a.order - b.order,
     );
 
-    // Pre-populate session exercises from workout exercises
+    // 根据训练动作预填充会话中的训练动作
     const sessionExercises = sortedExercises.map((we) =>
       this.sessionExerciseRepo.create({
         exercise: we.exercise,
@@ -266,7 +266,7 @@ export class WorkoutSessionService {
 
       const saved = await manager.save(WorkoutSession, session);
 
-      // Save completed exercises & sets if provided
+    // 如果提供了已完成的训练动作和训练组，则保存它们
       if (dto.completedExercises?.length) {
         const sessionExercises: WorkoutSessionExercise[] = [];
         const allSets: WorkoutSessionSet[] = [];
@@ -307,7 +307,7 @@ export class WorkoutSessionService {
           await manager.save(WorkoutSessionSet, allSets);
         }
 
-        // Compute totalWeight & exerciseStats
+    // 计算 totalWeight 和 exerciseStats
         let totalWeight = 0;
         const stats: { exerciseId: number; totalWeight: number }[] = [];
         for (let i = 0; i < dto.completedExercises.length; i++) {
@@ -326,10 +326,10 @@ export class WorkoutSessionService {
         await manager.save(WorkoutSession, saved);
       }
 
-      // Update streak
+    // 更新连续打卡数据
       await this.userService.updateStreakOnWorkoutCompletion(userId);
 
-      // Compute and upsert personal records for logged past sessions
+    // 计算并写入已记录历史会话的个人纪录
       if (dto.completedExercises?.length) {
         const completedForRecords = dto.completedExercises
           .filter((ce) => ce.sets?.length)
@@ -391,7 +391,7 @@ export class WorkoutSessionService {
 
     if (!exercise) throw new NotFoundException('Exercise not found');
 
-    // Assign order as next after current max
+    // 将顺序设置为当前最大值之后的下一个值
     const maxOrder = session.exercises.reduce(
       (max, e) => Math.max(max, e.order ?? 0),
       0,
@@ -406,7 +406,7 @@ export class WorkoutSessionService {
 
     await this.sessionExerciseRepo.save(sessionExercise);
 
-    // Reload session to return full updated entity
+    // 重新加载会话，以返回完整的更新后实体
     return this.getOneSession(sessionId, userId);
   }
 
@@ -456,7 +456,7 @@ export class WorkoutSessionService {
             });
             if (!exercise) throw new NotFoundException('Exercise not found');
 
-            // Assign order as next after current max
+    // 将顺序设置为当前最大值之后的下一个值
             const currentMax = (session.exercises ?? []).reduce(
               (max, e) => Math.max(max, e.order ?? 0),
               0,
@@ -506,7 +506,7 @@ export class WorkoutSessionService {
         await manager.remove(WorkoutSessionSet, setsToRemove);
       }
 
-      // Remove exercises that have no sets (user didn't complete them)
+    // 删除没有训练组的训练动作（用户未完成）
       const exercisesToRemove: WorkoutSessionExercise[] = [];
       for (const ex of session.exercises ?? []) {
         if (!ex.sets?.length) {
@@ -558,10 +558,10 @@ export class WorkoutSessionService {
 
       await manager.save(WorkoutSession, session);
 
-      // Update user's streak after finishing workout
+    // 完成训练后更新用户的连续打卡数据
       await this.userService.updateStreakOnWorkoutCompletion(userId);
 
-      // Compute and upsert personal records
+    // 计算并写入个人纪录
       const completedForRecords = (session.exercises ?? [])
         .filter((ex) => ex.exercise?.id && ex.sets?.length)
         .map((ex) => ({
@@ -718,7 +718,7 @@ export class WorkoutSessionService {
       if (!sessionExercise)
         throw new NotFoundException('Exercise not found in session');
 
-      // Replace sets
+    // 替换训练组
       if (sessionExercise.sets?.length) {
         await manager.remove(WorkoutSessionSet, sessionExercise.sets);
       }
@@ -740,7 +740,7 @@ export class WorkoutSessionService {
 
       sessionExercise.sets = newSets;
 
-      // Recalculate totalWeight & exerciseStats
+    // 重新计算 totalWeight 和 exerciseStats
       let totalWeight = 0;
       const stats: { exerciseId: number; totalWeight: number }[] = [];
       for (const ex of session.exercises) {
@@ -760,7 +760,7 @@ export class WorkoutSessionService {
       session.exerciseStats = stats;
       await manager.save(WorkoutSession, session);
 
-      // Re-run personal records
+    // 重新计算个人纪录
       const exercisesForRecords = session.exercises
         .filter((ex) => ex.exercise?.id && ex.sets?.length)
         .map((ex) => ({

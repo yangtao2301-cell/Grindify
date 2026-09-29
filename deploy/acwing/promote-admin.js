@@ -1,4 +1,4 @@
-// Run inside the production backend container. The target must already be registered.
+// 在生产环境的后端容器中运行；目标账号必须已经注册。
 const { AppDataSource } = require('/app/dist/dataSource');
 
 async function main() {

@@ -1,6 +1,6 @@
 /**
- * Normalize comma to dot and parse to float.
- * Returns 0 for empty or invalid input.
+ * 将逗号统一为句点并解析为浮点数。
+ * 空输入或无效输入返回 0。
  */
 export function parseDecimalInput(value: string | number | null | undefined): number {
   if (value === null || value === undefined || value === '') return 0
@@ -10,8 +10,8 @@ export function parseDecimalInput(value: string | number | null | undefined): nu
 }
 
 /**
- * Parse to integer (floor), handling comma decimal separators.
- * Returns 0 for empty or invalid input.
+ * 解析为整数（向下取整），并处理逗号小数分隔符。
+ * 空输入或无效输入返回 0。
  */
 export function parseIntInput(value: string | number | null | undefined): number {
   if (value === null || value === undefined || value === '') return 0
@@ -21,8 +21,8 @@ export function parseIntInput(value: string | number | null | undefined): number
 }
 
 /**
- * Format a number for display in a decimal text field.
- * Returns empty string for null/undefined so the field appears empty.
+ * 将数字格式化为小数文本字段的显示值。
+ * null/undefined 返回空字符串，使字段显示为空。
  */
 export function formatDecimalDisplay(value: number | null | undefined): string {
   if (value === null || value === undefined) return ''
@@ -30,9 +30,9 @@ export function formatDecimalDisplay(value: number | null | undefined): string {
 }
 
 /**
- * Normalize comma to dot in a raw input string.
- * Use as the @update:model-value handler for decimal text fields to allow
- * both "." and "," as decimal separators while preserving partial input like "90.".
+ * 将原始输入字符串中的逗号统一为句点。
+ * 用作小数文本字段的 @update:model-value 处理器，允许使用“.”或“,”作为小数分隔符，
+ * 同时保留“90.”这样的未完成输入。
  */
 export function normalizeDecimalStr(value: string): string {
   return value.replace(',', '.')

@@ -31,15 +31,15 @@ export class MigrateActivityIconsToMdiNames1774300000000
   implements MigrationInterface
 {
   public async up(queryRunner: QueryRunner): Promise<void> {
-    // Change column to text so we can update values freely
+    // 将列改为 text，以便自由更新值
     await queryRunner.query(
       `ALTER TABLE "activity" ALTER COLUMN "icon" TYPE TEXT`,
     );
 
-    // Drop old enum type
+    // 删除旧枚举类型
     await queryRunner.query(`DROP TYPE IF EXISTS "activity_icon_enum"`);
 
-    // Rename old icon values to correct MDI icon names
+    // 将旧图标值重命名为正确的 MDI 图标名称
     for (const [oldValue, newValue] of iconMapping) {
       await queryRunner.query(
         `UPDATE "activity" SET "icon" = $1 WHERE "icon" = $2`,
@@ -47,7 +47,7 @@ export class MigrateActivityIconsToMdiNames1774300000000
       );
     }
 
-    // Create new enum type with MDI icon names
+    // 创建包含 MDI 图标名称的新枚举类型
     await queryRunner.query(
       `CREATE TYPE "activity_icon_enum" AS ENUM (` +
         `'run', 'walk', 'bike', 'soccer', 'swim', 'kayaking', 'hiking', ` +
@@ -55,27 +55,27 @@ export class MigrateActivityIconsToMdiNames1774300000000
         `'ski', 'skate', 'rowing', 'dots-horizontal')`,
     );
 
-    // Restore enum column
+    // 恢复枚举列
     await queryRunner.query(
       `ALTER TABLE "activity" ALTER COLUMN "icon" TYPE "activity_icon_enum" USING "icon"::"activity_icon_enum"`,
     );
 
-    // Restore default
+    // 恢复默认值
     await queryRunner.query(
       `ALTER TABLE "activity" ALTER COLUMN "icon" SET DEFAULT 'dots-horizontal'`,
     );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    // Change column to text
+    // 将列改为 text
     await queryRunner.query(
       `ALTER TABLE "activity" ALTER COLUMN "icon" TYPE TEXT`,
     );
 
-    // Drop new enum type
+    // 删除新枚举类型
     await queryRunner.query(`DROP TYPE IF EXISTS "activity_icon_enum"`);
 
-    // Revert MDI icon names back to old values
+    // 将 MDI 图标名称还原为旧值
     for (const [oldValue, newValue] of iconMapping) {
       await queryRunner.query(
         `UPDATE "activity" SET "icon" = $1 WHERE "icon" = $2`,
@@ -83,7 +83,7 @@ export class MigrateActivityIconsToMdiNames1774300000000
       );
     }
 
-    // Recreate old enum type
+    // 重新创建旧枚举类型
     await queryRunner.query(
       `CREATE TYPE "activity_icon_enum" AS ENUM (` +
         `'running', 'walking', 'cycling', 'football', 'swimming', 'kayaking', ` +
@@ -91,12 +91,12 @@ export class MigrateActivityIconsToMdiNames1774300000000
         `'skiing', 'skating', 'rowing', 'other')`,
     );
 
-    // Restore enum column
+    // 恢复枚举列
     await queryRunner.query(
       `ALTER TABLE "activity" ALTER COLUMN "icon" TYPE "activity_icon_enum" USING "icon"::"activity_icon_enum"`,
     );
 
-    // Restore default
+    // 恢复默认值
     await queryRunner.query(
       `ALTER TABLE "activity" ALTER COLUMN "icon" SET DEFAULT 'other'`,
     );

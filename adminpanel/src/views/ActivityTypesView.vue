@@ -219,7 +219,7 @@ function trackingFlags(a: GlobalActivity): string {
     </table>
   </div>
 
-  <!-- Create/Edit Dialog -->
+<!-- 创建/编辑对话框 -->
   <div v-if="dialogOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" @click.self="dialogOpen = false">
     <div class="bg-surface border border-border rounded-card w-full max-w-xl max-h-[90vh] overflow-y-auto shadow-2xl">
       <div class="flex items-center justify-between px-5 py-4 border-b border-border">
@@ -298,7 +298,7 @@ function trackingFlags(a: GlobalActivity): string {
     </div>
   </div>
 
-  <!-- Delete Confirmation -->
+<!-- 删除确认 -->
   <div v-if="deleteConfirmId !== null" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" @click.self="deleteConfirmId = null">
     <div class="bg-surface border border-border rounded-card w-full max-w-sm p-6 shadow-2xl">
       <h2 class="text-[15px] font-semibold text-text mb-2">Delete Activity?</h2>

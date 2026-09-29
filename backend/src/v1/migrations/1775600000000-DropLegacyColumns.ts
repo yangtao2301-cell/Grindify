@@ -16,16 +16,15 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
 /**
- * Phase 11 cleanup: drops legacy string columns that were superseded by JSONB
- * i18n columns in 1775500000000-GlobalExercisesAndTranslations.
+ * 第 11 阶段清理：删除已被 1775500000000-GlobalExercisesAndTranslations
+ * 中 JSONB i18n 列替代的旧字符串列。
  *
- * Safe to run once the new JSONB columns have been in production and confirmed
- * stable. The down() migration cannot recover the string data once dropped, so
- * run a DB backup before applying.
+ * 新 JSONB 列上线并确认稳定后即可安全执行。删除后，down() 迁移无法恢复字符串数据，
+ * 因此执行前请先备份数据库。
  */
 export class DropLegacyColumns1775600000000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
-    // ── EXERCISE TABLE ────────────────────────────────────────────────────────
+    // ── 训练动作表 ────────────────────────────────────────────────────────
     await queryRunner.query(
       `ALTER TABLE "exercise" DROP COLUMN IF EXISTS "name"`,
     );
@@ -48,7 +47,7 @@ export class DropLegacyColumns1775600000000 implements MigrationInterface {
       `ALTER TABLE "exercise" DROP COLUMN IF EXISTS "isNameCustom"`,
     );
 
-    // ── ACTIVITY TABLE ────────────────────────────────────────────────────────
+    // ── 活动表 ────────────────────────────────────────────────────────
     await queryRunner.query(
       `ALTER TABLE "activity" DROP COLUMN IF EXISTS "name"`,
     );
@@ -58,7 +57,7 @@ export class DropLegacyColumns1775600000000 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    // Restore exercise legacy columns (data is lost — columns will be empty)
+    // 恢复训练动作旧列（数据已经丢失，列将为空）
     await queryRunner.query(
       `ALTER TABLE "exercise" ADD COLUMN IF NOT EXISTS "name" varchar`,
     );
@@ -81,7 +80,7 @@ export class DropLegacyColumns1775600000000 implements MigrationInterface {
       `ALTER TABLE "exercise" ADD COLUMN IF NOT EXISTS "isNameCustom" boolean NOT NULL DEFAULT false`,
     );
 
-    // Restore activity legacy columns (data is lost)
+    // 恢复活动旧列（数据已经丢失）
     await queryRunner.query(
       `ALTER TABLE "activity" ADD COLUMN IF NOT EXISTS "name" varchar`,
     );

@@ -33,7 +33,7 @@ export class WeightLog {
   @Column({ type: 'date' })
   date: Date;
 
-  /** Weight stored in kg. Frontend converts to lbs if unitScale === 'imperial'. */
+/** 体重以千克存储；当 unitScale === “imperial”时由前端转换为磅。 */
   @Column({ type: 'decimal', precision: 5, scale: 2 })
   weight: number;
 

@@ -18,7 +18,7 @@ import { useI18n } from 'vue-i18n'
 import type { StreakInfo } from '@/interfaces/User.interface'
 
 /**
- * Pick a deterministic-random element from a pool, stable per calendar day.
+ * 从候选池中选择一个确定性的随机元素，同一日保持稳定。
  */
 function pickFromPool(pool: unknown[], dayOfYear: number): string {
   if (!Array.isArray(pool) || pool.length === 0) return ''
@@ -26,19 +26,19 @@ function pickFromPool(pool: unknown[], dayOfYear: number): string {
 }
 
 /**
- * Returns a reactive greeting string based on (in priority order):
- *  1. Streak milestones (7, 14, 30, 100+) — shown for 3 days after milestone
- *  2. Weekly goal hit / one session away
- *  3. Day-of-week (Monday, Friday, weekend)
- *  4. Time-of-day (morning, afternoon, evening, night)
+ * 按以下优先级返回响应式问候语：
+ *  1. 连续打卡里程碑（7、14、30、100+）——里程碑达成后显示 3 天
+ *  2. 完成本周目标/距离目标还差一次会话
+ *  3. 星期几（周一、周五、周末）
+ *  4. 时间段（早上、下午、傍晚、夜间）
  *
- * The random pick within each pool is seeded by the day-of-year
- * so the message stays consistent throughout a given day.
+ * 每个候选池中的随机选择以一年中的第几天作为种子，
+ * 因此同一天内消息保持一致。
  */
 export function useGreeting(streakInfo: Ref<StreakInfo | null>) {
   const { t, tm } = useI18n({ useScope: 'global' })
 
-  /** Safely resolve a tm() key to a string array (mirrors ProgressBar pattern). */
+  /** 安全地将 tm() 键解析为字符串数组（与 ProgressBar 的模式一致）。 */
   function getPool(key: string): string[] {
     const v = tm(key)
     return Array.isArray(v) ? (v as string[]) : []
@@ -48,13 +48,13 @@ export function useGreeting(streakInfo: Ref<StreakInfo | null>) {
     const info = streakInfo.value
     const now = new Date()
     const hour = now.getHours()
-    const day = now.getDay() // 0 = Sunday
+    const day = now.getDay() // 0 = 周日
 
-    // Stable seed based on day-of-year
+    // 基于一年中的第几天生成稳定种子
     const startOfYear = new Date(now.getFullYear(), 0, 0)
     const dayOfYear = Math.floor((now.getTime() - startOfYear.getTime()) / (1000 * 60 * 60 * 24))
 
-    // ── Priority 1: Streak milestones (visible for 3 days after milestone) ──
+    // ── 优先级 1：连续打卡里程碑（里程碑达成后显示 3 天） ──
     if (info) {
       const s = info.currentStreak
       if (s >= 100) return t('greetings.streak100', { streak: s })
@@ -63,7 +63,7 @@ export function useGreeting(streakInfo: Ref<StreakInfo | null>) {
       if (s >= 7 && s <= 9) return t('greetings.streak7', { streak: s })
     }
 
-    // ── Priority 2: Weekly goal status ──
+    // ── 优先级 2：每周目标状态 ──
     if (info && info.weeklyWorkoutGoal > 0) {
       if (info.currentWeekWorkouts >= info.weeklyWorkoutGoal) {
         return t('greetings.goalHit')
@@ -73,7 +73,7 @@ export function useGreeting(streakInfo: Ref<StreakInfo | null>) {
       }
     }
 
-    // ── Priority 3: Day-specific quotes ──
+    // ── 优先级 3：特定日期的问候语 ──
     if (day === 1) {
       const pool = getPool('greetings.monday')
       if (pool.length) return pickFromPool(pool, dayOfYear)
@@ -87,7 +87,7 @@ export function useGreeting(streakInfo: Ref<StreakInfo | null>) {
       if (pool.length) return pickFromPool(pool, dayOfYear)
     }
 
-    // ── Priority 4: Time-of-day quotes ──
+    // ── 优先级 4：特定时间段的问候语 ──
     let timeKey: string
     if (hour >= 5 && hour < 12) timeKey = 'morning'
     else if (hour >= 12 && hour < 17) timeKey = 'afternoon'
@@ -97,7 +97,7 @@ export function useGreeting(streakInfo: Ref<StreakInfo | null>) {
     const pool = getPool(`greetings.${timeKey}`)
     if (pool.length) return pickFromPool(pool, dayOfYear)
 
-    // ── Fallback ──
+    // ── 回退问候语 ──
     return t('home.ready')
   })
 

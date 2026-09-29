@@ -29,7 +29,7 @@ export class MuscleGroup {
   @PrimaryGeneratedColumn()
   id: number;
 
-  // Internal identifier key, e.g. 'chest', 'muscleGroups.back' — not shown directly to users
+  // 内部标识键，例如“chest”“muscleGroups.back”，不会直接展示给用户
   @Column({ unique: true })
   name: string;
 

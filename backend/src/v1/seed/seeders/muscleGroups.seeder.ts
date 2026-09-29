@@ -17,9 +17,9 @@ import { DataSource } from 'typeorm';
 import { MuscleGroup } from '../../muscleGroup/muscleGroup.entity';
 import { muscleGroupsToSeed } from '../data/muscleGroups.data';
 
-/** Maps old stored names (Swedish or previous i18nKey format) to the new simple English name */
+/** 将旧的存储名称（瑞典语或旧版 i18nKey 格式）映射为新的简单英文名称。 */
 const NAME_MIGRATION_MAP: Record<string, string> = {
-  // Old Swedish names
+// 旧瑞典语名称
   Bröst: 'chest',
   Rygg: 'back',
   Axlar: 'shoulders',
@@ -38,7 +38,7 @@ const NAME_MIGRATION_MAP: Record<string, string> = {
   Ländrygg: 'lowerBack',
   'Övre bröst': 'upperChest',
   Höftböjare: 'hipFlexors',
-  // Old i18nKey-as-name format
+// 旧版将 i18nKey 直接作为名称的格式
   'muscleGroups.chest': 'chest',
   'muscleGroups.back': 'back',
   'muscleGroups.shoulders': 'shoulders',
@@ -64,7 +64,7 @@ export async function seedMuscleGroups(
 ): Promise<Map<string, MuscleGroup>> {
   const mgRepo = dataSource.getRepository(MuscleGroup);
 
-  // Migrate existing records with old names to the new simple English names
+// 将使用旧名称的现有记录迁移为新的简单英文名称
   for (const [oldName, newName] of Object.entries(NAME_MIGRATION_MAP)) {
     const existing = await mgRepo.findOne({ where: { name: oldName } });
     if (existing) {
@@ -73,7 +73,7 @@ export async function seedMuscleGroups(
     }
   }
 
-  // Insert any muscle groups that don't exist yet
+// 插入尚不存在的肌群
   for (const mg of muscleGroupsToSeed) {
     const existing = await mgRepo.findOne({ where: { name: mg.name } });
     if (!existing) {

@@ -50,7 +50,7 @@ export class AuthService {
   private generateCode(): { code: string; hash: string; expires: Date } {
     const code = crypto.randomInt(100000, 999999).toString();
     const hash = crypto.createHash('sha256').update(code).digest('hex');
-    const expires = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+    const expires = new Date(Date.now() + 15 * 60 * 1000); // 15 分钟
     return { code, hash, expires };
   }
 
@@ -87,13 +87,13 @@ export class AuthService {
       showRpe: defaultShowRpe,
       termsAcceptedAt: new Date(),
       termsVersion: '1.0',
-      emailVerified: !requireVerification, // auto-verified when feature is disabled
+      emailVerified: !requireVerification, // 功能关闭时自动验证
       emailVerificationToken,
       emailVerificationExpires,
     });
     const savedUser = await this.userRepo.save(user);
 
-    // Send verification email only when feature is enabled
+    // 仅在启用此功能时发送验证邮件
     if (requireVerification && verificationCode) {
       await this.emailService.sendVerificationEmail(
         savedUser.email,
@@ -201,12 +201,12 @@ export class AuthService {
       select: ['id', 'email', 'emailVerified', 'emailVerificationExpires'],
     });
 
-    // Return silently to avoid user enumeration
+    // 静默返回，避免暴露用户是否存在
     if (!user) return;
     if (user.emailVerified)
       throw new BadRequestException('Email already verified');
 
-    // Rate-limit: block resend if a code was sent less than 1 minute ago
+    // 频率限制：如果距上次发送验证码不足 1 分钟，则禁止再次发送
     const oneMinuteFromNow = new Date(Date.now() + 14 * 60 * 1000);
     if (
       user.emailVerificationExpires &&
@@ -232,7 +232,7 @@ export class AuthService {
       select: ['id', 'email', 'emailVerified'],
     });
 
-    // Always return silently to avoid user enumeration
+    // 始终静默返回，避免暴露用户是否存在
     if (!user || !user.emailVerified) return;
 
     const { code, hash, expires } = this.generateCode();
@@ -251,13 +251,13 @@ export class AuthService {
     lastName: string;
     avatar?: string;
   }): Promise<{ token: string; user: UserWithoutPasswordDto; isNew: boolean }> {
-    // 1. Try to find by githubId
+    // 1. 尝试通过 githubId 查找
     let user = await this.userRepo.findOne({
       where: { githubId: profile.githubId },
     });
 
     if (!user && profile.email) {
-      // 2. Try to find by email — link GitHub to existing account
+    // 2. 尝试通过邮箱查找——将 GitHub 账号关联到已有账号
       user = await this.userRepo.findOne({ where: { email: profile.email } });
       if (user) {
         await this.userRepo.update(user.id, { githubId: profile.githubId });
@@ -267,7 +267,7 @@ export class AuthService {
 
     let isNew = false;
     if (!user) {
-      // 3. Create new user
+    // 3. 创建新用户
       const defaultShowRpeRaw =
         this.configService.get<string>('DEFAULT_SHOW_RPE');
       const defaultShowRpe =
@@ -284,7 +284,7 @@ export class AuthService {
         lastName: profile.lastName,
         avatar: profile.avatar,
         showRpe: defaultShowRpe,
-        emailVerified: true, // GitHub already confirmed the email
+      emailVerified: true, // GitHub 已确认邮箱
         termsAcceptedAt: new Date(),
         termsVersion: '1.0',
       });
@@ -293,7 +293,7 @@ export class AuthService {
       isNew = true;
     }
 
-    // Ensure email is marked verified for GitHub users
+    // 确保 GitHub 用户的邮箱标记为已验证
     if (!user.emailVerified) {
       await this.userRepo.update(user.id, { emailVerified: true });
       user.emailVerified = true;
@@ -310,13 +310,13 @@ export class AuthService {
     lastName: string;
     avatar?: string;
   }): Promise<{ token: string; user: UserWithoutPasswordDto; isNew: boolean }> {
-    // 1. Try to find by googleId
+    // 1. 尝试通过 googleId 查找
     let user = await this.userRepo.findOne({
       where: { googleId: profile.googleId },
     });
 
     if (!user && profile.email) {
-      // 2. Try to find by email — link Google to existing account
+    // 2. 尝试通过邮箱查找——将 Google 账号关联到已有账号
       user = await this.userRepo.findOne({ where: { email: profile.email } });
       if (user) {
         await this.userRepo.update(user.id, { googleId: profile.googleId });
@@ -326,7 +326,7 @@ export class AuthService {
 
     let isNew = false;
     if (!user) {
-      // 3. Create new user
+    // 3. 创建新用户
       const defaultShowRpeRaw =
         this.configService.get<string>('DEFAULT_SHOW_RPE');
       const defaultShowRpe =
@@ -343,7 +343,7 @@ export class AuthService {
         lastName: profile.lastName,
         avatar: profile.avatar,
         showRpe: defaultShowRpe,
-        emailVerified: true, // Google already confirmed the email
+      emailVerified: true, // Google 已确认邮箱
         termsAcceptedAt: new Date(),
         termsVersion: '1.0',
       });
@@ -352,7 +352,7 @@ export class AuthService {
       isNew = true;
     }
 
-    // Ensure email is marked verified for Google users
+    // 确保 Google 用户的邮箱标记为已验证
     if (!user.emailVerified) {
       await this.userRepo.update(user.id, { emailVerified: true });
       user.emailVerified = true;

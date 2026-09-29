@@ -13,7 +13,7 @@
  * <https://www.gnu.org/licenses/>.
  */
 
-// stores/authStore.ts
+// stores/authStore.ts（相关认证 store）
 import { defineStore } from 'pinia'
 import * as muscleGroupsService from '@/services/muscleGroup.service'
 import type { MuscleGroup } from '@/interfaces/MuscleGroup.interface'
@@ -50,7 +50,7 @@ export const useMuscleGroupStore = defineStore(
       }
     }
 
-    // Only fetch muscle groups when authenticated; otherwise avoid 401 loops on app boot.
+// 仅在已认证时获取肌群，避免应用启动时反复收到 401。
     watch(
       () => authStore.isAuthenticated,
       authed => {
@@ -61,7 +61,7 @@ export const useMuscleGroupStore = defineStore(
       { immediate: true }
     )
 
-    // Re-fetch when the app regains visibility (e.g. switching back from another device/tab).
+// 应用重新获得可见性时重新获取（例如从其他设备/标签页切回来）。
     if (typeof document !== 'undefined' && typeof window !== 'undefined') {
       const onVisible = () => {
         if (document.visibilityState === 'visible' && authStore.isAuthenticated) {

@@ -17,7 +17,7 @@ import { MigrationInterface, QueryRunner, TableColumn } from 'typeorm';
 
 export class AddStreakToUser1768754686000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
-    // Add weeklyWorkoutGoal column
+    // 添加 weeklyWorkoutGoal 列
     await queryRunner.addColumn(
       'user',
       new TableColumn({
@@ -27,7 +27,7 @@ export class AddStreakToUser1768754686000 implements MigrationInterface {
       }),
     );
 
-    // Add currentStreak column
+    // 添加 currentStreak 列
     await queryRunner.addColumn(
       'user',
       new TableColumn({
@@ -37,7 +37,7 @@ export class AddStreakToUser1768754686000 implements MigrationInterface {
       }),
     );
 
-    // Add lastStreakCheckDate column
+    // 添加 lastStreakCheckDate 列
     await queryRunner.addColumn(
       'user',
       new TableColumn({
@@ -47,7 +47,7 @@ export class AddStreakToUser1768754686000 implements MigrationInterface {
       }),
     );
 
-    // Add currentWeekWorkouts column
+    // 添加 currentWeekWorkouts 列
     await queryRunner.addColumn(
       'user',
       new TableColumn({

@@ -19,19 +19,19 @@ export class GlobalExercisesAndTranslations1775500000000
   implements MigrationInterface
 {
   public async up(queryRunner: QueryRunner): Promise<void> {
-    // ── EXERCISE TABLE ────────────────────────────────────────────────────────
+    // ── 训练动作表 ────────────────────────────────────────────────────────
 
-    // Allow global exercises (no owner)
+    // 允许全局训练动作（没有所有者）
     await queryRunner.query(
       `ALTER TABLE "exercise" ALTER COLUMN "createdById" DROP NOT NULL`,
     );
 
-    // Global flag — all existing exercises stay false (user-owned)
+    // 全局标记——所有现有训练动作保持为 false（属于用户）
     await queryRunner.query(
       `ALTER TABLE "exercise" ADD COLUMN IF NOT EXISTS "isGlobal" boolean NOT NULL DEFAULT false`,
     );
 
-    // Personalization tracking — set when user duplicates or inherits a deleted global
+    // 个性化跟踪——用户复制或继承已删除的全局训练动作时设置
     await queryRunner.query(
       `ALTER TABLE "exercise" ADD COLUMN IF NOT EXISTS "personalizedFromGlobalId" integer NULL`,
     );
@@ -39,7 +39,7 @@ export class GlobalExercisesAndTranslations1775500000000
       `ALTER TABLE "exercise" ADD COLUMN IF NOT EXISTS "personalizedAt" timestamptz NULL`,
     );
 
-    // title: JSONB translation object — migrated from existing name string
+    // title：JSONB 翻译对象——由现有 name 字符串迁移而来
     await queryRunner.query(
       `ALTER TABLE "exercise" ADD COLUMN IF NOT EXISTS "title" jsonb`,
     );
@@ -50,7 +50,7 @@ export class GlobalExercisesAndTranslations1775500000000
       `ALTER TABLE "exercise" ALTER COLUMN "title" SET NOT NULL`,
     );
 
-    // descriptionI18n: JSONB — migrated from existing description string
+    // descriptionI18n：JSONB——由现有 description 字符串迁移而来
     await queryRunner.query(
       `ALTER TABLE "exercise" ADD COLUMN IF NOT EXISTS "descriptionI18n" jsonb`,
     );
@@ -59,7 +59,7 @@ export class GlobalExercisesAndTranslations1775500000000
        WHERE "description" IS NOT NULL AND "description" != ''`,
     );
 
-    // instructionsI18n: JSONB — migrated from existing jsonb array
+    // instructionsI18n：JSONB——由现有 JSONB 数组迁移而来
     await queryRunner.query(
       `ALTER TABLE "exercise" ADD COLUMN IF NOT EXISTS "instructionsI18n" jsonb`,
     );
@@ -68,7 +68,7 @@ export class GlobalExercisesAndTranslations1775500000000
        WHERE "instructions" IS NOT NULL`,
     );
 
-    // proTipsI18n: JSONB — migrated from existing jsonb array
+    // proTipsI18n：JSONB——由现有 JSONB 数组迁移而来
     await queryRunner.query(
       `ALTER TABLE "exercise" ADD COLUMN IF NOT EXISTS "proTipsI18n" jsonb`,
     );
@@ -77,7 +77,7 @@ export class GlobalExercisesAndTranslations1775500000000
        WHERE "proTips" IS NOT NULL`,
     );
 
-    // mistakesI18n: JSONB — migrated from existing jsonb array
+    // mistakesI18n：JSONB——由现有 JSONB 数组迁移而来
     await queryRunner.query(
       `ALTER TABLE "exercise" ADD COLUMN IF NOT EXISTS "mistakesI18n" jsonb`,
     );
@@ -86,9 +86,9 @@ export class GlobalExercisesAndTranslations1775500000000
        WHERE "mistakes" IS NOT NULL`,
     );
 
-    // ── ACTIVITY TABLE ────────────────────────────────────────────────────────
+    // ── 活动表 ────────────────────────────────────────────────────────
 
-    // Drop the composite unique constraint (name, createdById) — replaced by partial indexes below
+    // 删除组合唯一约束（name、createdById）——由下面的部分索引替代
     await queryRunner.query(`
       DO $$
       DECLARE
@@ -113,12 +113,12 @@ export class GlobalExercisesAndTranslations1775500000000
       END $$;
     `);
 
-    // Allow global activities (no owner)
+    // 允许全局活动（没有所有者）
     await queryRunner.query(
       `ALTER TABLE "activity" ALTER COLUMN "createdById" DROP NOT NULL`,
     );
 
-    // Global flag + personalization tracking
+    // 全局标记 + 个性化跟踪
     await queryRunner.query(
       `ALTER TABLE "activity" ADD COLUMN IF NOT EXISTS "isGlobal" boolean NOT NULL DEFAULT false`,
     );
@@ -129,7 +129,7 @@ export class GlobalExercisesAndTranslations1775500000000
       `ALTER TABLE "activity" ADD COLUMN IF NOT EXISTS "personalizedAt" timestamptz NULL`,
     );
 
-    // title: JSONB — migrated from existing name string
+    // title：JSONB——由现有 name 字符串迁移而来
     await queryRunner.query(
       `ALTER TABLE "activity" ADD COLUMN IF NOT EXISTS "title" jsonb`,
     );
@@ -140,7 +140,7 @@ export class GlobalExercisesAndTranslations1775500000000
       `ALTER TABLE "activity" ALTER COLUMN "title" SET NOT NULL`,
     );
 
-    // descriptionI18n: JSONB — migrated from existing description string
+    // descriptionI18n：JSONB——由现有 description 字符串迁移而来
     await queryRunner.query(
       `ALTER TABLE "activity" ADD COLUMN IF NOT EXISTS "descriptionI18n" jsonb`,
     );
@@ -149,7 +149,7 @@ export class GlobalExercisesAndTranslations1775500000000
        WHERE "description" IS NOT NULL AND "description" != ''`,
     );
 
-    // Partial unique indexes replacing the old composite constraint
+    // 用部分唯一索引替代旧的组合约束
     await queryRunner.query(`
       CREATE UNIQUE INDEX IF NOT EXISTS "UQ_activity_name_user"
         ON "activity" ("name", "createdById")
@@ -161,15 +161,15 @@ export class GlobalExercisesAndTranslations1775500000000
         WHERE "createdById" IS NULL
     `);
 
-    // ── USER TABLE ────────────────────────────────────────────────────────────
+    // ── 用户表 ────────────────────────────────────────────────────────────
 
     await queryRunner.query(
       `ALTER TABLE "user" ADD COLUMN IF NOT EXISTS "language" varchar(10) NOT NULL DEFAULT 'default'`,
     );
 
-    // ── MUSCLE_GROUP TABLE ────────────────────────────────────────────────────
+    // ── 肌群表 ────────────────────────────────────────────────────
 
-    // nameI18n: JSONB display name — migrated from existing name string (name stays as internal key)
+    // nameI18n：JSONB 展示名称——由现有 name 字符串迁移而来（name 仍作为内部键）
     await queryRunner.query(
       `ALTER TABLE "muscle_group" ADD COLUMN IF NOT EXISTS "nameI18n" jsonb`,
     );
@@ -180,7 +180,7 @@ export class GlobalExercisesAndTranslations1775500000000
       `ALTER TABLE "muscle_group" ALTER COLUMN "nameI18n" SET NOT NULL`,
     );
 
-    // descriptionI18n: JSONB — migrated from existing description string
+    // descriptionI18n：JSONB——由现有 description 字符串迁移而来
     await queryRunner.query(
       `ALTER TABLE "muscle_group" ADD COLUMN IF NOT EXISTS "descriptionI18n" jsonb`,
     );
@@ -191,7 +191,7 @@ export class GlobalExercisesAndTranslations1775500000000
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    // ── MUSCLE_GROUP ──────────────────────────────────────────────────────────
+    // ── 肌群 ──────────────────────────────────────────────────────────
     await queryRunner.query(
       `ALTER TABLE "muscle_group" DROP COLUMN IF EXISTS "descriptionI18n"`,
     );
@@ -199,12 +199,12 @@ export class GlobalExercisesAndTranslations1775500000000
       `ALTER TABLE "muscle_group" DROP COLUMN IF EXISTS "nameI18n"`,
     );
 
-    // ── USER ──────────────────────────────────────────────────────────────────
+    // ── 用户 ──────────────────────────────────────────────────────────────────
     await queryRunner.query(
       `ALTER TABLE "user" DROP COLUMN IF EXISTS "language"`,
     );
 
-    // ── ACTIVITY ──────────────────────────────────────────────────────────────
+    // ── 活动 ──────────────────────────────────────────────────────────────
     await queryRunner.query(
       `DROP INDEX IF EXISTS "UQ_activity_name_global"`,
     );
@@ -229,13 +229,13 @@ export class GlobalExercisesAndTranslations1775500000000
     await queryRunner.query(
       `ALTER TABLE "activity" ALTER COLUMN "createdById" SET NOT NULL`,
     );
-    // Restore original unique constraint
+    // 恢复原有唯一约束
     await queryRunner.query(
       `ALTER TABLE "activity" ADD CONSTRAINT "UQ_activity_name_createdBy"
        UNIQUE ("name", "createdById")`,
     );
 
-    // ── EXERCISE ──────────────────────────────────────────────────────────────
+    // ── 训练动作 ──────────────────────────────────────────────────────────────
     await queryRunner.query(
       `ALTER TABLE "exercise" DROP COLUMN IF EXISTS "mistakesI18n"`,
     );

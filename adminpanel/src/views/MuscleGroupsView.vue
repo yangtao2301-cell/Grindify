@@ -22,7 +22,7 @@ const error = ref<string | null>(null)
 const muscleGroups = ref<AdminMuscleGroup[]>([])
 const search = ref('')
 
-// ─── Create / Edit dialog ─────────────────────────────────────────────────────
+// ─── 创建/编辑对话框 ─────────────────────────────────────────────────────
 
 const dialogOpen = ref(false)
 const dialogMode = ref<'create' | 'edit'>('create')
@@ -43,7 +43,7 @@ function emptyForm(): MgForm {
 
 const form = ref<MgForm>(emptyForm())
 
-// ─── Delete dialog ────────────────────────────────────────────────────────────
+// ─── 删除对话框 ────────────────────────────────────────────────────────────
 
 const pendingDeleteMg = ref<AdminMuscleGroup | null>(null)
 const deleteExercises = ref<{ id: number; title: I18nString }[]>([])
@@ -52,7 +52,7 @@ const deleteAccepted = ref(false)
 const deleting = ref(false)
 const deleteError = ref<string | null>(null)
 
-// ─── Data loading ─────────────────────────────────────────────────────────────
+// ─── 数据加载 ─────────────────────────────────────────────────────────────
 
 async function fetchMuscleGroups() {
   loading.value = true
@@ -79,7 +79,7 @@ const filteredGroups = computed(() => {
   })
 })
 
-// ─── Create / Edit ────────────────────────────────────────────────────────────
+// ─── 创建/编辑 ────────────────────────────────────────────────────────────
 
 function openCreate() {
   form.value = emptyForm()
@@ -129,7 +129,7 @@ async function save() {
   }
 }
 
-// ─── Delete ───────────────────────────────────────────────────────────────────
+// ─── 删除 ───────────────────────────────────────────────────────────────────
 
 async function openDelete(mg: AdminMuscleGroup) {
   pendingDeleteMg.value = mg
@@ -141,7 +141,7 @@ async function openDelete(mg: AdminMuscleGroup) {
   try {
     deleteExercises.value = await adminApi.getMuscleGroupExercises(mg.id)
   } catch {
-    // Non-fatal: dialog still opens, user can proceed without the list
+// 非致命错误：对话框仍会打开，用户可以在没有列表的情况下继续
   } finally {
     deleteExercisesLoading.value = false
   }
@@ -166,7 +166,7 @@ async function confirmDelete() {
   }
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// ─── 辅助方法 ──────────────────────────────────────────────────────────────────
 
 function i18nGet(obj: I18nString | undefined, lang: Lang): string {
   if (!obj) return ''
@@ -258,7 +258,7 @@ function coverageLabel(mg: AdminMuscleGroup): string {
     </table>
   </div>
 
-  <!-- Create / Edit Dialog -->
+<!-- 创建/编辑对话框 -->
   <div v-if="dialogOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" @click.self="dialogOpen = false">
     <div class="bg-surface border border-border rounded-card w-full max-w-lg shadow-2xl">
       <div class="flex items-center justify-between px-5 py-4 border-b border-border">
@@ -279,7 +279,7 @@ function coverageLabel(mg: AdminMuscleGroup): string {
       </div>
 
       <div class="p-5 flex flex-col gap-4">
-        <!-- Key field: only editable on create, shown read-only on edit -->
+<!-- 键字段：仅创建时可编辑，编辑时以只读方式显示 -->
         <div v-if="activeLang === 'default'">
           <label class="block text-[11.5px] font-bold uppercase tracking-widest text-dim mb-1.5">
             Internal Key *
@@ -324,7 +324,7 @@ function coverageLabel(mg: AdminMuscleGroup): string {
     </div>
   </div>
 
-  <!-- Delete Confirmation Dialog -->
+<!-- 删除确认对话框 -->
   <div v-if="pendingDeleteMg" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" @click.self="closeDelete">
     <div class="bg-surface border border-border rounded-card w-full max-w-md shadow-2xl">
       <div class="flex items-center justify-between px-5 py-4 border-b border-border">
@@ -339,13 +339,13 @@ function coverageLabel(mg: AdminMuscleGroup): string {
           <span class="font-mono text-faint text-[12px] ml-1">({{ pendingDeleteMg.name }})</span>.
         </p>
 
-        <!-- Loading exercises -->
+<!-- 正在加载训练动作 -->
         <div v-if="deleteExercisesLoading" class="flex items-center gap-2 text-[13px] text-mute">
           <Loader2 :size="15" class="animate-spin" />
           <span>Checking exercise references…</span>
         </div>
 
-        <!-- Exercises using this group -->
+<!-- 使用此肌群的训练动作 -->
         <template v-else-if="deleteExercises.length > 0">
           <div class="rounded-card border border-amber-500/30 bg-amber-500/5 p-3.5 flex flex-col gap-2">
             <div class="flex items-center gap-2 text-amber-400 text-[13px] font-medium">
@@ -369,7 +369,7 @@ function coverageLabel(mg: AdminMuscleGroup): string {
           </label>
         </template>
 
-        <!-- No exercises using this group -->
+<!-- 没有训练动作使用此肌群 -->
         <p v-else class="text-[13px] text-mute">
           No exercises reference this muscle group. This action cannot be undone.
         </p>

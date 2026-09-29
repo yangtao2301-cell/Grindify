@@ -2,7 +2,7 @@ FROM node:22-slim AS development
 
 ARG APT_MIRROR=deb.debian.org
 
-# Install sharp dependencies and procps for Debian ARM
+# 为 Debian ARM 安装 sharp 依赖和 procps
 RUN sed -i "s|deb.debian.org|${APT_MIRROR}|g" /etc/apt/sources.list.d/debian.sources \
     && apt-get -o Acquire::ForceIPv4=true update && apt-get install -y \
     bash \
@@ -16,19 +16,19 @@ WORKDIR /app
 
 COPY ./backend/package*.json ./
 
-# Install devDependencies too (for ts-node-dev)
+# 同时安装开发依赖（供 ts-node-dev 使用）
 RUN npm install
 
-# Copy rest of the code
+# 复制其余代码
 COPY ./backend .
 
-# Expose port
+# 暴露端口
 EXPOSE 1337
 
-# Run dev script (with hot reload)
+# 运行开发脚本（支持热重载）
 CMD ["npm", "run", "start:dev"]
 
-# Compile the Nest application once for the production container.
+# 为生产容器编译一次 Nest 应用。
 FROM development AS production
 RUN npm run build && npm prune --omit=dev
 ENV NODE_ENV=production

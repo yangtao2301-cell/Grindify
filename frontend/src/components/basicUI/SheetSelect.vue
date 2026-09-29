@@ -13,7 +13,7 @@
   - <https://www.gnu.org/licenses/>.
   -->
 <template>
-  <!-- Read-only activator field -->
+<!-- 只读激活字段 -->
   <div
     class="sheet-select"
     :class="{ 'sheet-select--disabled': disabled }"
@@ -29,7 +29,7 @@
       hide-details="auto"
       class="pointer-field"
     >
-      <!-- Chip display for multi mode -->
+<!-- 多选模式下的标签展示 -->
       <template v-if="multiple && selectedItems.length" #prepend-inner>
         <div class="d-flex flex-wrap ga-1 my-1">
           <v-chip
@@ -47,10 +47,10 @@
     </v-text-field>
   </div>
 
-  <!-- Bottom sheet with options -->
+<!-- 带选项的底部抽屉 -->
   <v-bottom-sheet v-model="isOpen" max-height="60vh">
     <v-card class="rounded-t-xl">
-      <!-- Header -->
+<!-- 标题 -->
       <v-card-title class="d-flex align-center justify-space-between py-3 px-4">
         <span class="text-body-1 font-weight-bold">{{ label }}</span>
         <div class="d-flex ga-2">
@@ -71,7 +71,7 @@
 
       <v-divider />
 
-      <!-- Options list -->
+<!-- 选项列表 -->
       <v-list
         class="overflow-y-auto pb-safe"
         max-height="50vh"
@@ -97,9 +97,8 @@
 
 <script setup lang="ts" generic="T">
 /**
- * Works with both primitive arrays (['a','b']) and
- * object arrays ([{ name: 'Foo', id: 1 }]) via
- * itemTitle / itemValue props – same API as v-select.
+ * 通过 itemTitle / itemValue 属性同时支持基本类型数组（['a','b']）和
+ * 对象数组（[{ name: 'Foo', id: 1 }]），与 v-select 使用相同的 API。
  */
 
 type NormalizedItem = { title: string; value: unknown; raw: unknown }
@@ -187,9 +186,9 @@ function onListUpdate(vals: unknown[]) {
   if (props.multiple) {
     emit('update:modelValue', [...vals] as T)
   } else {
-    // single-select: emit the first picked value (or null when deselected)
+// 单选：发送第一个选中的值（取消选择时发送 null）
     emit('update:modelValue', (vals.length ? vals[0] : null) as T)
-    if (vals.length) isOpen.value = false // auto-close on single pick
+if (vals.length) isOpen.value = false // 单选后自动关闭
   }
 }
 
@@ -218,8 +217,7 @@ function clearSelection() {
   cursor: pointer;
 }
 
-/* Extra bottom padding inside the sheet so the last option clears
-   the iOS home indicator */
+/* 在抽屉内部增加底部内边距，使最后一个选项避开 iOS 主屏幕指示条 */
 .pb-safe {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }

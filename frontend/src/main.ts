@@ -16,19 +16,19 @@
 /**
  * main.ts
  *
- * Bootstraps Vuetify and other plugins then mounts the App`
+ * 初始化 Vuetify 和其他插件，然后挂载 App。
  */
 
-// Plugins
+// 插件
 import { registerPlugins } from '@/plugins';
 
-// Components
+// 组件
 import App from './App.vue';
 
-// Composables
+// 组合式函数
 import { createApp } from 'vue';
 
-// Styles
+// 样式
 import 'unfonts.css';
 
 const app = createApp(App);

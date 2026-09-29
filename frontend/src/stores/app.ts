@@ -13,7 +13,7 @@
  * <https://www.gnu.org/licenses/>.
  */
 
-// Utilities
+// 工具函数
 import { defineStore } from 'pinia'
 
 export const useAppStore = defineStore('app', {

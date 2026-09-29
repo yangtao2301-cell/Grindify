@@ -25,7 +25,7 @@
     />
 
     <v-form class="mx-5 mt-2 pb-10">
-      <!-- Workout Title -->
+<!-- 训练标题 -->
       <div>
         <v-label class="text-body-2 font-weight-bold text-textPrimary mb-1">
           {{ $t('workoutForm.nameLabel') }}<span class="text-error text-h6 ml-1">*</span>
@@ -39,7 +39,7 @@
         />
       </div>
 
-      <!-- Description -->
+<!-- 描述 -->
       <div>
         <v-label class="text-body-2 font-weight-bold text-textPrimary mb-2">
           {{ $t('common.description') }}
@@ -53,7 +53,7 @@
         />
       </div>
 
-      <!-- Type + Duration -->
+<!-- 类型 + 时长 -->
       <div class="d-flex w-100 ga-5 align-end">
         <div class="w-100">
           <v-label class="text-body-2 font-weight-bold text-textPrimary mb-1">
@@ -85,7 +85,7 @@
         </div>
       </div>
 
-      <!-- Target Muscles -->
+<!-- 目标肌群 -->
       <div>
         <v-label class="text-body-2 font-weight-bold text-textPrimary mb-1">
           {{ $t('exerciseDetails.targetMuscles') }}
@@ -107,7 +107,7 @@
         </div>
       </div>
 
-      <!-- Exercises -->
+<!-- 训练动作 -->
       <div class="mt-5">
         <div class="d-flex justify-space-between align-center">
           <v-label class="text-h6 font-weight-bold text-textPrimary mb-1">
@@ -212,7 +212,7 @@
       </div>
     </v-form>
 
-    <!-- Add Exercise Dialog -->
+<!-- 添加训练动作对话框 -->
     <v-dialog v-model="isAddExerciseOpen" fullscreen>
       <AddExerciseList
         v-if="isAddExerciseOpen"
@@ -270,7 +270,7 @@ const exerciseStore = useExerciseStore()
 const isAddExerciseOpen = ref(false)
 const isSaving = ref(false)
 
-// -- Form state --
+// -- 表单状态 --
 interface ExerciseForm {
   exerciseId: number
   sets: number
@@ -294,13 +294,13 @@ onMounted(() => {
   if (props.initialData) {
     if (props.initialData.time != null) form.time = props.initialData.time
     if (props.initialData.exercises.length) {
-      // Shallow copy is sufficient; WorkoutExerciseInitialData contains only primitives.
+// 浅拷贝即可；WorkoutExerciseInitialData 只包含基本类型值。
       form.exercises = props.initialData.exercises.map(ex => ({ ...ex }))
     }
   }
 })
 
-// -- Workout type items --
+// -- 训练类型项目 --
 const workoutTypeItems = computed(() => [
   { label: t('editWorkout.types.strength'), value: 'strength' },
   { label: t('editWorkout.types.cardio'), value: 'cardio' },
@@ -309,7 +309,7 @@ const workoutTypeItems = computed(() => [
   { label: t('editWorkout.types.endurance'), value: 'endurance' },
 ])
 
-// -- Get all muscle groups from exercises --
+// -- 获取训练动作涉及的所有肌群 --
 const availableMuscleGroups = computed(() => {
   const mgMap = new Map<number, { id: number; name: string }>()
 
@@ -342,7 +342,7 @@ const toggleTargetMuscle = (id: number) => {
   selectedTargetMuscleIds.value = set
 }
 
-// -- Helpers --
+// -- 辅助方法 --
 const findExerciseData = (exerciseId: number) => {
   const exercises = exerciseStore.exercises as ExerciseCatalog[]
   return exercises?.find(ex => ex.id === exerciseId) ?? null
@@ -354,7 +354,7 @@ const getExerciseName = (exerciseId: number) => {
   return displayExerciseName(data, lang.value)
 }
 
-// -- Exercise management --
+// -- 训练动作管理 --
 const removeExercise = (index: number) => {
   form.exercises.splice(index, 1)
   form.exercises.forEach((ex, i) => {
@@ -392,13 +392,13 @@ const onDragEnd = () => {
   })
 }
 
-// -- Save (Create) --
+// -- 保存（创建） --
 const saveWorkout = async () => {
   if (!form.title || isSaving.value) return
   isSaving.value = true
 
   try {
-    // 1. Create the workout
+// 1. 创建训练
     const created = await createWorkout({
       title: form.title,
       description: form.description || undefined,
@@ -411,17 +411,17 @@ const saveWorkout = async () => {
 
     const workoutId = created.id
 
-    // 2. Add exercises if any
+// 2. 如果有训练动作，则添加它们
     if (form.exercises.length > 0) {
       const exerciseIds = form.exercises.map(e => e.exerciseId)
       await addExercisesToWorkout(workoutId, exerciseIds)
 
-      // 3. Refresh to get exercise IDs from backend
+// 3. 刷新以从后端获取训练动作 ID
       await workoutStore.setWorkouts(true)
       const refreshedWorkout = workoutStore.workouts.find((w: Workout) => w.id === workoutId)
 
       if (refreshedWorkout) {
-        // 4. Update each exercise's sets/reps/rest
+// 4. 更新每个训练动作的组数/次数/休息时间
         for (const exForm of form.exercises) {
           const matchingWe = refreshedWorkout.exercises.find(
             (we: WorkoutExercise) => we.exercise.id === exForm.exerciseId
@@ -440,7 +440,7 @@ const saveWorkout = async () => {
           }
         }
 
-        // 5. Reorder
+// 5. 重新排序
         const reorderPayload = form.exercises
           .map(exForm => {
             const matchingWe = refreshedWorkout.exercises.find(

@@ -23,7 +23,7 @@
       overscroll-behavior: none;
     "
   >
-    <!-- Header -->
+<!-- 标题 -->
     <BackHeader
       :title="sessionTitle"
       show-menu
@@ -50,13 +50,13 @@
       </template>
     </BackHeader>
 
-    <!-- Avatar -->
+<!-- 头像 -->
     <v-avatar size="70" tile color="avatarBg" class="mx-5 mb-3 mt-4 rounded-lg">
       <v-icon color="primary" size="35">{{ sessionIcon }}</v-icon>
     </v-avatar>
 
     <div class="mx-5 d-flex flex-column ga-4">
-      <!-- Title + type/status badges -->
+<!-- 标题 + 类型/状态标签 -->
       <div class="pt-4">
         <div class="d-flex align-center ga-2 flex-wrap">
           <p class="text-primary text-body-1 text-capitalize">
@@ -80,7 +80,7 @@
         <p class="text-body-2 text-textSecondary mt-1">{{ sessionSubtitle }}</p>
       </div>
 
-      <!-- Stat cards -->
+<!-- 统计卡片 -->
       <div class="d-flex w-100 ga-3" style="align-items: stretch">
         <v-card
           class="text-center pa-4 rounded-lg bg-cardBg"
@@ -129,7 +129,7 @@
         </v-card>
       </div>
 
-      <!-- Calories burned (workout sessions only, shown when logged) -->
+<!-- 消耗的卡路里（仅训练会话，记录后显示） -->
       <div
         v-if="type === 'workout' && workoutSession && workoutSession.caloriesBurned"
         class="d-flex ga-3"
@@ -152,13 +152,13 @@
         </v-card>
       </div>
 
-      <!-- Notes -->
+<!-- 备注 -->
       <div v-if="sessionNotes">
         <h1 class="text-h6">{{ $t('sessionDetail.notes') }}</h1>
         <p class="text-body-1 text-textSecondary mt-1">{{ sessionNotes }}</p>
       </div>
 
-      <!-- WORKOUT SESSION: exercise list -->
+<!-- 训练会话：训练动作列表 -->
       <template v-if="type === 'workout' && workoutSession">
         <div v-if="workoutSession.exercises?.length">
           <h1 class="text-h6 mb-3">{{ $t('sessionDetail.exerciseDetails') }}</h1>
@@ -239,7 +239,7 @@
         </div>
       </template>
 
-      <!-- ACTIVITY LOG: details grid -->
+<!-- 活动日志：详情网格 -->
       <template v-else-if="type === 'activity' && activityLog">
         <div>
           <h1 class="text-h6 mb-3">{{ $t('sessionDetail.activityDetails') }}</h1>
@@ -324,7 +324,7 @@
       </template>
     </div>
 
-    <!-- Exercise Details Dialog -->
+<!-- 训练动作详情对话框 -->
     <v-dialog v-model="exerciseDialog" fullscreen>
       <ExerciseDetails
         v-if="selectedExercise"
@@ -363,7 +363,7 @@
       />
     </v-dialog>
 
-    <!-- Delete confirm dialog -->
+<!-- 删除确认对话框 -->
     <v-dialog v-model="deleteDialog" max-width="360">
       <v-card
         class="bg-cardBg rounded-lg pa-4"
@@ -386,7 +386,7 @@
       </v-card>
     </v-dialog>
 
-    <!-- Save as Workout dialog -->
+<!-- 保存为训练对话框 -->
     <v-dialog v-model="saveAsWorkoutDialog" fullscreen>
       <CreateWorkout
         v-if="saveAsWorkoutDialog && workoutInitialData"
@@ -446,7 +446,7 @@ const editExerciseSetsDialog = ref(false)
 const selectedExercise = ref<Exercise | null>(null)
 const selectedSessionExercise = ref<WorkoutSession['exercises'][number] | null>(null)
 
-// Local ref for the session being viewed — does NOT write into the shared store
+// 当前查看会话的本地引用——不会写入共享 store
 const localWorkoutSession = ref<WorkoutSession | null>(null)
 const localActivityLog = ref<ActivityLog | null>(null)
 
@@ -454,7 +454,7 @@ const workoutSession = computed<WorkoutSession | null>(() => {
   if (type.value !== 'workout') return null
   if (localWorkoutSession.value && localWorkoutSession.value.id === id.value)
     return localWorkoutSession.value
-  // Fallback to list data while full session is loading
+// 完整会话加载期间，回退使用列表数据
   const sessions = (workoutSessionStore.workoutSessions as WorkoutSession[]) || []
   return sessions.find(s => s.id === id.value) ?? null
 })
@@ -478,7 +478,7 @@ const durationMinutes = computed(() => {
 
 const workoutInitialData = computed(() =>
   workoutSession.value
-    ? mapSessionToWorkoutInitialData(workoutSession.value, durationMinutes.value * 60) // convert minutes → seconds
+? mapSessionToWorkoutInitialData(workoutSession.value, durationMinutes.value * 60) // 将分钟转换为秒
     : undefined
 )
 

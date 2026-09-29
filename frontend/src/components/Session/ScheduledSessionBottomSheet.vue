@@ -16,7 +16,7 @@
 <template>
   <v-bottom-sheet v-model="sheetOpen" inset>
     <v-card v-if="scheduledSession" class="bg-cardBg rounded-t-lg">
-      <!-- Header -->
+<!-- 标题 -->
       <div class="pa-4 d-flex align-center ga-3">
         <v-avatar
           :color="scheduledSession.type === 'workout' ? 'blue-darken-4' : 'blue-darken-4'"
@@ -48,15 +48,15 @@
 
       <v-divider />
 
-      <!-- Notes -->
+<!-- 备注 -->
       <div v-if="scheduledSession.notes" class="pa-4">
         <p class="text-caption text-textSecondary mb-1">{{ $t('schedule.notes') }}</p>
         <p class="text-body-2">{{ scheduledSession.notes }}</p>
       </div>
 
-      <!-- Actions -->
+<!-- 操作 -->
       <v-list class="bg-cardBg">
-        <!-- Start / Log (today only) -->
+<!-- 开始/记录（仅限今天） -->
         <v-list-item
           v-if="isToday"
           prepend-icon="mdi-play"
@@ -66,7 +66,7 @@
           @click="startSession"
         />
 
-        <!-- Log Past Session (past dates only) -->
+<!-- 记录过去的会话（仅限过去日期） -->
         <v-list-item
           v-if="isPast"
           prepend-icon="mdi-history"
@@ -76,7 +76,7 @@
 
         <v-divider v-if="isToday || isPast" />
 
-        <!-- Delete options -->
+<!-- 删除选项 -->
         <v-list-item
           v-if="scheduledSession.isRecurring"
           prepend-icon="mdi-calendar-remove"

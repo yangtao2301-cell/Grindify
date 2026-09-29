@@ -51,7 +51,7 @@ export const deleteUser = async () => {
     await fetchWrapper<void>(`${apiUrl}/users`, {
       method: 'DELETE',
     })
-    return true // deletion succeeded (204/200)
+      return true // 删除成功（204/200）
   } catch (error) {
     console.error('Error deleting user:', error)
     throw new Error('Failed to delete user')

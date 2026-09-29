@@ -32,9 +32,9 @@
       <v-tab value="workouts">{{ $t('statistics.workouts') }}</v-tab>
     </v-tabs>
 
-    <!-- ═══════ OVERVIEW TAB ═══════ -->
+<!-- ═══════ 概览标签页 ═══════ -->
     <div v-if="activeTab === 'overview'" class="d-flex flex-column ga-4 fade-in">
-      <!-- Loading skeleton -->
+<!-- 加载骨架屏 -->
       <div v-if="statisticsStore.isLoadingOverview" class="d-flex flex-column ga-4">
         <v-skeleton-loader type="card" class="rounded-lg" />
         <v-skeleton-loader type="card" class="rounded-lg" />
@@ -42,16 +42,16 @@
       </div>
 
       <template v-else>
-        <!-- Hero Stats Card with animated numbers -->
+<!-- 带数字动画的主要统计卡片 -->
         <StatisticsHeroCard
           :overview="statisticsStore.overview"
           :comparison="statisticsStore.comparison"
         />
 
-        <!-- Activity Heatmap -->
+<!-- 活动热力图 -->
         <ActivityHeatmap :data="statisticsStore.heatmap" :weeks="12" />
 
-        <!-- Quick Stats Grid (secondary metrics) -->
+<!-- 快速统计网格（次要指标） -->
         <div v-if="statisticsStore.overview" class="d-flex flex-wrap ga-2">
           <v-card
             v-for="stat in secondaryStats"
@@ -71,26 +71,26 @@
           </v-card>
         </div>
 
-        <!-- Comparison Cards -->
+<!-- 对比卡片 -->
         <ComparisonCards :comparison="statisticsStore.comparison" />
 
-        <!-- Weekly Volume Bar Chart -->
+<!-- 每周训练量柱状图 -->
         <WeeklyVolumeChart :trends="statisticsStore.weeklyTrends" />
 
-        <!-- Muscle Balance Radar -->
+<!-- 肌群平衡雷达图 -->
         <MuscleRadarChart
           v-if="statisticsStore.overview?.muscleGroupVolume?.length"
           :muscle-data="statisticsStore.overview.muscleGroupVolume"
         />
 
-        <!-- PR Trophy Timeline -->
+<!-- 个人纪录奖杯时间线 -->
         <PRTimeline
           v-if="statisticsStore.overview?.recentPRs?.length"
           :prs="statisticsStore.overview.recentPRs"
           @select-exercise="handlePRExerciseClick"
         />
 
-        <!-- Most Trained Chips -->
+<!-- 训练最多的项目标签 -->
         <div
           v-if="statisticsStore.overview?.mostTrainedMuscleGroups?.length"
           class="d-flex flex-column ga-3"
@@ -129,7 +129,7 @@
           </div>
         </div>
 
-        <!-- Empty state (no data at all) -->
+<!-- 空状态（完全没有数据） -->
         <div
           v-if="!statisticsStore.overview || statisticsStore.overview.totalWorkouts === 0"
           class="text-center pa-6 text-textSecondary"
@@ -140,7 +140,7 @@
       </template>
     </div>
 
-    <!-- ═══════ EXERCISES TAB ═══════ -->
+<!-- ═══════ 训练动作标签页 ═══════ -->
     <div v-if="activeTab === 'exercises'" class="fade-in">
       <v-text-field
         v-model="exerciseSearch"
@@ -190,7 +190,7 @@
       </v-card>
     </div>
 
-    <!-- ═══════ WORKOUTS TAB ═══════ -->
+<!-- ═══════ 训练标签页 ═══════ -->
     <div v-if="activeTab === 'workouts'" class="fade-in">
       <div v-if="workoutStore.workouts.length === 0" class="text-center pa-8 text-textSecondary">
         <v-icon size="48" class="mb-2" style="opacity: 0.3">mdi-clipboard-list</v-icon>
@@ -221,10 +221,10 @@
       </v-card>
     </div>
 
-    <!-- Exercise Detail Dialog -->
+<!-- 训练动作详情对话框 -->
     <ExerciseStatisticsDetail v-model="showExerciseDetail" :exercise="selectedExercise" />
 
-    <!-- Workout Detail Dialog -->
+<!-- 训练详情对话框 -->
     <WorkoutStatisticsDetail v-model="showWorkoutDetail" :workout="selectedWorkout" />
   </div>
 </template>
@@ -337,7 +337,7 @@ function handlePRExerciseClick(exerciseId: number) {
 }
 
 onMounted(async () => {
-  // Fetch all data in parallel for maximum speed
+// 并行获取所有数据，以获得最大速度
   await Promise.all([
     statisticsStore.fetchOverview(),
     statisticsStore.fetchWeeklyTrends(),

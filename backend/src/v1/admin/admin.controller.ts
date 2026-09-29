@@ -88,7 +88,7 @@ export class AdminController {
     private readonly exerciseImageRepo: Repository<ExerciseImage>,
   ) {}
 
-  // --- Admin meta ---
+  // --- 管理后台元数据 ---
 
   @Get('me')
   @ApiOperation({ summary: 'Get current superadmin profile' })
@@ -102,7 +102,7 @@ export class AdminController {
     return this.adminService.getStats();
   }
 
-  // --- Users ---
+  // --- 用户 ---
 
   @Get('users')
   @ApiOperation({ summary: 'List all users with pagination and search' })
@@ -124,7 +124,7 @@ export class AdminController {
     return this.adminService.getUserById(id);
   }
 
-  // --- Global Exercises ---
+  // --- 全局训练动作 ---
 
   @Get('exercises')
   @ApiOperation({ summary: 'List all global exercises' })
@@ -161,7 +161,7 @@ export class AdminController {
     return this.exerciseService.deleteGlobal(id);
   }
 
-  // --- Global Exercise Media ---
+  // --- 全局训练动作媒体 ---
 
   @Post('exercises/:id/media')
   @ApiOperation({ summary: 'Upload instructional media (image or video) to a global exercise' })
@@ -198,7 +198,7 @@ export class AdminController {
     return this.exerciseService.reorderGlobalMedia(id, body.mediaIds);
   }
 
-  // --- Exercise Image Library ---
+  // --- 训练动作图片库 ---
 
   @Get('exercise-images')
   @ApiOperation({ summary: 'List all images in the exercise image library' })
@@ -260,7 +260,7 @@ export class AdminController {
     const image = await this.exerciseImageRepo.findOne({ where: { id } });
     if (!image) return;
 
-    // Block deletion if the image URL is still referenced by any exercise
+    // 如果图片 URL 仍被训练动作引用，则禁止删除
     const result: { count: string }[] = await this.exerciseImageRepo.manager.query(
       `SELECT COUNT(*) AS count FROM exercise WHERE image = $1 AND "deletedAt" IS NULL`,
       [image.url],
@@ -277,7 +277,7 @@ export class AdminController {
     await this.exerciseImageRepo.remove(image);
   }
 
-  // --- Global Activities ---
+  // --- 全局活动 ---
 
   @Get('activities')
   @ApiOperation({ summary: 'List all global activities' })
@@ -314,7 +314,7 @@ export class AdminController {
     return this.activityService.deleteGlobal(id);
   }
 
-  // --- Muscle Groups ---
+  // --- 肌群 ---
 
   @Get('muscle-groups')
   @ApiOperation({ summary: 'List all muscle groups' })
@@ -369,7 +369,7 @@ export class AdminController {
     return this.muscleGroupService.remove(id);
   }
 
-  // --- Export ---
+  // --- 导出 ---
 
   @Get('export/exercises')
   @ApiOperation({ summary: 'Export all global exercises as a ZIP archive (one folder per exercise)' })
@@ -394,7 +394,7 @@ export class AdminController {
 
       const mediaEntries: { order: number; type: string; file: string }[] = [];
 
-      // Cover image
+    // 封面图片
       let coverImagePath: string | null = null;
       if (ex.image) {
         const buffer = await this.uploadService.readFileAsBuffer(ex.image);
@@ -405,7 +405,7 @@ export class AdminController {
         }
       }
 
-      // Media items
+    // 媒体项目
       const sortedMedia = [...(ex.media ?? [])].sort((a, b) => a.order - b.order);
       for (const mediaItem of sortedMedia) {
         const buffer = await this.uploadService.readFileAsBuffer(mediaItem.url);
@@ -485,7 +485,7 @@ export class AdminController {
     });
   }
 
-  // --- Import ---
+  // --- 导入 ---
 
   @Post('import/exercises')
   @ApiOperation({ summary: 'Import global exercises from a ZIP export archive' })
@@ -505,7 +505,7 @@ export class AdminController {
       throw new BadRequestException('Invalid ZIP file');
     }
 
-    // Find all exercise.json entries (not directories)
+    // 查找所有 exercise.json 文件（排除目录）
     const exerciseJsonPaths: string[] = Object.keys(zip.files).filter(
       (p: string) => p.endsWith('/exercise.json') && !zip.files[p].dir,
     );
@@ -529,7 +529,7 @@ export class AdminController {
     const errors: string[] = [];
 
     for (const jsonPath of exerciseJsonPaths) {
-      const folderPrefix = jsonPath.slice(0, jsonPath.lastIndexOf('/') + 1); // e.g. "Bench Press/"
+  const folderPrefix = jsonPath.slice(0, jsonPath.lastIndexOf('/') + 1); // 例如“Bench Press/”
       let item: any;
       try {
         const jsonContent = await zip.files[jsonPath].async('string');
@@ -546,7 +546,7 @@ export class AdminController {
       }
 
       try {
-        // Cover image
+      // 封面图片
         let imageUrl: string | undefined;
         if (item.coverImage) {
           const coverPath = `${folderPrefix}${item.coverImage}`;
@@ -579,7 +579,7 @@ export class AdminController {
           mistakesI18n: item.mistakesI18n ?? undefined,
         } as any);
 
-        // Media items
+      // 媒体项目
         for (const mediaEntry of (item.media ?? []) as { order: number; type: string; file: string }[]) {
           const mediaPath = `${folderPrefix}${mediaEntry.file}`;
           const mediaFile = zip.files[mediaPath];

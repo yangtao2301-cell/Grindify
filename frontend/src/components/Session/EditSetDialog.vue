@@ -89,7 +89,7 @@
 import { type PropType } from 'vue';
 import { parseDecimalInput, parseIntInput, normalizeDecimalStr, formatDecimalDisplay } from '@/utils/decimalInput';
 
-// Define the structure for a workout set
+// 定义训练组的数据结构
 interface WorkoutSet {
   set: number;
   previous: string;

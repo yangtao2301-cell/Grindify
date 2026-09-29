@@ -30,8 +30,8 @@ export class ActivitySeedService implements OnModuleInit {
   ) {}
 
   /**
-   * Seeds the global activity catalog on application start if none exist yet.
-   * Global activities are shared across all users and managed via the admin panel.
+ * 如果全局活动目录尚不存在，则在应用启动时填充默认数据。
+ * 全局活动由所有用户共享，并通过管理后台进行管理。
    */
   async onModuleInit(): Promise<void> {
     await this.seedGlobalActivities();

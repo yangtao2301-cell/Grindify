@@ -70,7 +70,7 @@ export interface HealthResponse {
   at: string
 }
 
-// --- i18n types ---
+// --- i18n 类型 ---
 
 export interface I18nString {
   default: string | null
@@ -86,7 +86,7 @@ export interface I18nStringArray {
   zho?: string[]
 }
 
-// --- Exercise Image Library ---
+// --- 训练动作图片库 ---
 
 export interface ExerciseImage {
   id: number
@@ -96,7 +96,7 @@ export interface ExerciseImage {
   usedBy: { id: number; title: Record<string, string> } | null
 }
 
-// --- Global Exercise ---
+// --- 全局训练动作 ---
 
 export interface ExerciseMediaItem {
   id: number
@@ -136,7 +136,7 @@ export interface CreateGlobalExercisePayload {
   mistakesI18n?: I18nStringArray
 }
 
-// --- Global Activity ---
+// --- 全局活动 ---
 
 export interface GlobalActivity {
   id: number
@@ -164,7 +164,7 @@ export interface CreateGlobalActivityPayload {
   trackCalories: boolean
 }
 
-// --- Muscle Group ---
+// --- 肌群 ---
 
 export interface AdminMuscleGroup {
   id: number
@@ -204,7 +204,7 @@ export const adminApi = {
   getReleases: () => apiFetch<ReleasesResponse>('/releases'),
   getHealth: () => apiFetch<HealthResponse>('/auth/health'),
 
-  // Global Exercises
+// 全局训练动作
   getGlobalExercises: () => apiFetch<GlobalExercise[]>('/admin/exercises'),
   createGlobalExercise: (data: CreateGlobalExercisePayload) =>
     apiFetch<GlobalExercise>('/admin/exercises', { method: 'POST', body: JSON.stringify(data) }),
@@ -213,7 +213,7 @@ export const adminApi = {
   deleteGlobalExercise: (id: number) =>
     apiFetch<void>(`/admin/exercises/${id}`, { method: 'DELETE' }),
 
-  // Global Exercise Media
+// 全局训练动作媒体
   uploadGlobalExerciseMedia: (exerciseId: number, file: File) => {
     const fd = new FormData()
     fd.append('file', file)
@@ -227,7 +227,7 @@ export const adminApi = {
       body: JSON.stringify({ mediaIds }),
     }),
 
-  // Exercise Image Library
+// 训练动作图片库
   getExerciseImages: () => apiFetch<ExerciseImage[]>('/admin/exercise-images'),
   uploadExerciseImage: (file: File) => {
     const fd = new FormData()
@@ -237,7 +237,7 @@ export const adminApi = {
   deleteExerciseImage: (id: number) =>
     apiFetch<void>(`/admin/exercise-images/${id}`, { method: 'DELETE' }),
 
-  // Global Activities
+// 全局活动
   getGlobalActivities: () => apiFetch<GlobalActivity[]>('/admin/activities'),
   createGlobalActivity: (data: CreateGlobalActivityPayload) =>
     apiFetch<GlobalActivity>('/admin/activities', { method: 'POST', body: JSON.stringify(data) }),
@@ -246,7 +246,7 @@ export const adminApi = {
   deleteGlobalActivity: (id: number) =>
     apiFetch<void>(`/admin/activities/${id}`, { method: 'DELETE' }),
 
-  // Muscle Groups
+// 肌群
   getMuscleGroups: () => apiFetch<AdminMuscleGroup[]>('/admin/muscle-groups'),
   createMuscleGroup: (data: CreateMuscleGroupPayload) =>
     apiFetch<AdminMuscleGroup>('/admin/muscle-groups', { method: 'POST', body: JSON.stringify(data) }),
@@ -257,11 +257,11 @@ export const adminApi = {
   deleteMuscleGroup: (id: number) =>
     apiFetch<void>(`/admin/muscle-groups/${id}`, { method: 'DELETE' }),
 
-  // Export
+// 导出
   exportExercises: () => apiFetchBlob('/admin/export/exercises'),
   exportActivities: () => apiFetchBlob('/admin/export/activities'),
 
-  // Import
+// 导入
   importExercises: (file: File) => {
     const fd = new FormData()
     fd.append('file', file)

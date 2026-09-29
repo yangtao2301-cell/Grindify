@@ -56,7 +56,7 @@ const displayName = computed(() => {
     :class="collapsed ? 'w-sidebar-collapsed' : 'w-sidebar'"
     style="background: linear-gradient(180deg, #0b0b0d 0%, #0a0a0c 100%)"
   >
-    <!-- Brand -->
+<!-- 品牌 -->
     <div class="flex items-center gap-2.5 px-4 pt-[18px] pb-3 font-bold tracking-tight text-[15px] whitespace-nowrap overflow-hidden">
       <div
         class="w-7 h-7 rounded-[8px] flex items-center justify-center text-lime-ink font-extrabold text-[15px] shrink-0"
@@ -71,7 +71,7 @@ const displayName = computed(() => {
       </div>
     </div>
 
-    <!-- Navigation -->
+<!-- 导航 -->
     <nav class="flex-1 overflow-y-auto overflow-x-hidden px-2.5 pt-1.5 pb-2.5 flex flex-col gap-px">
       <template v-for="(entry, i) in ADMIN_NAV" :key="i">
         <div
@@ -109,7 +109,7 @@ const displayName = computed(() => {
       </template>
     </nav>
 
-    <!-- Profile tile -->
+<!-- 个人资料卡片 -->
     <div class="px-3 pb-3 pt-2.5 border-t border-border">
       <div ref="menuRef" class="relative">
         <div
@@ -160,7 +160,7 @@ const displayName = computed(() => {
 </template>
 
 <style scoped>
-/* Active indicator line — requires ::before pseudo, can't be done in Tailwind */
+/* 激活状态指示线——需要使用 ::before 伪元素，无法通过 Tailwind 实现 */
 .nav-item.active::before {
   content: '';
   position: absolute;

@@ -330,7 +330,7 @@ const getSanitizedExerciseDataForWorkout = () => {
     )
   )
 
-  // Always include setWeights — array diff is unreliable
+// 始终包含 setWeights——数组差异比较不可靠
   changes.setWeights = parsedSetWeights
 
   return changes

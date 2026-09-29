@@ -19,13 +19,13 @@ export class RemoveCardioFromExercises1768837747655
   implements MigrationInterface
 {
   public async up(queryRunner: QueryRunner): Promise<void> {
-    // Remove trackingMode and defaultDistance from exercise table (if they exist)
+    // 从 exercise 表删除 trackingMode 和 defaultDistance（如果存在）
     await queryRunner.query(`ALTER TABLE "exercise" DROP COLUMN IF EXISTS "defaultDistance"`);
     await queryRunner.query(`ALTER TABLE "exercise" DROP COLUMN IF EXISTS "trackingMode"`);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    // Add back trackingMode and defaultDistance to exercise table
+    // 将 trackingMode 和 defaultDistance 加回 exercise 表
     await queryRunner.query(`
       ALTER TABLE "exercise" 
       ADD "trackingMode" character varying NOT NULL DEFAULT 'strength'

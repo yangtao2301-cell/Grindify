@@ -50,7 +50,7 @@ export class AddNewActivityIcons1774400000000 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    // Reassign any rows using new icons to 'dots-horizontal' before removing them
+    // 删除新图标前，将使用这些图标的记录重新设置为“dots-horizontal”
     for (const value of newValues) {
       await queryRunner.query(
         `UPDATE "activity" SET "icon" = 'dots-horizontal' WHERE "icon" = $1`,

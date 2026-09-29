@@ -202,11 +202,11 @@ function fromKg(val: number | undefined | null): number | null {
   return isImperial.value ? Number((val * 2.20462).toFixed(1)) : Number(Number(val).toFixed(1))
 }
 
-// Weight goal fields
+// 体重目标字段
 const weightGoalType = ref<string | null>(props.user?.weightGoalType ?? null)
 const targetWeightStr = ref<string>(formatDecimalDisplay(fromKg(props.user?.targetWeight)))
 
-// Goal duration
+// 目标时长
 const goalDurationValue = ref<number | undefined>(undefined)
 const goalDurationUnit = ref<'weeks' | 'months'>('weeks')
 
@@ -232,7 +232,7 @@ const goalTypeItems = computed(() => [
   { title: t('weightLog.goalMaintain'), value: 'maintain' },
 ])
 
-// Load streak info when the component is mounted
+// 组件挂载时加载连续打卡信息
 onMounted(async () => {
   try {
     streakInfo.value = await getStreakInfo()
@@ -241,7 +241,7 @@ onMounted(async () => {
   }
 })
 
-// Sync props back if user changes externally
+// 用户从外部修改时同步 props
 watch(
   () => props.user,
   u => {
@@ -265,7 +265,7 @@ const saveWeeklyGoal = async () => {
     emit('updated', updated)
     await authStore.refreshUser()
 
-    // Refresh streak info
+// 刷新连续打卡信息
     streakInfo.value = await getStreakInfo()
     toast.success(t('settings.goalUpdated'), { progressBar: true, duration: 1000 })
   } catch (error) {

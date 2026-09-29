@@ -15,7 +15,7 @@
 
 <template>
   <div class="pa-5">
-    <!-- Header row: filter + compare button -->
+<!-- 标题行：筛选器 + 对比按钮 -->
     <div class="d-flex align-center justify-space-between mb-4">
       <v-btn-toggle
         v-model="activeFilter"
@@ -46,7 +46,7 @@
       </v-btn>
     </div>
 
-    <!-- Compare mode hint -->
+<!-- 对比模式提示 -->
     <p v-if="compareMode" class="text-caption text-textSecondary mb-3 text-center">
       {{
         selectedForCompare.length === 0
@@ -55,7 +55,7 @@
       }}
     </p>
 
-    <!-- Empty state -->
+<!-- 空状态 -->
     <div
       v-if="filteredPhotos.length === 0 && !isLoading"
       class="d-flex flex-column align-center justify-center py-12 ga-3"
@@ -67,12 +67,12 @@
       </p>
     </div>
 
-    <!-- Loading -->
+<!-- 加载中 -->
     <div v-if="isLoading" class="d-flex justify-center py-10">
       <v-progress-circular indeterminate color="primary" />
     </div>
 
-    <!-- 2-column grid -->
+<!-- 两列网格 -->
     <div v-if="!isLoading && filteredPhotos.length > 0" class="photo-grid">
       <div
         v-for="photo in filteredPhotos"
@@ -81,7 +81,7 @@
         :class="{ 'photo-card--selected': selectedForCompare.includes(photo.id) }"
         @click="onCardClick(photo)"
       >
-        <!-- Thumbnail -->
+<!-- 缩略图 -->
         <div class="photo-thumbnail" style="position: relative">
           <v-img
             :src="getImageUrl(photo.photoUrl) ?? ''"
@@ -96,7 +96,7 @@
             </template>
           </v-img>
 
-          <!-- Selection overlay in compare mode -->
+<!-- 对比模式下的选择遮罩 -->
           <div
             v-if="compareMode"
             class="compare-overlay"
@@ -111,7 +111,7 @@
             </v-icon>
           </div>
 
-          <!-- Pose badge -->
+<!-- 姿势标签 -->
           <v-chip
             v-if="photo.poseTag"
             :color="poseColor(photo.poseTag)"
@@ -123,7 +123,7 @@
           </v-chip>
         </div>
 
-        <!-- Info row -->
+<!-- 信息行 -->
         <div
           class="pa-2 bg-cardBg rounded-b-lg"
           :style="{ border: '1px solid rgb(var(--v-theme-borderColor))', borderTop: 'none' }"
@@ -134,7 +134,7 @@
           </p>
         </div>
 
-        <!-- Three-dot menu (not in compare mode) -->
+<!-- 三点菜单（对比模式下不显示） -->
         <v-menu v-if="!compareMode">
           <template #activator="{ props: menuProps }">
             <v-btn
@@ -161,7 +161,7 @@
       </div>
     </div>
 
-    <!-- Floating upload button -->
+<!-- 浮动上传按钮 -->
     <v-btn
       v-if="!compareMode"
       color="primary"
@@ -175,7 +175,7 @@
     </v-btn>
   </div>
 
-  <!-- Upload bottom sheet -->
+<!-- 上传底部抽屉 -->
   <v-bottom-sheet v-model="uploadSheetOpen" max-width="600">
     <v-card class="bg-cardBg rounded-t-xl pa-5" :style="{ borderTop: '1px solid rgb(var(--v-theme-borderColor))' }">
       <h3 class="text-subtitle-1 text-textPrimary mb-4">{{ $t('progressPhotos.uploadPhoto') }}</h3>
@@ -249,7 +249,7 @@
     </v-card>
   </v-bottom-sheet>
 
-  <!-- Full-screen photo viewer -->
+<!-- 全屏照片查看器 -->
   <v-dialog v-model="viewerOpen" fullscreen>
     <v-card class="bg-black d-flex flex-column">
       <div class="d-flex align-center justify-space-between pa-4">
@@ -285,7 +285,7 @@
     </v-card>
   </v-dialog>
 
-  <!-- Split-screen comparison view -->
+<!-- 分屏对比视图 -->
   <v-dialog v-model="compareViewOpen" fullscreen>
     <v-card class="bg-black d-flex flex-column">
       <div class="d-flex align-center justify-space-between pa-4">
@@ -328,7 +328,7 @@
     </v-card>
   </v-dialog>
 
-  <!-- Delete confirmation -->
+<!-- 删除确认 -->
   <v-dialog v-model="deleteDialogOpen" max-width="360">
     <v-card class="bg-cardBg rounded-lg" :style="{ border: '1px solid rgb(var(--v-theme-borderColor))' }">
       <v-card-title class="text-h6 pa-4">{{ $t('progressPhotos.deletePhoto') }}</v-card-title>
@@ -365,14 +365,14 @@ const isLoading = computed(() => photoStore.isLoading)
 const isImperial = computed(() => authStore.user?.unitScale === 'imperial')
 const weightUnit = computed(() => (isImperial.value ? 'lbs' : 'kg'))
 
-// Filter
+// 筛选
 const activeFilter = ref<'all' | PoseTag>('all')
 const filteredPhotos = computed(() => {
   if (activeFilter.value === 'all') return photoStore.photos
   return photoStore.photos.filter(p => p.poseTag === activeFilter.value)
 })
 
-// Helpers
+// 辅助方法
 const formatDate = (d: string) =>
   new Date(d).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
 
@@ -385,7 +385,7 @@ const weightOnDay = (date: string): string | null => {
   const logs = weightLogStore.weightLogs
   if (!logs.length) return null
   const targetMs = new Date(date).getTime()
-  // Find closest log within 2 days
+// 查找 2 天内最接近的日志
   let closest: { diff: number; weight: number } | null = null
   for (const log of logs) {
     const diff = Math.abs(new Date(log.date).getTime() - targetMs)
@@ -395,7 +395,7 @@ const weightOnDay = (date: string): string | null => {
   return fromKg(closest.weight).toFixed(1)
 }
 
-// Upload
+// 上传
 const uploadSheetOpen = ref(false)
 const fileInputRef = ref<HTMLInputElement | null>(null)
 const uploadPreviewUrl = ref<string | null>(null)
@@ -445,7 +445,7 @@ const doUpload = async () => {
   }
 }
 
-// Compare mode
+// 对比模式
 const compareMode = ref(false)
 const selectedForCompare = ref<number[]>([])
 const compareViewOpen = ref(false)
@@ -481,7 +481,7 @@ const onCardClick = (photo: ProgressPhoto) => {
   }
 }
 
-// Viewer
+// 查看器
 const viewerOpen = ref(false)
 const viewerPhoto = ref<ProgressPhoto | null>(null)
 const viewPhoto = (photo: ProgressPhoto) => {
@@ -489,7 +489,7 @@ const viewPhoto = (photo: ProgressPhoto) => {
   viewerOpen.value = true
 }
 
-// Delete
+// 删除
 const deleteDialogOpen = ref(false)
 const deletingPhoto = ref<ProgressPhoto | null>(null)
 const isDeleting = ref(false)

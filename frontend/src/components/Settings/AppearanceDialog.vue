@@ -99,7 +99,7 @@ const savePreferences = async () => {
   } catch (error) {
     console.error('Failed saving preferences:', error)
     toast.error(t('settings.failedToSavePreferences'), { progressBar: true, duration: 1000 })
-    // rollback UI to last known good value
+// 将界面回滚到最近一次已知的有效值
     useRpe.value = props.user?.showRpe ?? true
     weightTrackingEnabled.value = props.user?.showWeightTracking ?? false
   } finally {

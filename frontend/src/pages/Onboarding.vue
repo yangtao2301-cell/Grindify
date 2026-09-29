@@ -15,7 +15,7 @@
 
 <template>
   <div class="onboarding-page d-flex flex-column fill-height pa-0 background-background px-5 py-8">
-    <!-- Step 1: Personal Information -->
+<!-- 第 1 步：个人信息 -->
     <div v-if="currentStep === 1" class="step-content mt-8">
       <div class="mb-6">
         <h1 class="text-h4 text-textPrimary mb-2">{{ $t('onboarding.welcome') }}</h1>
@@ -90,7 +90,7 @@
       </v-form>
     </div>
 
-    <!-- Step 2: Goals -->
+<!-- 第 2 步：目标 -->
     <div v-if="currentStep === 2" class="step-content mt-8">
       <div class="mb-6">
         <h1 class="text-h4 text-textPrimary mb-2">{{ $t('onboarding.goals') }}</h1>
@@ -272,7 +272,7 @@ const dobRules = [
   (v: string) => v <= sixteenYearsAgo || t('onboarding.mustBeAtLeast16'),
 ]
 
-// String refs for decimal fields — allow both "." and "," as decimal separator
+// 小数输入字段的字符串引用——同时允许“.”和“,”作为小数分隔符
 const weightStr = ref('')
 const heightStr = ref('')
 const targetWeightStr = ref('')
@@ -280,7 +280,7 @@ const targetWeightStr = ref('')
 const goalDurationValue = ref<number | undefined>(undefined)
 const goalDurationUnit = ref<'weeks' | 'months'>('weeks')
 
-// Derive goalTimeframe in weeks from goalDurationValue + goalDurationUnit
+// 根据 goalDurationValue + goalDurationUnit 推导以周为单位的 goalTimeframe
 const derivedGoalTimeframeWeeks = computed(() => {
   if (!goalDurationValue.value || goalDurationValue.value <= 0) return undefined
   return goalDurationUnit.value === 'months'
@@ -288,7 +288,7 @@ const derivedGoalTimeframeWeeks = computed(() => {
     : goalDurationValue.value
 })
 
-// Auto-derive weightGoalType from primaryGoal
+// 根据 primaryGoal 自动推导 weightGoalType
 const derivedWeightGoalType = computed(() => {
   if (formData.value.primaryGoal === 'lose_weight') return 'lose'
   if (formData.value.primaryGoal === 'gain_weight') return 'gain'
@@ -317,7 +317,7 @@ const completeOnboarding = async () => {
 
   loading.value = true
   try {
-    // Parse decimal string fields
+// 解析小数字符串字段
     formData.value.weight = weightStr.value ? parseDecimalInput(weightStr.value) : undefined
     formData.value.height = heightStr.value ? parseDecimalInput(heightStr.value) : undefined
     formData.value.targetWeight = targetWeightStr.value ? parseDecimalInput(targetWeightStr.value) : undefined
@@ -327,12 +327,12 @@ const completeOnboarding = async () => {
       onboardingCompleted: true,
     }
 
-    // Auto-enable weight tracking if the user provided their weight
+// 如果用户提供了体重，则自动启用体重跟踪
     if (formData.value.weight && formData.value.weight > 0) {
       preferences.showWeightTracking = true
     }
 
-    // Use derived values
+// 使用推导出的值
     if (derivedGoalTimeframeWeeks.value) {
       preferences.goalTimeframe = derivedGoalTimeframeWeeks.value
     }
@@ -342,12 +342,12 @@ const completeOnboarding = async () => {
 
     const updatedUser = await updateUserPreferences(preferences)
 
-    // Update user in auth store
+// 更新 auth store 中的用户
     if (authStore.user) {
       authStore.user = updatedUser
     }
 
-    // Create the initial weight log entry so the first-time setup dialog is skipped
+// 创建初始体重日志，这样可以跳过首次设置对话框
     if (formData.value.weight && formData.value.weight > 0) {
       const weightInKg =
         formData.value.unitScale === 'imperial'

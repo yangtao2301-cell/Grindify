@@ -25,7 +25,7 @@
     />
 
     <v-form ref="formRef" class="mx-5 mt-4 pb-10 d-flex flex-column ga-4">
-      <!-- Date -->
+<!-- 日期 -->
       <div>
         <v-label class="text-body-2 font-weight-bold text-textPrimary mb-1">
           {{ $t('activity.date') }}
@@ -38,7 +38,7 @@
         />
       </div>
 
-      <!-- Duration -->
+<!-- 时长 -->
       <div>
         <v-label class="text-body-2 font-weight-bold text-textPrimary mb-1">
           {{ $t('activity.duration') }}
@@ -54,7 +54,7 @@
         />
       </div>
 
-      <!-- Distance (if tracked) -->
+<!-- 距离（如果已跟踪） -->
       <div v-if="log.activity.trackDistance">
         <v-label class="text-body-2 font-weight-bold text-textPrimary mb-1">
           {{ $t('activity.distance') }}
@@ -69,7 +69,7 @@
         />
       </div>
 
-      <!-- Elevation (if tracked) -->
+<!-- 海拔（如果已跟踪） -->
       <div v-if="log.activity.trackElevation">
         <v-label class="text-body-2 font-weight-bold text-textPrimary mb-1">
           {{ $t('activity.elevationGain') }}
@@ -84,7 +84,7 @@
         />
       </div>
 
-      <!-- Calories (if tracked) -->
+<!-- 卡路里（如果已跟踪） -->
       <div v-if="log.activity.trackCalories">
         <v-label class="text-body-2 font-weight-bold text-textPrimary mb-1">
           {{ $t('activity.calories') }}
@@ -99,7 +99,7 @@
         />
       </div>
 
-      <!-- Notes -->
+<!-- 备注 -->
       <div>
         <v-label class="text-body-2 font-weight-bold text-textPrimary mb-1">
           {{ $t('activity.notes') }}
@@ -113,7 +113,7 @@
         />
       </div>
 
-      <!-- Delete -->
+<!-- 删除 -->
       <v-btn
         color="error"
         variant="tonal"
@@ -167,7 +167,7 @@ const form = ref({
   notes: props.log.notes ?? '',
 })
 
-// String refs for decimal fields
+// 小数输入字段的字符串引用
 const durationStr = ref(String(props.log.duration ?? ''))
 const distanceStr = ref(formatDecimalDisplay(props.log.distance ?? undefined))
 const elevationGainStr = ref(formatDecimalDisplay(props.log.elevationGain ?? undefined))
@@ -177,7 +177,7 @@ async function saveLog() {
   const { valid } = await formRef.value.validate()
   if (!valid) return
 
-  // Parse string refs to numbers before saving
+// 保存前将字符串引用解析为数字
   form.value.duration = parseDecimalInput(durationStr.value)
   form.value.distance = distanceStr.value ? parseDecimalInput(distanceStr.value) : undefined
   form.value.elevationGain = elevationGainStr.value ? parseDecimalInput(elevationGainStr.value) : undefined

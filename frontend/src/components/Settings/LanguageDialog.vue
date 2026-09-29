@@ -74,7 +74,7 @@ const selectLanguage = async (nextLocale: AppLocale) => {
     await updateUserPreferences({ language: lang })
     if (authStore.user) authStore.user.language = lang
   } catch {
-    // locale already switched locally; backend sync failure is non-fatal
+// locale 已在本地切换；后端同步失败不会影响主要流程
   }
 
   emit('close')

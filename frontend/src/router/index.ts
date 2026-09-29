@@ -152,7 +152,7 @@ const routes = [
     meta: { hideBottomNav: true },
   },
   {
-    path: '/:pathMatch(.*)*', // 404
+  path: '/:pathMatch(.*)*', // 404 页面
     redirect: () => '/',
   },
 ]
@@ -163,7 +163,7 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
-  const authStore = useAuthStore() // Get store instance inside the guard
+const authStore = useAuthStore() // 在守卫中获取 store 实例
   const isAuthenticated = authStore.isAuthenticated
 
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
@@ -182,13 +182,13 @@ router.beforeEach(async (to, from, next) => {
     authStore.user &&
     !authStore.user.onboardingCompleted
   ) {
-    // Redirect to onboarding if not completed (except when already on onboarding page)
+// 如果尚未完成新手引导，则重定向到新手引导页（已经在该页面时除外）
     next('/onboarding')
   } else {
     next()
   }
 })
-// Workaround for https://github.com/vitejs/vite/issues/11804
+// 针对 https://github.com/vitejs/vite/issues/11804 的临时解决方案
 router.onError((err, to) => {
   if (err?.message?.includes?.('Failed to fetch dynamically imported module')) {
     if (!localStorage.getItem('vuetify:dynamic-reload')) {

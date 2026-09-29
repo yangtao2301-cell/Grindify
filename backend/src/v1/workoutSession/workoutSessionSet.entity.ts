@@ -41,12 +41,12 @@ export class WorkoutSessionSet {
   @Column({ nullable: true })
   notes: string;
 
-  // Cardio exercise fields
+  // 有氧训练字段
   @Column({ type: 'decimal', precision: 6, scale: 2, nullable: true })
   distance?: number;
 
   @Column({ nullable: true })
-  duration?: number; // in minutes
+  duration?: number; // 单位：分钟
 
   @Column({ nullable: true })
   calories?: number;

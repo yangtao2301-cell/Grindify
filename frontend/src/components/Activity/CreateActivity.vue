@@ -25,7 +25,7 @@
     />
 
     <v-form ref="formRef" class="mx-5 mt-2 pb-10">
-      <!-- Name -->
+<!-- 名称 -->
       <v-label class="text-body-2 font-weight-bold text-textPrimary mb-1">
         {{ $t('activity.activityName') }} <span class="text-error text-h6 ml-1">*</span>
       </v-label>
@@ -35,7 +35,7 @@
         :rules="[v => !!v || $t('common.name')]"
       />
 
-      <!-- Description -->
+<!-- 描述 -->
       <v-label class="text-body-2 font-weight-bold text-textPrimary mb-2">
         {{ $t('activity.activityDescription') }}
       </v-label>
@@ -47,7 +47,7 @@
         class="small-textarea"
       />
 
-      <!-- Icon picker -->
+<!-- 图标选择器 -->
       <v-label class="text-body-2 font-weight-bold text-textPrimary mb-2">
         {{ $t('activity.selectIcon') }}
       </v-label>
@@ -66,7 +66,7 @@
         </v-btn>
       </div>
 
-      <!-- Equipment -->
+<!-- 器械 -->
       <v-label class="text-body-2 font-weight-bold text-textPrimary mb-2">
         {{ $t('activity.equipment') }}
       </v-label>
@@ -76,7 +76,7 @@
         class="mb-4"
       />
 
-      <!-- Tracking flags -->
+<!-- 跟踪选项 -->
       <v-label class="text-body-2 font-weight-bold text-textPrimary mb-2">
         {{ $t('activity.trackedMetrics') }}
       </v-label>

@@ -29,7 +29,7 @@
       </div>
 
       <div v-else>
-        <!-- Mini summary row -->
+<!-- 简要摘要行 -->
         <div class="d-flex align-center justify-space-between mb-3">
           <div class="d-flex align-center ga-2">
             <span class="text-body-2 font-weight-bold text-textPrimary">
@@ -124,7 +124,7 @@ const chartData = computed(() => {
         label: t('statistics.totalVolume'),
         data: safeVolumes,
         backgroundColor: props.trends.map((trend, idx) => {
-          // Highlight the latest bar with full primary, others with lower opacity
+// 使用完整主色高亮最新柱，其余柱使用较低不透明度
           const isLatest = idx === props.trends.length - 1
           const trendVolume = asNumber(trend.totalVolume)
           const intensity = 0.25 + (trendVolume / maxVolume) * 0.75

@@ -70,7 +70,7 @@ export class ActivityService {
       return activities.map((a) => this.toResponseDto(a));
     }
 
-    // 'all': user's own first, then globals
+    // “all”：先返回用户自己的，再返回全局的
     const [userActivities, globalActivities] = await Promise.all([
       this.activityRepo.find({ where: { createdBy: { id: userId }, isGlobal: false } }),
       this.activityRepo.find({ where: { isGlobal: true }, order: { id: 'ASC' } }),
@@ -127,7 +127,7 @@ export class ActivityService {
     if (!activity) throw new NotFoundException('Global activity not found');
 
     await this.dataSource.transaction(async (manager) => {
-      // Find all users with activity logs referencing this activity
+    // 查找活动日志引用此活动的所有用户
       const affectedUsers: { userId: number }[] = await manager.query(`
         SELECT DISTINCT user_id AS "userId"
         FROM activity_log

@@ -138,7 +138,7 @@
               {{ value }}
             </v-chip>
           </v-chip-group>
-          <!-- TODO: Disable for now (Not working yet, and still don't know how i want it)-->
+<!-- TODO：暂时禁用（尚未实现，而且还没有确定最终交互方式） -->
           <!-- <v-text-field
             label="Exercise Notes"
             :model-value="props.notes"
@@ -197,8 +197,8 @@
 </template>
 
 <script lang="ts" setup>
-// TODO: Add functionality to view exercise details
-// TODO: Maybe have a info icon that shows exercise details in a dialog instead of a dropdown
+// TODO：增加查看训练动作详情的功能
+// TODO：可以考虑使用信息图标，在对话框中显示训练动作详情，而不是使用下拉菜单
 
 import { useI18n } from 'vue-i18n';
 import { displayExerciseName, resolveI18n } from '@/utils/exerciseDisplay';

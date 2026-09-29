@@ -18,7 +18,7 @@
     <BackHeader :title="$t('exerciseForm.createTitle')" :show-menu="false" @close="emit('close')" />
 
     <v-form ref="formRef" class="mx-5 mt-2 pb-10">
-      <!-- Exercise Name -->
+<!-- 训练动作名称 -->
       <v-text-field
         v-model="form.name"
         :label="$t('exerciseForm.nameLabel')"
@@ -27,7 +27,7 @@
         :rules="[v => !!v || $t('exerciseForm.nameRequired')]"
       />
 
-      <!-- About / Description (optional) -->
+<!-- 关于/描述（可选） -->
       <v-textarea
         v-model="form.description"
         :label="$t('exerciseForm.aboutLabel')"
@@ -37,7 +37,7 @@
         class="mt-1"
       />
 
-      <!-- Exercise Type -->
+<!-- 训练动作类型 -->
       <div class="mt-4">
         <p class="text-body-2 text-textSecondary mb-2">
           {{ $t('exerciseForm.exerciseTypeLabel') }}
@@ -54,7 +54,7 @@
         </v-chip-group>
       </div>
 
-      <!-- Target Muscles -->
+<!-- 目标肌群 -->
       <FullscreenListSelect
         v-model="form.muscleGroupIds"
         :label="$t('exerciseForm.muscleGroupsLabel')"
@@ -63,7 +63,7 @@
         class="mt-6"
       />
 
-      <!-- Primary Muscle -->
+<!-- 主要肌群 -->
       <FullscreenListSelect
         v-model="form.primaryMuscleGroupIds"
         :label="$t('exerciseForm.primaryMuscleLabel')"
@@ -73,7 +73,7 @@
         :disabled="form.muscleGroupIds.length === 0"
       />
 
-      <!-- Equipment (chip input) -->
+<!-- 器械（标签输入） -->
       <div class="mt-4">
         <p class="text-body-2 text-textSecondary mb-2">{{ $t('exerciseForm.equipmentLabel') }}</p>
         <ChipTextInput
@@ -82,13 +82,13 @@
         />
       </div>
 
-      <!-- Media Upload -->
+<!-- 媒体上传 -->
       <div class="mt-2">
         <p class="text-body-2 text-textSecondary mb-2">{{ $t('exerciseForm.mediaLabel') }}</p>
         <MediaUpload v-model="newMediaItems" />
       </div>
 
-      <!-- How to Perform (draggable list) -->
+<!-- 操作方法（可拖动列表） -->
       <div class="mt-6">
         <p class="text-body-2 text-textSecondary mb-2">
           {{ $t('exerciseForm.instructionsLabel') }}
@@ -101,7 +101,7 @@
         />
       </div>
 
-      <!-- Pro Tips (draggable list) -->
+<!-- 专业提示（可拖动列表） -->
       <div class="mt-6">
         <p class="text-body-2 text-textSecondary mb-2">{{ $t('exerciseForm.proTipsLabel') }}</p>
         <DraggableTextList
@@ -112,7 +112,7 @@
         />
       </div>
 
-      <!-- Avoid These Mistakes (draggable list) -->
+<!-- 避免这些错误（可拖动列表） -->
       <div class="mt-6">
         <p class="text-body-2 text-textSecondary mb-2">{{ $t('exerciseForm.mistakesLabel') }}</p>
         <DraggableTextList
@@ -123,7 +123,7 @@
         />
       </div>
 
-      <!-- Create Button -->
+<!-- 创建按钮 -->
       <v-btn
         color="primary"
         class="w-100 mt-8"
@@ -182,7 +182,7 @@ const selectedMuscleGroupItems = computed(() =>
   muscleGroupItems.value.filter(g => form.value.muscleGroupIds.includes(g.id))
 )
 
-// Normalize chip group deselect: v-chip-group emits undefined when deselected, but our type is ExerciseType | null
+// 统一标签组取消选择的值：取消选择时 v-chip-group 会发送 undefined，但我们的类型是 ExerciseType | null
 watch(
   () => form.value.exerciseType,
   v => {
@@ -246,7 +246,7 @@ const createNewExercise = async () => {
     const response = await createExercise(payload)
 
     if (response) {
-      // Upload media items
+// 上传媒体项目
       for (const item of newMediaItems.value) {
         if (item.file) {
           try {

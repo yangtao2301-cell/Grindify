@@ -22,10 +22,10 @@
       padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px));
     "
   >
-    <!-- Top padding -->
+<!-- 顶部内边距 -->
     <div class="pt-10" />
 
-    <!-- Icon -->
+<!-- 图标 -->
     <div class="d-flex justify-center mb-4">
       <v-avatar size="80" color="avatarBg" class="rounded-xl">
         <v-icon color="primary" size="44">mdi-trophy-outline</v-icon>
@@ -33,13 +33,13 @@
     </div>
 
     <div class="mx-5 d-flex flex-column ga-5">
-      <!-- Title -->
+<!-- 标题 -->
       <div class="text-center">
         <h1 class="text-h5 font-weight-bold">{{ $t('sessionSummary.title') }}</h1>
         <p class="text-body-2 text-textSecondary mt-1">{{ workoutName }}</p>
       </div>
 
-      <!-- Stat cards row 1: Duration + Volume -->
+<!-- 第 1 行统计卡片：时长 + 训练量 -->
       <div class="d-flex w-100 ga-3">
         <v-card
           class="text-center pa-4 rounded-lg bg-cardBg flex-1-1-0"
@@ -62,7 +62,7 @@
         </v-card>
       </div>
 
-      <!-- Stat cards row 2: Exercises + Sets -->
+<!-- 第 2 行统计卡片：训练动作 + 训练组 -->
       <div class="d-flex w-100 ga-3">
         <v-card
           class="text-center pa-4 rounded-lg bg-cardBg flex-1-1-0"
@@ -83,7 +83,7 @@
         </v-card>
       </div>
 
-      <!-- New PRs -->
+<!-- 新个人纪录 -->
       <div v-if="newRecords.length" class="d-flex flex-column ga-2">
         <h2 class="text-h6 font-weight-bold">{{ $t('sessionSummary.newPRs') }}</h2>
         <v-card
@@ -115,7 +115,7 @@
         </v-card>
       </div>
 
-      <!-- Calories (optional) -->
+<!-- 卡路里（可选） -->
       <div>
         <h2 class="text-h6 font-weight-bold mb-1">{{ $t('sessionSummary.caloriesTitle') }}</h2>
         <p class="text-body-2 text-textSecondary mb-3">{{ $t('sessionSummary.caloriesHint') }}</p>
@@ -135,12 +135,12 @@
         />
       </div>
 
-      <!-- Done button -->
+<!-- 完成按钮 -->
       <v-btn color="primary" size="large" block :loading="isSaving" class="mt-2" @click="done">
         {{ $t('sessionSummary.done') }}
       </v-btn>
 
-      <!-- Save as Workout (only for empty workouts with exercises) -->
+<!-- 保存为训练（仅限包含训练动作的空训练） -->
       <v-btn
         v-if="isEmptyWorkout"
         color="primary"
@@ -154,7 +154,7 @@
       </v-btn>
     </div>
 
-    <!-- Save as Workout dialog -->
+<!-- 保存为训练对话框 -->
     <v-dialog v-model="saveAsWorkoutDialog" fullscreen>
       <CreateWorkout
         v-if="saveAsWorkoutDialog && workoutInitialData"
@@ -182,7 +182,7 @@ const workoutSessionStore = useWorkoutSessionStore()
 
 const summary = workoutSessionStore.lastCompletedSummary
 
-// If there's no summary (direct navigation), send home
+// 如果没有摘要数据（直接导航进入），则返回首页
 if (!summary) {
   router.replace('/')
 }
@@ -198,7 +198,7 @@ const workoutInitialData = computed(() =>
   session ? mapSessionToWorkoutInitialData(session, durationSeconds) : undefined
 )
 
-// Derived stats
+// 推导出的统计数据
 const workoutName = computed(() => session?.workout?.title ?? t('sessionSummary.unknownWorkout'))
 
 const formattedDuration = computed(() => {
@@ -239,7 +239,7 @@ async function done() {
     }
   }
 
-  // Clear the summary so back-navigation to this page redirects home
+// 清除摘要数据，使返回此页面时重定向到首页
   workoutSessionStore.lastCompletedSummary = null
   router.replace('/')
 }

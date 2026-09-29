@@ -1,4 +1,4 @@
-# .github/labeler.yml
+# .github/labeler.yml 配置
 "client: web-mobile":
   - changed-files:
       - any-glob-to-any-file: ["frontend/**/*"]
@@ -11,27 +11,27 @@
           - "!backend/v1/schemas/**/*"
           - "!backend/v1/documentation/**/*"
 
-# Maps to 'topic: database'
+# 匹配到“topic: database”
 "topic: database":
   - changed-files:
       - any-glob-to-any-file:
           - "backend/v1/schemas/**/*"
 
-# Maps to 'type: docs'
+# 匹配到“type: docs”
 "type: docs":
   - changed-files:
       - any-glob-to-any-file:
           - "*.md"
           - "backend/v1/documentation/**/*"
 
-# Maps to 'topic: ci-cd'
+# 匹配到“topic: ci-cd”
 "topic: ci-cd":
   - changed-files:
       - any-glob-to-any-file:
           - ".github/workflows/*"
           - "Dockerfile"
 
-# Maps to 'topic: config'
+# 匹配到“topic: config”
 "topic: config":
   - changed-files:
       - any-glob-to-any-file:

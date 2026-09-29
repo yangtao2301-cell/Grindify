@@ -76,7 +76,7 @@ export const useActivityStore = defineStore(
       }
     };
 
-    // Only fetch when authenticated
+// 仅在已认证时获取数据
     watch(
       () => authStore.isAuthenticated,
       (authed) => {
