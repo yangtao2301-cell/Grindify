@@ -119,7 +119,8 @@ export default defineConfig({
         ],
       },
       workbox: {
-        navigateFallbackDenylist: [/^\/api\//],
+        // Keep API, admin, and uploaded-file routes out of the main app's SPA fallback.
+        navigateFallbackDenylist: [/^\/(?:api|v1|admin|uploads)(?:\/|$)/],
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         runtimeCaching: [
           {
