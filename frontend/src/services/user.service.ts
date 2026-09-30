@@ -14,6 +14,7 @@
  */
 
 import type { CreateUser, User, StreakInfo } from '@/interfaces/User.interface'
+import type { UserDataExport } from '@/interfaces/UserDataExport.interface'
 import { fetchWrapper } from '@/utils/fetchWrapper'
 
 const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:1337/v1'
@@ -91,6 +92,10 @@ export const getStreakInfo = async () => {
     console.error('Error fetching streak info:', error)
     throw new Error('Failed to fetch streak info')
   }
+}
+
+export const getUserDataExport = async () => {
+  return fetchWrapper<UserDataExport>(`${apiUrl}/users/export`)
 }
 
 export const useStreakFreeze = async (date: string) => {

@@ -140,7 +140,7 @@
               <v-icon>mdi-chevron-right</v-icon>
             </v-list-item-title>
           </v-list-item>
-          <v-list-item class="px-5" @click="exportUserData">
+          <v-list-item class="px-5" @click="isExportDialogOpen = true">
             <v-list-item-title class="d-flex flex-row justify-space-between align-center">
               <div>
                 <p>{{ $t('settings.exportData') }}</p>
@@ -206,10 +206,86 @@
     <PrivacyPolicyDialog v-model="isPrivacyPolicyOpen" />
     <TermsAndConditionsDialog v-model="isTermsOpen" />
     <ImprintDialog v-model="isImprintOpen" />
+
+    <v-dialog v-model="isExportDialogOpen" max-width="520" :persistent="Boolean(exportingReport)">
+      <v-card color="cardBg" rounded="xl">
+        <v-card-title class="px-6 pt-6 text-h6">
+          {{ $t('settings.exportReportTitle') }}
+        </v-card-title>
+        <v-card-text class="px-6 pb-2 text-textSecondary">
+          {{ $t('settings.exportReportDescription') }}
+        </v-card-text>
+        <v-card-text class="px-6 pt-2">
+          <v-card
+            class="pa-4 mb-3 export-option"
+            color="cardBg"
+            variant="outlined"
+            :disabled="Boolean(exportingReport)"
+            @click="exportSelectedReport('summary')"
+          >
+            <div class="d-flex align-center ga-4">
+              <v-avatar color="avatarBg" size="48">
+                <v-icon color="primary">mdi-chart-box-outline</v-icon>
+              </v-avatar>
+              <div class="flex-grow-1">
+                <div class="text-subtitle-1 font-weight-bold">
+                  {{ $t('settings.exportSummaryTitle') }}
+                </div>
+                <div class="text-body-2 text-textSecondary">
+                  {{ $t('settings.exportSummaryDescription') }}
+                </div>
+              </div>
+              <v-progress-circular
+                v-if="exportingReport === 'summary'"
+                indeterminate
+                color="primary"
+                size="22"
+              />
+              <v-icon v-else color="primary">mdi-chevron-right</v-icon>
+            </div>
+          </v-card>
+          <v-card
+            class="pa-4 export-option"
+            color="cardBg"
+            variant="outlined"
+            :disabled="Boolean(exportingReport)"
+            @click="exportSelectedReport('complete')"
+          >
+            <div class="d-flex align-center ga-4">
+              <v-avatar color="avatarBg" size="48">
+                <v-icon color="primary">mdi-file-document-multiple-outline</v-icon>
+              </v-avatar>
+              <div class="flex-grow-1">
+                <div class="text-subtitle-1 font-weight-bold">
+                  {{ $t('settings.exportCompleteTitle') }}
+                </div>
+                <div class="text-body-2 text-textSecondary">
+                  {{ $t('settings.exportCompleteDescription') }}
+                </div>
+              </div>
+              <v-progress-circular
+                v-if="exportingReport === 'complete'"
+                indeterminate
+                color="primary"
+                size="22"
+              />
+              <v-icon v-else color="primary">mdi-chevron-right</v-icon>
+            </div>
+          </v-card>
+        </v-card-text>
+        <v-card-actions class="px-6 pb-5">
+          <v-spacer />
+          <v-btn variant="text" :disabled="Boolean(exportingReport)" @click="isExportDialogOpen = false">
+            {{ $t('common.cancel') }}
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 <script lang="ts" setup>
-import { getCurrentUser, getStreakInfo } from '@/services/user.service'
+import { getCurrentUser, getStreakInfo, getUserDataExport } from '@/services/user.service'
+import { exportUserDataReport as createUserDataReport } from '@/utils/userDataReport'
 import type { User, StreakInfo } from '@/interfaces/User.interface'
 import { toast } from 'vuetify-sonner'
 import { onMounted } from 'vue'
@@ -248,6 +324,8 @@ const isGoalsDialogOpen = ref(false)
 const isPrivacyPolicyOpen = ref(false)
 const isTermsOpen = ref(false)
 const isImprintOpen = ref(false)
+const isExportDialogOpen = ref(false)
+const exportingReport = ref<'summary' | 'complete' | null>(null)
 const currentUser = ref<User | null>(null)
 const weightTrackingEnabled = ref(false)
 const streakInfo = ref<StreakInfo | null>(null)
@@ -334,23 +412,19 @@ const setPreferenceDialogToOpen = async (type?: string) => {
   }
 }
 
-const exportUserData = async () => {
+const exportSelectedReport = async (mode: 'summary' | 'complete') => {
+  if (exportingReport.value) return
+  exportingReport.value = mode
   try {
-    const response = await fetch(`${apiUrl}/users/export`, {
-      method: 'GET',
-      credentials: 'include',
-    })
-    if (!response.ok) throw new Error('Export failed')
-    const blob = await response.blob()
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = 'grindify-data-export.json'
-    a.click()
-    URL.revokeObjectURL(url)
-    toast.success(t('settings.exportDataSuccess'), { progressBar: true, duration: 3000 })
-  } catch {
+    const data = await getUserDataExport()
+    await createUserDataReport(data, mode, locale.value, apiUrl)
+    isExportDialogOpen.value = false
+    toast.success(t('settings.exportReportSuccess'), { progressBar: true, duration: 3000 })
+  } catch (error) {
+    console.error('Error exporting user data report:', error)
     toast.error(t('settings.exportDataError'), { progressBar: true, duration: 3000 })
+  } finally {
+    exportingReport.value = null
   }
 }
 

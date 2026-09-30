@@ -42,7 +42,7 @@ const isLocalDevelopmentHost = (hostname: string) =>
  * 但 VITE_API_URL 指向局域网 IP（或反过来）时，浏览器会将请求视为跨站请求，
  * 并且在 SameSite=Lax 下不会发送该 Cookie。
  */
-const resolveRequestUrl = (url: string) => {
+export const resolveRequestUrl = (url: string) => {
   if (typeof window === 'undefined') return url;
 
   try {

@@ -556,7 +556,7 @@ export class UserService {
       }),
       this.sessionRepo.find({
         where: { user: { id: userId } },
-        relations: ['exercises', 'exercises.sets'],
+        relations: ['workout', 'exercises', 'exercises.exercise', 'exercises.sets'],
       }),
       this.activityLogRepo.find({ where: { user: { id: userId } } }),
       this.weightLogRepo.find({ where: { user: { id: userId } } }),
