@@ -148,8 +148,20 @@ export class UploadService {
   async deleteImage(imageUrl: string): Promise<void> {
     if (!imageUrl) return;
 
+    const relativeUrl = imageUrl.replace(/^\/+/, '');
+    if (
+      !relativeUrl.startsWith('uploads/') ||
+      relativeUrl.includes('\\') ||
+      path.posix.normalize(relativeUrl) !== relativeUrl
+    ) {
+      return;
+    }
+
+    const filepath = path.resolve(process.cwd(), relativeUrl);
+    const uploadsRoot = `${path.resolve(this.uploadsDir)}${path.sep}`;
+    if (!filepath.startsWith(uploadsRoot)) return;
+
     try {
-      const filepath = path.join(process.cwd(), imageUrl);
       await fs.unlink(filepath);
     } catch (error) {
   // 文件可能不存在，这种情况可以忽略

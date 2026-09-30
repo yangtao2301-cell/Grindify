@@ -193,7 +193,7 @@ export class UserController {
 
   @Get('export')
   @ApiOperation({
-    summary: 'Export all user data (GDPR Art. 20 data portability)',
+    summary: 'Export the authenticated user’s account and fitness data',
   })
   @ApiOkResponse({
     description:

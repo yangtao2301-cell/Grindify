@@ -402,7 +402,7 @@ const setPreferenceDialogToOpen = async (type?: string) => {
       isVersionHistoryOpen.value = true
       break
     case 'contact':
-      window.location.href = `mailto:${import.meta.env.VITE_CONTACT_EMAIL ?? ''}`
+      window.location.href = `mailto:${import.meta.env.VITE_CONTACT_EMAIL ?? '3405351711@qq.com'}`
       break
     case 'logout':
       await authStore.logout()

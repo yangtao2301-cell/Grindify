@@ -156,12 +156,53 @@ export class UserService {
       throw new NotFoundException('User not found');
     }
 
+    const [progressPhotos, userExercises] = await Promise.all([
+      this.progressPhotoRepo.find({ where: { user: { id: userId } } }),
+      this.exerciseRepo.find({
+        where: { createdBy: { id: userId } },
+        relations: ['media'],
+        withDeleted: true,
+      }),
+    ]);
+    const uploadedFiles = new Set(
+      [
+        user.avatar,
+        ...progressPhotos.map((photo) => photo.photoUrl),
+        ...userExercises.flatMap((exercise) => [
+          exercise.image,
+          ...(exercise.media ?? []).map((media) => media.url),
+        ]),
+      ].filter(
+        (url): url is string => Boolean(url?.startsWith('/uploads/')),
+      ),
+    );
+
     // 删除关联数据（先删除会话，避免 workout_session_exercise 产生外键冲突）
     await this.sessionRepo.delete({ user: { id: userId } });
     await this.exerciseRepo.delete({ createdBy: { id: userId } });
     await this.workoutRepo.delete({ createdBy: { id: userId } });
 
     await this.userRepo.remove(user);
+
+    await Promise.all(
+      [...uploadedFiles].map(async (fileUrl) => {
+        const [avatarReferences, photoReferences] = await Promise.all([
+          this.userRepo.count({ where: { avatar: fileUrl } }),
+          this.progressPhotoRepo.count({ where: { photoUrl: fileUrl } }),
+        ]);
+        const exerciseReferences = await this.exerciseRepo
+          .createQueryBuilder('exercise')
+          .withDeleted()
+          .leftJoin('exercise.media', 'media')
+          .where('exercise.image = :fileUrl', { fileUrl })
+          .orWhere('media.url = :fileUrl', { fileUrl })
+          .getCount();
+
+        if (avatarReferences === 0 && photoReferences === 0 && exerciseReferences === 0) {
+          await this.uploadService.deleteImage(fileUrl);
+        }
+      }),
+    );
 
     return { message: 'User and all related data deleted' };
   }
@@ -529,7 +570,7 @@ export class UserService {
   }
 
   /**
- * 导出用户的全部数据，以满足 GDPR 第 20 条的数据可携带权。
+ * 导出用户的账户资料、训练记录和相关数据。
    */
   async exportUserData(userId: number): Promise<object> {
     const user = await this.userRepo.findOne({ where: { id: userId } });

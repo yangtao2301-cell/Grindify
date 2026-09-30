@@ -99,7 +99,12 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
             VITE_API_URL=${{ vars.VITE_API_URL }}
-            VITE_CONTACT_EMAIL=${{ vars.VITE_CONTACT_EMAIL }}
+            VITE_CONTACT_EMAIL=${{ vars.VITE_CONTACT_EMAIL || '3405351711@qq.com' }}
+            VITE_OPERATOR_NAME=${{ vars.VITE_OPERATOR_NAME || 'Yang' }}
+            VITE_OPERATOR_ADDRESS=${{ vars.VITE_OPERATOR_ADDRESS || '天津科技大学' }}
+            VITE_OPERATOR_CITY=${{ vars.VITE_OPERATOR_CITY || '天津' }}
+            VITE_OPERATOR_COUNTRY=${{ vars.VITE_OPERATOR_COUNTRY || '中国' }}
+            VITE_OPERATOR_PHONE=${{ vars.VITE_OPERATOR_PHONE || '+86 18340012138' }}
             VERSION=${{ steps.build.outputs.version }}
             GIT_SHA=${{ steps.build.outputs.git_sha }}
             BUILD_TIME=${{ steps.build.outputs.build_time }}

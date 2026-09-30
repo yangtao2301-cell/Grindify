@@ -45,6 +45,12 @@ services:
       target: production
       args:
         VITE_API_URL: ${VITE_API_URL}
+        VITE_CONTACT_EMAIL: ${VITE_CONTACT_EMAIL}
+        VITE_OPERATOR_NAME: ${VITE_OPERATOR_NAME}
+        VITE_OPERATOR_ADDRESS: ${VITE_OPERATOR_ADDRESS}
+        VITE_OPERATOR_CITY: ${VITE_OPERATOR_CITY}
+        VITE_OPERATOR_COUNTRY: ${VITE_OPERATOR_COUNTRY}
+        VITE_OPERATOR_PHONE: ${VITE_OPERATOR_PHONE}
         FRONTEND_BUILD_SCRIPT: build-only
         NODE_OPTIONS: --max-old-space-size=1024
     container_name: grindify_frontend

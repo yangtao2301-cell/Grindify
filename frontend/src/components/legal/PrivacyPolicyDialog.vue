@@ -26,10 +26,11 @@
       />
       <v-card-text class="pa-6">
         <p class="text-caption text-textSecondary mb-6">{{ $t('legal.lastUpdated') }}</p>
+        <p class="text-body-2 mb-4">{{ $t('legal.privacy.frameworkText') }}</p>
 
         <h3 class="text-h6 mb-2">{{ $t('legal.privacy.dataControllerTitle') }}</h3>
         <p class="text-body-2 mb-4">
-          {{ $t('legal.privacy.dataControllerText', { email: contactEmail }) }}
+          {{ $t('legal.privacy.dataControllerText', { operatorName, email: contactEmail, phone: operatorPhone }) }}
         </p>
 
         <h3 class="text-h6 mb-2">{{ $t('legal.privacy.collectTitle') }}</h3>
@@ -41,6 +42,9 @@
           <li>{{ $t('legal.privacy.usageData') }}</li>
           <li>{{ $t('legal.privacy.consentRecords') }}</li>
         </ul>
+
+        <h3 class="text-h6 mb-2">{{ $t('legal.privacy.specialInfoTitle') }}</h3>
+        <p class="text-body-2 mb-4">{{ $t('legal.privacy.specialInfoText') }}</p>
 
         <h3 class="text-h6 mb-2">{{ $t('legal.privacy.legalBasisTitle') }}</h3>
         <p class="text-body-2 mb-2">{{ $t('legal.privacy.legalBasisIntro') }}</p>
@@ -75,23 +79,42 @@
           <li>{{ $t('legal.privacy.withdraw') }}</li>
         </ul>
         <p class="text-body-2 mb-4">
-          {{ $t('legal.privacy.rightsContact', { email: contactEmail }) }}
+          {{ $t('legal.privacy.rightsContact', { email: contactEmail, phone: operatorPhone }) }}
         </p>
 
         <h3 class="text-h6 mb-2">{{ $t('legal.privacy.sharingTitle') }}</h3>
         <p class="text-body-2 mb-4">{{ $t('legal.privacy.sharingText') }}</p>
+        <h4 class="text-subtitle-1 mb-2">{{ $t('legal.privacy.thirdPartyTitle') }}</h4>
+        <p class="text-body-2 mb-2">{{ $t('legal.privacy.thirdPartyIntro') }}</p>
+        <ul class="text-body-2 mb-4 pl-4">
+          <li>
+            {{ $t('legal.privacy.googleRecipient') }}
+            (<a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">{{ $t('legal.privacy.googlePolicyLink') }}</a>)
+          </li>
+          <li>
+            {{ $t('legal.privacy.githubRecipient') }}
+            (<a href="https://docs.github.com/zh/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener noreferrer">{{ $t('legal.privacy.githubPolicyLink') }}</a>)
+          </li>
+          <li>
+            {{ $t('legal.privacy.resendRecipient') }}
+            (<a href="https://resend.com/legal/privacy-policy" target="_blank" rel="noopener noreferrer">{{ $t('legal.privacy.resendPolicyLink') }}</a>)
+          </li>
+        </ul>
+
+        <h3 class="text-h6 mb-2">{{ $t('legal.privacy.locationTitle') }}</h3>
+        <p class="text-body-2 mb-4">{{ $t('legal.privacy.locationText') }}</p>
 
         <h3 class="text-h6 mb-2">{{ $t('legal.privacy.complaintTitle') }}</h3>
         <p class="text-body-2 mb-4">
           {{ $t('legal.privacy.complaintText') }}<br /><br />
-          <strong>Integritetsskyddsmyndigheten (IMY)</strong><br />
-          {{ $t('legal.imprint.website') }} <strong>imy.se</strong><br />
-          {{ $t('legal.imprint.phone') }} +46 8 657 61 00
+          <a href="https://www.12377.cn/jbzn.html?tab=4" target="_blank" rel="noopener noreferrer">
+            {{ $t('legal.imprint.website') }}12377.cn
+          </a>
         </p>
 
         <h3 class="text-h6 mb-2">{{ $t('legal.privacy.contactTitle') }}</h3>
         <p class="text-body-2 mb-4">
-          {{ $t('legal.privacy.contactText', { email: contactEmail }) }}
+          {{ $t('legal.privacy.contactText', { operatorName, email: contactEmail, phone: operatorPhone }) }}
         </p>
       </v-card-text>
       <v-card-actions class="pa-4">
@@ -113,5 +136,7 @@
 defineProps<{ modelValue: boolean }>()
 defineEmits<{ 'update:modelValue': [value: boolean] }>()
 
-const contactEmail = import.meta.env.VITE_CONTACT_EMAIL ?? 'contact@example.com'
+const contactEmail = import.meta.env.VITE_CONTACT_EMAIL ?? '3405351711@qq.com'
+const operatorName = import.meta.env.VITE_OPERATOR_NAME ?? 'Yang'
+const operatorPhone = import.meta.env.VITE_OPERATOR_PHONE ?? '+86 18340012138'
 </script>

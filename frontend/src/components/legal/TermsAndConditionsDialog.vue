@@ -31,7 +31,7 @@
         <p class="text-body-2 mb-4">{{ $t('legal.terms.acceptanceText') }}</p>
 
         <h3 class="text-h6 mb-2">{{ $t('legal.terms.descriptionTitle') }}</h3>
-        <p class="text-body-2 mb-4">{{ $t('legal.terms.descriptionText') }}</p>
+        <p class="text-body-2 mb-4">{{ $t('legal.terms.descriptionText', { operatorName }) }}</p>
 
         <h3 class="text-h6 mb-2">{{ $t('legal.terms.accountTitle') }}</h3>
         <p class="text-body-2 mb-4">{{ $t('legal.terms.accountText') }}</p>
@@ -69,7 +69,7 @@
 
         <h3 class="text-h6 mb-2">{{ $t('legal.terms.contactTitle') }}</h3>
         <p class="text-body-2 mb-4">
-          {{ $t('legal.terms.contactText', { email: contactEmail }) }}
+          {{ $t('legal.terms.contactText', { operatorName, email: contactEmail, phone: operatorPhone }) }}
         </p>
       </v-card-text>
       <v-card-actions class="pa-4">
@@ -91,5 +91,7 @@
 defineProps<{ modelValue: boolean }>()
 defineEmits<{ 'update:modelValue': [value: boolean] }>()
 
-const contactEmail = import.meta.env.VITE_CONTACT_EMAIL ?? 'contact@example.com'
+const contactEmail = import.meta.env.VITE_CONTACT_EMAIL ?? '3405351711@qq.com'
+const operatorName = import.meta.env.VITE_OPERATOR_NAME ?? 'Yang'
+const operatorPhone = import.meta.env.VITE_OPERATOR_PHONE ?? '+86 18340012138'
 </script>
