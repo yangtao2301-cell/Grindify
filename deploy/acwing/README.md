@@ -50,6 +50,25 @@ The production Compose file publishes the API, frontend, and admin panel on loop
 
 ## Deploy prebuilt Docker images
 
+### One-click deployment from GitHub Actions
+
+The `Deploy AcWing` workflow deploys the latest `main` commit selected when the run starts. Open **Actions → Deploy AcWing → Run workflow**, leave the branch as `main`, and click **Run workflow**. It builds the three `linux/amd64` images on the GitHub runner, transfers one image archive and its checksum over SSH, then runs `deploy-image-archive.sh` on the existing server. It does not publish images to GHCR or read the server's private `.env` on GitHub.
+
+Before the first run, add these repository **Actions secrets**:
+
+| Secret | Value |
+| --- | --- |
+| `DEPLOY_HOST` | Existing server's SSH hostname or IP address. |
+| `DEPLOY_USER` | SSH user that owns `~/Grindify` and can run Docker without `sudo`. |
+| `DEPLOY_SSH_KEY` | Private key for that SSH user. Install the matching public key on the server. |
+| `DEPLOY_KNOWN_HOSTS` | Verified SSH host-key line for `DEPLOY_HOST` and its port. Verify the fingerprint through an independent channel before saving it. |
+
+Optionally set the repository **Actions variable** `DEPLOY_PORT` if SSH does not use port 22. The known-hosts entry for a non-default port must use `[host]:port`. The server must already have `~/Grindify/.env`, Docker Compose, and the running Grindify containers. The workflow always uses `~/Grindify` and does not provision a new server or initialize its database.
+
+The workflow uses repository Actions variables `VITE_API_URL`, `VITE_CONTACT_EMAIL`, `VITE_OPERATOR_NAME`, `VITE_OPERATOR_ADDRESS`, `VITE_OPERATOR_CITY`, `VITE_OPERATOR_COUNTRY`, and `VITE_OPERATOR_PHONE` when present. Otherwise it uses the production defaults in the workflow. Check that these public build-time values match the server before deploying; Vite embeds them in the images. Server secrets stay in `~/Grindify/.env`.
+
+The deployment script backs up PostgreSQL and uploads, checks the new containers, and restores the previous application images if deployment fails. It does not automatically reverse database migrations. A successful run removes the transferred archive after loading it; the loaded Docker images and backups remain on the server.
+
 The server can run prebuilt images without compiling the source. `docker-compose.images.yml` uses the same Compose project name, container names, ports, database volume, and uploads volume as the existing deployment. It does not replace the PostgreSQL data or uploaded files. The first switch from `docker-compose.prod.yml` can therefore keep the existing database and uploads.
 
 On a development machine with Docker and PowerShell, build from a **clean Git checkout** of the desired commit. For the currently deployed version, use a temporary worktree at `bc6aabc`; the archive builder itself can stay in the main checkout:

@@ -1,0 +1,126 @@
+name: Deploy AcWing
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-acwing-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Build archive and deploy main
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Require main
+        shell: bash
+        run: |
+          if [[ "$GITHUB_REF" != refs/heads/main ]]; then
+            echo "Choose the main branch when running this workflow." >&2
+            exit 1
+          fi
+
+      - name: Checkout selected main commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Build image archive
+        id: archive
+        shell: pwsh
+        env:
+          VITE_API_URL: ${{ vars.VITE_API_URL || 'https://app7592.acapp.acwing.com.cn/v1' }}
+          VITE_CONTACT_EMAIL: ${{ vars.VITE_CONTACT_EMAIL || '3405351711@qq.com' }}
+          VITE_OPERATOR_NAME: ${{ vars.VITE_OPERATOR_NAME || 'Yang' }}
+          VITE_OPERATOR_ADDRESS: ${{ vars.VITE_OPERATOR_ADDRESS || '天津科技大学' }}
+          VITE_OPERATOR_CITY: ${{ vars.VITE_OPERATOR_CITY || '天津' }}
+          VITE_OPERATOR_COUNTRY: ${{ vars.VITE_OPERATOR_COUNTRY || '中国' }}
+          VITE_OPERATOR_PHONE: ${{ vars.VITE_OPERATOR_PHONE || '+86 18340012138' }}
+        run: |
+          $publicEnv = Join-Path $env:RUNNER_TEMP 'grindify-public.env'
+          @(
+            "VITE_CONTACT_EMAIL=$env:VITE_CONTACT_EMAIL"
+            "VITE_OPERATOR_NAME=$env:VITE_OPERATOR_NAME"
+            "VITE_OPERATOR_ADDRESS=$env:VITE_OPERATOR_ADDRESS"
+            "VITE_OPERATOR_CITY=$env:VITE_OPERATOR_CITY"
+            "VITE_OPERATOR_COUNTRY=$env:VITE_OPERATOR_COUNTRY"
+            "VITE_OPERATOR_PHONE=$env:VITE_OPERATOR_PHONE"
+          ) | Set-Content -LiteralPath $publicEnv -Encoding utf8
+
+          $tag = $env:GITHUB_SHA.Substring(0, 7)
+          $imageDir = Join-Path $env:RUNNER_TEMP 'grindify-images'
+          & ./deploy/acwing/build-image-archive.ps1 `
+            -SourceRoot . `
+            -EnvironmentFile $publicEnv `
+            -OutputDirectory $imageDir `
+            -ApiUrl $env:VITE_API_URL `
+            -Tag $tag
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          "tag=$tag" >> $env:GITHUB_OUTPUT
+          "archive=$imageDir/grindify-images-$tag.tar" >> $env:GITHUB_OUTPUT
+
+      - name: Configure SSH
+        shell: bash
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+          DEPLOY_PORT: ${{ vars.DEPLOY_PORT || '22' }}
+        run: |
+          set -euo pipefail
+          : "${DEPLOY_HOST:?Set the DEPLOY_HOST repository secret}"
+          : "${DEPLOY_USER:?Set the DEPLOY_USER repository secret}"
+          : "${DEPLOY_SSH_KEY:?Set the DEPLOY_SSH_KEY repository secret}"
+          : "${DEPLOY_KNOWN_HOSTS:?Set the DEPLOY_KNOWN_HOSTS repository secret}"
+          [[ "$DEPLOY_HOST" =~ ^[A-Za-z0-9.-]+$ ]] || { echo 'Invalid DEPLOY_HOST' >&2; exit 1; }
+          [[ "$DEPLOY_USER" =~ ^[A-Za-z_][A-Za-z0-9_-]*$ ]] || { echo 'Invalid DEPLOY_USER' >&2; exit 1; }
+          [[ "$DEPLOY_PORT" =~ ^[0-9]{1,5}$ ]] || { echo 'Invalid DEPLOY_PORT' >&2; exit 1; }
+
+          umask 077
+          printf '%s\n' "$DEPLOY_SSH_KEY" > "$RUNNER_TEMP/grindify-deploy-key"
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > "$RUNNER_TEMP/grindify-known-hosts"
+          printf 'Host grindify-target\n  HostName %s\n  User %s\n  Port %s\n  IdentityFile %s\n  UserKnownHostsFile %s\n  StrictHostKeyChecking yes\n  IdentitiesOnly yes\n  BatchMode yes\n' \
+            "$DEPLOY_HOST" "$DEPLOY_USER" "$DEPLOY_PORT" \
+            "$RUNNER_TEMP/grindify-deploy-key" "$RUNNER_TEMP/grindify-known-hosts" \
+            > "$RUNNER_TEMP/grindify-ssh-config"
+
+      - name: Upload archive and deployment files
+        shell: bash
+        env:
+          IMAGE_ARCHIVE: ${{ steps.archive.outputs.archive }}
+          IMAGE_TAG: ${{ steps.archive.outputs.tag }}
+        run: |
+          set -euo pipefail
+          ssh -F "$RUNNER_TEMP/grindify-ssh-config" grindify-target \
+            'test -f "$HOME/Grindify/.env" && mkdir -p "$HOME/Grindify/.deploy/incoming" "$HOME/Grindify/deploy/acwing"'
+          scp -F "$RUNNER_TEMP/grindify-ssh-config" \
+            "$IMAGE_ARCHIVE" "$IMAGE_ARCHIVE.sha256" \
+            docker-compose.images.yml deploy/acwing/deploy-image-archive.sh \
+            grindify-target:Grindify/.deploy/incoming/
+
+      - name: Deploy and verify on server
+        shell: bash
+        env:
+          IMAGE_TAG: ${{ steps.archive.outputs.tag }}
+        run: |
+          set -euo pipefail
+          ssh -F "$RUNNER_TEMP/grindify-ssh-config" grindify-target \
+            "bash -s -- '$IMAGE_TAG'" <<'REMOTE'
+          set -euo pipefail
+          tag=$1
+          cd "$HOME/Grindify"
+          cp .deploy/incoming/docker-compose.images.yml docker-compose.images.yml
+          cp .deploy/incoming/deploy-image-archive.sh deploy/acwing/deploy-image-archive.sh
+          bash deploy/acwing/deploy-image-archive.sh \
+            "$tag" ".deploy/incoming/grindify-images-$tag.tar"
+          rm -f -- ".deploy/incoming/grindify-images-$tag.tar" \
+            ".deploy/incoming/grindify-images-$tag.tar.sha256" \
+            .deploy/incoming/docker-compose.images.yml \
+            .deploy/incoming/deploy-image-archive.sh
+          REMOTE
