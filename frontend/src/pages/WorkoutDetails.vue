@@ -25,7 +25,7 @@
   >
 <!-- 标题 -->
     <BackHeader
-      :title="workout?.title || ''"
+      :title="displayWorkoutTitle"
       show-menu
       @close="handleBack"
     >
@@ -86,7 +86,7 @@
             {{ $t(`editWorkout.types.${workout.type}`) }}
           </v-chip>
         </div>
-        <h1 class="text-h5 font-weight-bold">{{ workout?.title }}</h1>
+        <h1 class="text-h5 font-weight-bold">{{ displayWorkoutTitle }}</h1>
       </div>
 
 <!-- 统计卡片 -->
@@ -137,9 +137,9 @@
       </div>
 
 <!-- 关于 -->
-      <div v-if="workout?.description">
+      <div v-if="displayWorkoutDescription">
         <h1 class="text-h6">{{ $t('exerciseDetails.about') }}</h1>
-        <p class="text-body-1 text-textSecondary mt-1">{{ workout.description }}</p>
+        <p class="text-body-1 text-textSecondary mt-1">{{ displayWorkoutDescription }}</p>
       </div>
 
 <!-- 目标肌群 -->
@@ -325,6 +325,8 @@ function closeExerciseDetails() {
 }
 
 const workout = computed<Workout | null>(() => workoutStore.currentWorkout)
+const displayWorkoutTitle = computed(() => resolveI18n(workout.value?.titleI18n, lang.value) || workout.value?.title || '')
+const displayWorkoutDescription = computed(() => resolveI18n(workout.value?.descriptionI18n, lang.value) || workout.value?.description || '')
 
 const sortedExercises = computed(() => {
   if (!workout.value?.exercises) return []

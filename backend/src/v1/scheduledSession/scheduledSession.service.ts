@@ -231,6 +231,12 @@ export class ScheduledSessionService {
 
     if (dto.type !== undefined) scheduled.type = dto.type;
     if (dto.workoutId !== undefined) {
+      if (dto.workoutId) {
+        const workout = await this.workoutRepo.findOne({
+          where: { id: dto.workoutId, createdBy: { id: userId }, isGlobal: false },
+        });
+        if (!workout) throw new NotFoundException('Workout not found');
+      }
       scheduled.workout = dto.workoutId ? ({ id: dto.workoutId } as any) : null;
     }
     if (dto.activityId !== undefined) {

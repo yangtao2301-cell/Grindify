@@ -176,7 +176,7 @@ export class WorkoutSessionService {
     scheduledSessionId?: number,
   ): Promise<WorkoutSession> {
     const workout = await this.workoutRepo.findOne({
-      where: { id: workoutId },
+      where: { id: workoutId, createdBy: { id: userId }, isGlobal: false },
       relations: ['exercises', 'exercises.exercise'],
     });
 
@@ -244,9 +244,10 @@ export class WorkoutSessionService {
       let workout: Workout | null = null;
       if (dto.workoutId) {
         workout = await manager.findOne(Workout, {
-          where: { id: dto.workoutId },
+          where: { id: dto.workoutId, createdBy: { id: userId }, isGlobal: false },
           withDeleted: true,
         });
+        if (!workout) throw new NotFoundException('Workout not found');
       }
 
       const session = manager.create(WorkoutSession, {

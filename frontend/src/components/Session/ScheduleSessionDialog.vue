@@ -205,7 +205,7 @@ import type { ScheduledSessionType } from '@/interfaces/ScheduledSession.interfa
 import type { Workout } from '@/interfaces/Workout.interface'
 import type { Activity } from '@/interfaces/Activity.interface'
 import { useI18n } from 'vue-i18n'
-import { displayActivityName } from '@/utils/exerciseDisplay'
+import { displayActivityName, displayWorkoutName } from '@/utils/exerciseDisplay'
 import { useUserLanguage } from '@/composables/useUserLanguage'
 import { useUnsavedChanges } from '@/composables/useUnsavedChanges'
 
@@ -281,7 +281,7 @@ const itemList = computed<ListItem[]>(() => {
   if (sessionType.value === 'workout') {
     return ((workoutStore.workouts || []) as Workout[]).map(w => ({
       id: w.id,
-      name: w.title,
+      name: displayWorkoutName(w, lang.value),
     }))
   } else {
     return ((activityStore.activities || []) as Activity[]).map(a => ({

@@ -24,9 +24,9 @@ import { fetchWrapper } from '@/utils/fetchWrapper';
 
 const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:1337/v1';
 
-export const fetchAllWorkouts = async () => {
+export const fetchAllWorkouts = async (filter: 'mine' | 'global' | 'all' = 'mine') => {
   try {
-    const data = await fetchWrapper<Workout[]>(`${apiUrl}/workouts`);
+    const data = await fetchWrapper<Workout[]>(`${apiUrl}/workouts?filter=${filter}`);
     return Array.isArray(data) ? data : [];
   } catch (error) {
     console.error('Error fetching workouts:', error);

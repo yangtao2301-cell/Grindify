@@ -25,6 +25,11 @@
       </template>
     </BackHeader>
 
+    <v-tabs v-model="scope" color="primary" grow class="mx-5 mb-2" style="flex: 0 0 auto">
+      <v-tab value="mine">{{ $t('workoutList.myPlans') }}</v-tab>
+      <v-tab value="global">{{ $t('workoutList.publicPlans') }}</v-tab>
+    </v-tabs>
+
     <div class="mx-5 mt-2 mb-4">
       <v-text-field
         v-model="search"
@@ -104,9 +109,12 @@
                 <v-chip size="x-small" variant="outlined" class="mb-1">
                   {{ getWorkoutType(workout) }}
                 </v-chip>
+                <v-chip v-if="workout.difficulty" size="x-small" variant="outlined" class="mb-1 ml-1">
+                  {{ workout.difficulty === 'beginner' ? $t('workoutList.beginner') : workout.difficulty }}
+                </v-chip>
               </div>
               <v-list-item-title class="text-body-1 font-weight-bold">
-                {{ workout.title }}
+                {{ displayWorkoutTitle(workout) }}
               </v-list-item-title>
               <p class="text-textSecondary text-caption">
                 {{ workout.time }} {{ $t('units.minShort') }} • {{ workout.exercises.length }}
@@ -118,7 +126,18 @@
         </div>
       </v-list-item>
 
-      <div class="d-flex justify-center mt-2 mx-5">
+      <div v-if="scope === 'global' && loadingGlobal" class="text-center py-6">
+        <v-progress-circular indeterminate color="primary" />
+      </div>
+      <div v-else-if="scope === 'global' && globalError" class="text-center py-6 mx-5">
+        <p class="text-textSecondary mb-3">{{ $t('workoutList.failedToLoadPublic') }}</p>
+        <v-btn color="primary" variant="tonal" @click="loadGlobalWorkouts">{{ $t('workoutList.retry') }}</v-btn>
+      </div>
+      <div v-else-if="filteredWorkouts.length === 0" class="text-center text-textSecondary py-6 mx-5">
+        {{ scope === 'global' ? $t('workoutList.noPublicPlans') : $t('workoutList.noWorkoutsMatchFilters') }}
+      </div>
+
+      <div v-if="scope === 'mine'" class="d-flex justify-center mt-2 mx-5">
         <v-btn
           outlined
           block
@@ -140,6 +159,14 @@
     <HistoryDialog v-model="isCreateWorkoutOpen" history-key="settings:workout-create" fullscreen>
       <CreateWorkout history-key="settings:workout-create" @close="isCreateWorkoutOpen = false" />
     </HistoryDialog>
+    <v-dialog v-model="isPublicDetailsOpen" fullscreen>
+      <PublicWorkoutDetails
+        v-if="selectedGlobalWorkout"
+        :workout="selectedGlobalWorkout"
+        @close="isPublicDetailsOpen = false"
+        @added="onPublicWorkoutAdded"
+      />
+    </v-dialog>
 
     <HistoryDialog
       v-model="isWorkoutDetailsOpen"
@@ -165,16 +192,43 @@ import WorkoutDetails from '@/pages/WorkoutDetails.vue'
 import { resolveI18n } from '@/utils/exerciseDisplay'
 import { useUserLanguage } from '@/composables/useUserLanguage'
 import { useRoute } from 'vue-router'
+import { fetchAllWorkouts } from '@/services/workout.service'
+import PublicWorkoutDetails from './PublicWorkoutDetails.vue'
 
 const { t } = useI18n({ useScope: 'global' })
 const { lang } = useUserLanguage()
 
 const emit = defineEmits<{ (e: 'close'): void }>()
+const props = withDefaults(defineProps<{ initialScope?: 'mine' | 'global' }>(), { initialScope: 'mine' })
 const workoutStore = useWorkoutStore()
 const route = useRoute()
+const scope = ref<'mine' | 'global'>(props.initialScope)
+const globalWorkouts = ref<Workout[]>([])
+const loadingGlobal = ref(false)
+const globalError = ref(false)
+const isPublicDetailsOpen = ref(false)
+const selectedGlobalWorkout = ref<Workout | null>(null)
+
+async function loadGlobalWorkouts() {
+  loadingGlobal.value = true
+  globalError.value = false
+  try {
+    globalWorkouts.value = await fetchAllWorkouts('global')
+  } catch {
+    globalError.value = true
+  } finally {
+    loadingGlobal.value = false
+  }
+}
+
+onMounted(() => {
+  if (props.initialScope === 'mine' && !workoutStore.workouts.length) scope.value = 'global'
+  void loadGlobalWorkouts()
+})
 
 const workouts = computed<Workout[]>(() => {
-  const w = (workoutStore.workouts as Workout[]) || []
+  const w = scope.value === 'global' ? globalWorkouts.value : (workoutStore.workouts as Workout[]) || []
+  if (scope.value === 'global') return w
   return w.slice().sort((a, b) => {
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   })
@@ -233,7 +287,7 @@ const filteredWorkouts = computed<Workout[]>(() => {
   if (q) {
     list = list.filter(w => {
       const inTitle =
-        w.title.toLowerCase().includes(q) || (w.description || '').toLowerCase().includes(q)
+        displayWorkoutTitle(w).toLowerCase().includes(q) || displayWorkoutDescription(w).toLowerCase().includes(q)
       const inExercises = w.exercises.some(it => resolveI18n(it.exercise.title, lang.value).toLowerCase().includes(q))
       return inTitle || inExercises
     })
@@ -247,6 +301,7 @@ const filteredWorkouts = computed<Workout[]>(() => {
     })
   }
 
+  if (scope.value === 'global') return list
   return list.slice().sort((a, b) => {
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   })
@@ -323,8 +378,28 @@ function clearAllFilters() {
 }
 
 function openWorkoutDetails(id: number) {
+  if (scope.value === 'global') {
+    selectedGlobalWorkout.value = globalWorkouts.value.find(workout => workout.id === id) ?? null
+    isPublicDetailsOpen.value = !!selectedGlobalWorkout.value
+    return
+  }
   selectedWorkoutId.value = id
   isWorkoutDetailsOpen.value = true
+}
+
+function displayWorkoutTitle(workout: Workout) {
+  return resolveI18n(workout.titleI18n, lang.value) || workout.title
+}
+
+function displayWorkoutDescription(workout: Workout) {
+  return resolveI18n(workout.descriptionI18n, lang.value) || workout.description || ''
+}
+
+async function onPublicWorkoutAdded(id: number) {
+  isPublicDetailsOpen.value = false
+  await workoutStore.setWorkouts(true)
+  scope.value = 'mine'
+  openWorkoutDetails(id)
 }
 </script>
 <style scoped>

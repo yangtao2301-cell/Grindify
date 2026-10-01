@@ -25,6 +25,7 @@ import { ActivityModule } from '../activity/activity.module';
 import { MuscleGroupModule } from '../muscleGroup/muscleGroup.module';
 import { ExerciseImage } from '../exercise/exerciseImage.entity';
 import { UploadModule } from '../upload/upload.module';
+import { WorkoutModule } from '../workout/workout.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { UploadModule } from '../upload/upload.module';
     ActivityModule,
     MuscleGroupModule,
     UploadModule,
+    WorkoutModule,
   ],
   controllers: [AdminController],
   providers: [AdminService],

@@ -68,6 +68,8 @@ import { CreateMuscleGroupAdminDto } from '../muscleGroup/dto/createMuscleGroupA
 import { ExerciseImage } from '../exercise/exerciseImage.entity';
 import { ExerciseImageResponseDto } from '../exercise/dto/exerciseImageResponse.dto';
 import { UploadService } from '../upload/upload.service';
+import { WorkoutService } from '../workout/workout.service';
+import { CreateGlobalWorkoutDto, UpdateGlobalWorkoutDto } from '../workout/dto/globalWorkout.dto';
 
 interface RequestWithUser extends Request {
   user: { id: number; email: string; role: string };
@@ -84,6 +86,7 @@ export class AdminController {
     private readonly activityService: ActivityService,
     private readonly muscleGroupService: MuscleGroupService,
     private readonly uploadService: UploadService,
+    private readonly workoutService: WorkoutService,
     @InjectRepository(ExerciseImage)
     private readonly exerciseImageRepo: Repository<ExerciseImage>,
   ) {}
@@ -122,6 +125,33 @@ export class AdminController {
   @ApiOperation({ summary: 'Get a single user by ID' })
   getUser(@Param('id', ParseIntPipe) id: number) {
     return this.adminService.getUserById(id);
+  }
+
+  // --- 全局训练动作 ---
+
+  @Get('workout-templates')
+  @ApiOperation({ summary: 'List public workout templates, including drafts' })
+  listGlobalWorkouts() {
+    return this.workoutService.getGlobalWorkoutList(true);
+  }
+
+  @Post('workout-templates')
+  @ApiOperation({ summary: 'Create a public workout template' })
+  createGlobalWorkout(@Body() dto: CreateGlobalWorkoutDto) {
+    return this.workoutService.createGlobalWorkout(dto);
+  }
+
+  @Put('workout-templates/:id')
+  @ApiOperation({ summary: 'Update a public workout template' })
+  updateGlobalWorkout(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateGlobalWorkoutDto) {
+    return this.workoutService.updateGlobalWorkout(id, dto);
+  }
+
+  @Delete('workout-templates/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Archive a public workout template' })
+  deleteGlobalWorkout(@Param('id', ParseIntPipe) id: number) {
+    return this.workoutService.deleteGlobalWorkout(id);
   }
 
   // --- 全局训练动作 ---

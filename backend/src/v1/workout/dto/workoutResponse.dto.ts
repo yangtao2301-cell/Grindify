@@ -16,6 +16,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { WorkoutExerciseSnapshotDto } from './workoutExerciseSnapshot.dto';
 import { MuscleGroupResponseDto } from 'src/v1/muscleGroup/dto/muscleGroupResponse.dto';
+import { I18nString } from '../../common/types/i18n.types';
 
 export class WorkoutResponseDto {
   @ApiProperty()
@@ -26,6 +27,33 @@ export class WorkoutResponseDto {
 
   @ApiProperty({ required: false })
   description?: string;
+
+  @ApiProperty({ required: false })
+  titleI18n?: I18nString | null;
+
+  @ApiProperty({ required: false })
+  descriptionI18n?: I18nString | null;
+
+  @ApiProperty()
+  isGlobal: boolean;
+
+  @ApiProperty({ required: false })
+  sourceTemplateId?: number;
+
+  @ApiProperty({ required: false })
+  templateKey?: string;
+
+  @ApiProperty({ required: false })
+  status?: string;
+
+  @ApiProperty({ required: false })
+  difficulty?: string;
+
+  @ApiProperty({ required: false })
+  goal?: string;
+
+  @ApiProperty({ required: false, type: [String] })
+  equipment?: string[];
 
   @ApiProperty({ required: false })
   time?: number;

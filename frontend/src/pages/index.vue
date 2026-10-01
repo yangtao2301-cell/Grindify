@@ -39,7 +39,7 @@
               <p class="text-body-2 font-weight-bold">
                 {{
                   session.type === 'workout'
-                    ? session.workout?.title
+                    ? session.workout ? displayWorkoutName(session.workout, lang) : ''
                     : session.activity
                       ? displayActivityName(session.activity, lang)
                       : ''
@@ -142,7 +142,7 @@ import type { StreakInfo } from '@/interfaces/User.interface'
 import type { WorkoutSession } from '@/interfaces/workoutSession.interface'
 import type { ScheduledSessionForDate } from '@/interfaces/ScheduledSession.interface'
 import { useRouter } from 'vue-router'
-import { displayActivityName } from '@/utils/exerciseDisplay'
+import { displayActivityName, displayWorkoutName } from '@/utils/exerciseDisplay'
 import { useUserLanguage } from '@/composables/useUserLanguage'
 
 const router = useRouter()

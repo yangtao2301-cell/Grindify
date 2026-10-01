@@ -46,3 +46,10 @@ export function displayActivityName(
 ): string {
   return resolveI18n(activity.title, lang)
 }
+
+export function displayWorkoutName(
+  workout: { title: string; titleI18n?: I18nString | null },
+  lang: SupportedLanguage,
+): string {
+  return resolveI18n(workout.titleI18n, lang) || workout.title
+}

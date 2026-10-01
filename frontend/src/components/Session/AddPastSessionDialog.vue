@@ -87,7 +87,7 @@
                     >mdi-dumbbell</v-icon
                   >
                 </template>
-                <v-list-item-title class="font-weight-bold">{{ w.title }}</v-list-item-title>
+                <v-list-item-title class="font-weight-bold">{{ displayWorkoutName(w, lang) }}</v-list-item-title>
                 <template #append>
                   <v-icon v-if="selectedWorkoutId === w.id" color="primary">mdi-check</v-icon>
                 </template>
@@ -378,7 +378,7 @@ import { createActivityLog } from '@/services/activityLog.service'
 import type { Activity } from '@/interfaces/Activity.interface'
 import type { Workout } from '@/interfaces/Workout.interface'
 import { parseDecimalInput, parseIntInput, normalizeDecimalStr } from '@/utils/decimalInput'
-import { displayExerciseName, displayActivityName } from '@/utils/exerciseDisplay'
+import { displayExerciseName, displayActivityName, displayWorkoutName } from '@/utils/exerciseDisplay'
 import { useUserLanguage } from '@/composables/useUserLanguage'
 import { useUnsavedChanges } from '@/composables/useUnsavedChanges'
 

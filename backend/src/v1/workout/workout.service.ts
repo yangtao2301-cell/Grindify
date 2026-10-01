@@ -13,7 +13,7 @@
  * <https://www.gnu.org/licenses/>.
  */
 
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { In, Like, Repository } from 'typeorm';
 import { Workout, WorkoutType } from './workout.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -28,6 +28,7 @@ import { Exercise } from '../exercise/exercise.entity';
 import { MuscleGroup } from '../muscleGroup/muscleGroup.entity';
 import { UpdateWorkoutExerciseDto } from './dto/updateWorkoutExercise.dto';
 import { DataSource } from 'typeorm';
+import { CreateGlobalWorkoutDto, UpdateGlobalWorkoutDto } from './dto/globalWorkout.dto';
 
 @Injectable()
 export class WorkoutService {
@@ -48,7 +49,7 @@ export class WorkoutService {
     userId: number,
   ): Promise<Workout> {
     const workout = await this.workoutRepo.findOne({
-      where: { id: workoutId, createdBy: { id: userId } },
+      where: { id: workoutId, createdBy: { id: userId }, isGlobal: false },
       relations: ['exercises'],
     });
     if (!workout) {
@@ -159,7 +160,10 @@ export class WorkoutService {
 
   async getWorkout(id: number, userId: number): Promise<WorkoutResponseDto> {
     const workout = await this.workoutRepo.findOne({
-      where: { id, createdBy: { id: userId } },
+      where: [
+        { id, createdBy: { id: userId }, isGlobal: false },
+        { id, isGlobal: true, status: 'published' },
+      ],
       relations: [
         'exercises',
         'exercises.exercise',
@@ -176,7 +180,7 @@ export class WorkoutService {
     // ……服务代码的其余部分
   async getWorkoutList(userId: number): Promise<WorkoutResponseDto[]> {
     const workouts = await this.workoutRepo.find({
-      where: { createdBy: { id: userId } },
+      where: { createdBy: { id: userId }, isGlobal: false },
       relations: [
         'exercises',
         'exercises.exercise',
@@ -188,6 +192,115 @@ export class WorkoutService {
     });
 
     return workouts.map((w) => this.toResponseDto(w));
+  }
+
+  async getGlobalWorkoutList(includeUnpublished = false): Promise<WorkoutResponseDto[]> {
+    const workouts = await this.workoutRepo.find({
+      where: includeUnpublished ? { isGlobal: true } : { isGlobal: true, status: 'published' },
+      relations: [
+        'exercises', 'exercises.exercise', 'exercises.exercise.muscleGroups',
+        'exercises.exercise.primaryMuscleGroups', 'targetMuscleGroups',
+      ],
+      order: { sortOrder: 'ASC', id: 'ASC' },
+    });
+    return workouts.map((workout) => this.toResponseDto(workout));
+  }
+
+  async getGlobalWorkout(id: number): Promise<WorkoutResponseDto> {
+    const workout = await this.workoutRepo.findOne({
+      where: { id, isGlobal: true },
+      relations: [
+        'exercises', 'exercises.exercise', 'exercises.exercise.muscleGroups',
+        'exercises.exercise.primaryMuscleGroups', 'targetMuscleGroups',
+      ],
+    });
+    if (!workout) throw new NotFoundException('Public workout not found');
+    return this.toResponseDto(workout);
+  }
+
+  async createGlobalWorkout(dto: CreateGlobalWorkoutDto): Promise<WorkoutResponseDto> {
+    const id = await this.dataSource.transaction(async (manager) => {
+      const workout = manager.create(Workout, {
+        title: dto.title,
+        description: dto.description,
+        titleI18n: dto.titleI18n,
+        descriptionI18n: dto.descriptionI18n,
+        time: dto.time,
+        type: dto.type,
+        defaultWeightAndReps: dto.defaultWeightAndReps ?? 'default',
+        isGlobal: true,
+        createdBy: null,
+        status: dto.status ?? 'published',
+        difficulty: dto.difficulty,
+        goal: dto.goal,
+        equipment: dto.equipment,
+        sortOrder: dto.sortOrder ?? 0,
+        targetMuscleGroups: dto.targetMuscleGroupIds?.length
+          ? await manager.findBy(MuscleGroup, { id: In(dto.targetMuscleGroupIds) })
+          : [],
+      });
+      const saved = await manager.save(Workout, workout);
+      await this.replaceGlobalExercises(manager, saved, dto.exercises);
+      return saved.id;
+    });
+    return this.getGlobalWorkout(id);
+  }
+
+  async updateGlobalWorkout(id: number, dto: UpdateGlobalWorkoutDto): Promise<WorkoutResponseDto> {
+    await this.dataSource.transaction(async (manager) => {
+      const workout = await manager.findOne(Workout, {
+        where: { id, isGlobal: true }, relations: ['targetMuscleGroups'],
+      });
+      if (!workout) throw new NotFoundException('Public workout not found');
+      for (const field of ['title', 'description', 'titleI18n', 'descriptionI18n', 'time', 'type', 'defaultWeightAndReps', 'status', 'difficulty', 'goal', 'equipment', 'sortOrder'] as const) {
+        if (dto[field] !== undefined) (workout as any)[field] = dto[field];
+      }
+      if (dto.targetMuscleGroupIds !== undefined) {
+        workout.targetMuscleGroups = dto.targetMuscleGroupIds.length
+          ? await manager.findBy(MuscleGroup, { id: In(dto.targetMuscleGroupIds) })
+          : [];
+      }
+      await manager.save(Workout, workout);
+      if (dto.exercises !== undefined) await this.replaceGlobalExercises(manager, workout, dto.exercises);
+    });
+    return this.getGlobalWorkout(id);
+  }
+
+  async deleteGlobalWorkout(id: number): Promise<void> {
+    const workout = await this.workoutRepo.findOne({ where: { id, isGlobal: true } });
+    if (!workout) throw new NotFoundException('Public workout not found');
+    await this.workoutRepo.softDelete(id);
+  }
+
+  private async replaceGlobalExercises(
+    manager: import('typeorm').EntityManager,
+    workout: Workout,
+    exercises: CreateGlobalWorkoutDto['exercises'],
+  ): Promise<void> {
+    if (!exercises.length) throw new BadRequestException('A public workout needs exercises');
+    const ids = exercises.map((item) => item.exerciseId);
+    if (new Set(ids).size !== ids.length || new Set(exercises.map((item) => item.order)).size !== exercises.length) {
+      throw new BadRequestException('Exercise IDs and order values must be unique');
+    }
+    const available = await manager.find(Exercise, { where: { id: In(ids), isGlobal: true } });
+    if (available.length !== ids.length) throw new BadRequestException('All template exercises must be public');
+    for (const item of exercises) {
+      if (item.setWeights && item.setWeights.length !== item.sets) {
+        throw new BadRequestException('setWeights length must match sets');
+      }
+    }
+    await manager.delete(WorkoutExercise, { workout: { id: workout.id } });
+    await manager.save(WorkoutExercise, exercises.map((item) => manager.create(WorkoutExercise, {
+      workout,
+      exercise: available.find((exercise) => exercise.id === item.exerciseId)!,
+      order: item.order,
+      sets: item.sets,
+      reps: item.reps,
+      weight: item.weight,
+      setWeights: item.setWeights ?? Array(item.sets).fill(item.weight),
+      pauseSeconds: item.pauseSeconds,
+      distance: item.distance,
+    })));
   }
 
   async createWorkout(
@@ -223,6 +336,8 @@ export class WorkoutService {
 
     const { targetMuscleGroupIds, type, ...workoutData } = dto;
     Object.assign(workout, workoutData);
+    if (dto.title !== undefined) workout.titleI18n = null;
+    if (dto.description !== undefined) workout.descriptionI18n = null;
     if (type !== undefined) {
       workout.type = type as WorkoutType;
     }
@@ -246,7 +361,7 @@ export class WorkoutService {
     userId: number,
   ): Promise<{ message: string }> {
     const workout = await this.workoutRepo.findOne({
-      where: { id, createdBy: { id: userId } },
+      where: { id, createdBy: { id: userId }, isGlobal: false },
     });
     if (!workout) throw new NotFoundException('Workout not found');
 
@@ -260,11 +375,15 @@ export class WorkoutService {
     userId: number,
   ): Promise<WorkoutResponseDto> {
     const original = await this.workoutRepo.findOne({
-      where: { id, createdBy: { id: userId } },
+      where: [
+        { id, createdBy: { id: userId }, isGlobal: false },
+        { id, isGlobal: true, status: 'published' },
+      ],
       relations: [
         'exercises',
         'exercises.exercise',
         'exercises.exercise.primaryMuscleGroups',
+        'targetMuscleGroups',
         'createdBy',
       ],
     });
@@ -276,20 +395,34 @@ export class WorkoutService {
       where: { createdBy: { id: userId }, title: Like(`${baseTitle}%`) },
     });
 
-    let copyNumber = 1;
+    let copyNumber = original.isGlobal && existingCopies.length === 0 ? 0 : 1;
     existingCopies.forEach((w) => {
       const match = w.title.match(/\((\d+)\)$/);
       const number = match ? parseInt(match[1], 10) : 0;
-      copyNumber = Math.max(copyNumber, number + 1);
+      copyNumber = Math.max(copyNumber, number > 0 ? number + 1 : 2);
     });
+
+    const suffix = copyNumber ? ` (${copyNumber})` : '';
+    const localizedTitle = original.titleI18n
+      ? Object.fromEntries(Object.entries(original.titleI18n).map(([language, title]) => [
+          language,
+          title ? `${title.replace(/\s\(\d+\)$/, '')}${suffix}` : title,
+        ]))
+      : null;
 
     return await this.dataSource.transaction(async (manager) => {
       const newWorkout = manager.create(Workout, {
-        title: `${baseTitle} (${copyNumber})`,
+        title: `${baseTitle}${suffix}`,
         description: original.description,
+        titleI18n: localizedTitle,
+        descriptionI18n: original.descriptionI18n,
         time: original.time,
+        type: original.type,
         defaultWeightAndReps: original.defaultWeightAndReps,
-        createdBy: original.createdBy,
+        isGlobal: false,
+        sourceTemplateId: original.isGlobal ? original.id : original.sourceTemplateId,
+        createdBy: { id: userId } as User,
+        targetMuscleGroups: original.targetMuscleGroups,
       });
 
       const savedWorkout = await manager.save(Workout, newWorkout);
@@ -306,6 +439,7 @@ export class WorkoutService {
             weight: we.weight,
             setWeights: we.setWeights ?? null,
             pauseSeconds: we.pauseSeconds,
+            distance: we.distance,
           }),
         );
 
@@ -334,6 +468,15 @@ export class WorkoutService {
       id: workout.id,
       title: workout.title,
       description: workout.description,
+      titleI18n: workout.titleI18n,
+      descriptionI18n: workout.descriptionI18n,
+      isGlobal: workout.isGlobal,
+      sourceTemplateId: workout.sourceTemplateId,
+      templateKey: workout.templateKey,
+      status: workout.status,
+      difficulty: workout.difficulty,
+      goal: workout.goal,
+      equipment: workout.equipment,
       time: workout.time,
       type: workout.type ?? undefined,
       defaultWeightAndReps: workout.defaultWeightAndReps,
@@ -353,9 +496,10 @@ export class WorkoutService {
             order: e.order,
             sets: e.sets,
             reps: e.reps,
-            weight: e.weight,
+            weight: Number(e.weight),
             setWeights: e.setWeights ?? null,
             pauseSeconds: e.pauseSeconds,
+            distance: e.distance == null ? null : Number(e.distance),
             exercise: {
               id: e.exercise.id,
               title: e.exercise.title,

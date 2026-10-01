@@ -67,6 +67,12 @@ export class WorkoutExerciseSnapshotDto {
   @ApiProperty()
   weight!: number;
 
+  @ApiProperty({ required: false, type: [Number], nullable: true })
+  setWeights?: number[] | null;
+
+  @ApiProperty({ required: false, nullable: true })
+  distance?: number | null;
+
   @ApiProperty()
   pauseSeconds!: number;
 

@@ -141,7 +141,7 @@ import type { WorkoutSession } from '@/interfaces/workoutSession.interface'
 import type { ActivityLog } from '@/interfaces/Activity.interface'
 import { useI18n } from 'vue-i18n'
 import SessionDetail from '@/pages/SessionDetail.vue'
-import { displayExerciseName, displayActivityName, resolveI18n } from '@/utils/exerciseDisplay'
+import { displayExerciseName, displayActivityName, displayWorkoutName, resolveI18n } from '@/utils/exerciseDisplay'
 import { useUserLanguage } from '@/composables/useUserLanguage'
 import { useRoute } from 'vue-router'
 
@@ -186,7 +186,7 @@ const sessions = computed<UnifiedSession[]>(() => {
 
       if (session.type === 'workout') {
         const ws = session.data as WorkoutSession
-        if (ws.workout?.title?.toLowerCase().includes(query)) return true
+        if (ws.workout && displayWorkoutName(ws.workout, lang.value).toLowerCase().includes(query)) return true
         if (ws.notes?.toLowerCase().includes(query)) return true
         if (
           ws.exercises?.some(
@@ -272,7 +272,7 @@ function statusColor(status: WorkoutSession['status']) {
 function title(session: UnifiedSession) {
   if (session.type === 'workout') {
     return (
-      (session.data as WorkoutSession).workout?.title ||
+      ((session.data as WorkoutSession).workout ? displayWorkoutName((session.data as WorkoutSession).workout!, lang.value) : '') ||
       t('sessionList.sessionFallback', { id: (session.data as WorkoutSession).id })
     )
   } else {

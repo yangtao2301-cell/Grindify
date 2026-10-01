@@ -40,6 +40,11 @@ export class I18nStringDto implements I18nString {
   @ApiProperty({ required: false })
   @IsOptional()
   swe?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  zho?: string;
 }
 
 export class I18nStringArrayDto implements I18nStringArray {

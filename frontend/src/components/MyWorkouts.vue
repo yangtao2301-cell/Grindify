@@ -23,7 +23,7 @@
         <span
           v-if="workouts.length"
           class="text-capitalize text-primary text-caption font-weight-bold cursor-pointer"
-          @click="isWorkoutListOpen = true"
+          @click="openWorkoutList('mine')"
         >
           {{ $t('common.viewAll') }}
         </span>
@@ -54,7 +54,7 @@
           </v-avatar>
           <div>
             <h1 class="font-weight-bold text-textPrimary" style="font-size: 16px">
-              {{ workout.title }}
+              {{ displayWorkoutTitle(workout) }}
             </h1>
 
             <span class="text-caption text-textSecondary align-center d-flex ga-1">
@@ -87,6 +87,12 @@
     </v-card>
 
     <div class="d-flex justify-center mt-4">
+      <v-btn block color="primary" variant="tonal" class="mb-3" height="50" @click="openWorkoutList('global')">
+        {{ $t('workoutList.browsePublicPlans') }}
+      </v-btn>
+    </div>
+
+    <div class="d-flex justify-center">
       <v-btn
         outlined
         block
@@ -105,7 +111,7 @@
     </div>
 
     <HistoryDialog v-model="isWorkoutListOpen" history-key="home:workout-list" :back-to="backTo" fullscreen transition="slide-y-transition" persistent>
-      <WorkoutList @close="isWorkoutListOpen = false" />
+      <WorkoutList :initial-scope="listScope" @close="isWorkoutListOpen = false" />
     </HistoryDialog>
     <HistoryDialog v-model="isCreateWorkoutOpen" history-key="home:workout-create" :back-to="backTo" fullscreen>
       <CreateWorkout history-key="home:workout-create" @close="isCreateWorkoutOpen = false" />
@@ -117,14 +123,18 @@
 import { useRouter } from 'vue-router'
 import { useWorkoutStore } from '@/stores/workout.store'
 import type { Workout } from '@/interfaces/Workout.interface'
+import { resolveI18n } from '@/utils/exerciseDisplay'
+import { useUserLanguage } from '@/composables/useUserLanguage'
 
 defineProps<{ backTo: string }>()
 
 const router = useRouter()
 const workoutStore = useWorkoutStore()
+const { lang } = useUserLanguage()
 
 const loading = ref(false)
 const isWorkoutListOpen = ref(false)
+const listScope = ref<'mine' | 'global'>('mine')
 const isCreateWorkoutOpen = ref(false)
 
 const workouts = computed<Workout[]>(() => {
@@ -137,5 +147,14 @@ const workouts = computed<Workout[]>(() => {
 function routeTo(id: number) {
   workoutStore.setCurrentWorkout(id)
   router.push({ path: `/workout/${id}`, query: { returnTo: router.currentRoute.value.fullPath } })
+}
+
+function openWorkoutList(scope: 'mine' | 'global') {
+  listScope.value = scope
+  isWorkoutListOpen.value = true
+}
+
+function displayWorkoutTitle(workout: Workout) {
+  return resolveI18n(workout.titleI18n, lang.value) || workout.title
 }
 </script>

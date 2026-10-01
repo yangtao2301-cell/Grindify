@@ -174,7 +174,7 @@ import { useI18n } from 'vue-i18n'
 import { toast } from 'vuetify-sonner'
 import { mapSessionToWorkoutInitialData } from '@/utils/sessionToWorkout'
 import CreateWorkout from '@/components/Workout/CreateWorkout.vue'
-import { displayExerciseName } from '@/utils/exerciseDisplay'
+import { displayExerciseName, displayWorkoutName } from '@/utils/exerciseDisplay'
 import { useUserLanguage } from '@/composables/useUserLanguage'
 
 const { t } = useI18n({ useScope: 'global' })
@@ -200,7 +200,7 @@ const workoutInitialData = computed(() =>
 )
 
 // 推导出的统计数据
-const workoutName = computed(() => session?.workout?.title ?? t('sessionSummary.unknownWorkout'))
+const workoutName = computed(() => session?.workout ? displayWorkoutName(session.workout, lang.value) : t('sessionSummary.unknownWorkout'))
 
 const formattedDuration = computed(() => {
   const total = durationSeconds

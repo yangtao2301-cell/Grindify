@@ -297,7 +297,7 @@ import AddExerciseList from '@/components/Exercise/AddExerciseList.vue'
 import AcceptDialog from '@/components/basicUI/AcceptDialog.vue'
 import { toast } from 'vuetify-sonner'
 import { useI18n } from 'vue-i18n'
-import { displayExerciseName } from '@/utils/exerciseDisplay'
+import { displayExerciseName, resolveI18n } from '@/utils/exerciseDisplay'
 import { useUserLanguage } from '@/composables/useUserLanguage'
 import router from '@/router'
 import { parseDecimalInput } from '@/utils/decimalInput'
@@ -337,8 +337,8 @@ interface ExerciseForm {
 }
 
 const form = reactive({
-  title: props.workout?.title ?? '',
-  description: props.workout?.description ?? '',
+  title: resolveI18n(props.workout?.titleI18n, lang.value) || props.workout?.title || '',
+  description: resolveI18n(props.workout?.descriptionI18n, lang.value) || props.workout?.description || '',
   type: (props.workout?.type ?? null) as WorkoutType | null,
   time: props.workout?.time ?? 0,
   exercises: [] as ExerciseForm[],
@@ -354,8 +354,8 @@ const isDirty = computed(() => initialForm.value !== '' && currentFormSnapshot()
 // 根据训练初始化表单
 const initForm = () => {
   if (!props.workout) return
-  form.title = props.workout.title
-  form.description = props.workout.description ?? ''
+  form.title = resolveI18n(props.workout.titleI18n, lang.value) || props.workout.title
+  form.description = resolveI18n(props.workout.descriptionI18n, lang.value) || props.workout.description || ''
   form.type = props.workout.type ?? null
   form.time = props.workout.time
 

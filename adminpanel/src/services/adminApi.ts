@@ -136,6 +136,60 @@ export interface CreateGlobalExercisePayload {
   mistakesI18n?: I18nStringArray
 }
 
+export interface GlobalWorkoutExercise {
+  id: number
+  order: number
+  sets: number
+  reps: number
+  weight: number
+  setWeights?: number[] | null
+  pauseSeconds: number
+  distance?: number | null
+  exercise: { id: number; title: I18nString }
+}
+
+export interface GlobalWorkout {
+  id: number
+  title: string
+  description?: string
+  titleI18n?: I18nString | null
+  descriptionI18n?: I18nString | null
+  time: number
+  type?: string | null
+  difficulty?: string | null
+  goal?: string | null
+  equipment?: string[] | null
+  status: 'draft' | 'published' | 'archived'
+  exercises: GlobalWorkoutExercise[]
+  targetMuscleGroups?: { id: number; name: string }[]
+  createdAt: string
+}
+
+export interface CreateGlobalWorkoutPayload {
+  title: string
+  description?: string
+  titleI18n?: I18nString
+  descriptionI18n?: I18nString
+  time: number
+  type?: string
+  difficulty?: string
+  goal?: string
+  equipment?: string[]
+  status?: 'draft' | 'published' | 'archived'
+  sortOrder?: number
+  targetMuscleGroupIds?: number[]
+  exercises: Array<{
+    exerciseId: number
+    order: number
+    sets: number
+    reps: number
+    weight: number
+    setWeights?: number[]
+    pauseSeconds: number
+    distance?: number
+  }>
+}
+
 // --- 全局活动 ---
 
 export interface GlobalActivity {
@@ -201,6 +255,13 @@ export const adminApi = {
     return apiFetch<UsersResponse>(`/admin/users?${params}`)
   },
   getUser: (id: number) => apiFetch<AdminUserDetail>(`/admin/users/${id}`),
+  getGlobalWorkouts: () => apiFetch<GlobalWorkout[]>('/admin/workout-templates'),
+  createGlobalWorkout: (data: CreateGlobalWorkoutPayload) =>
+    apiFetch<GlobalWorkout>('/admin/workout-templates', { method: 'POST', body: JSON.stringify(data) }),
+  updateGlobalWorkout: (id: number, data: CreateGlobalWorkoutPayload) =>
+    apiFetch<GlobalWorkout>(`/admin/workout-templates/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteGlobalWorkout: (id: number) =>
+    apiFetch<void>(`/admin/workout-templates/${id}`, { method: 'DELETE' }),
   getReleases: () => apiFetch<ReleasesResponse>('/releases'),
   getHealth: () => apiFetch<HealthResponse>('/auth/health'),
 

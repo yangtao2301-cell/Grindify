@@ -209,7 +209,7 @@
               <v-icon size="18">mdi-clipboard-list</v-icon>
             </v-avatar>
             <div>
-              <p class="text-body-2 font-weight-bold">{{ workout.title }}</p>
+              <p class="text-body-2 font-weight-bold">{{ displayWorkoutName(workout, lang) }}</p>
               <p class="text-caption text-textSecondary">
                 {{ workout.exercises?.length ?? 0 }} {{ $t('statistics.exercises') }} ·
                 {{ workout.time }} {{ $t('units.minShort') }}
@@ -232,7 +232,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { resolveI18n } from '@/utils/exerciseDisplay'
+import { resolveI18n, displayWorkoutName } from '@/utils/exerciseDisplay'
 import { useUserLanguage } from '@/composables/useUserLanguage'
 import StatisticsHeroCard from '@/components/Statistics/StatisticsHeroCard.vue'
 import ActivityHeatmap from '@/components/Statistics/ActivityHeatmap.vue'

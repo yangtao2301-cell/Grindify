@@ -198,7 +198,7 @@
                 <p class="text-body-1 font-weight-bold">
                   {{
                     session.type === 'workout'
-                      ? session.workout?.title
+                      ? session.workout ? displayWorkoutName(session.workout, lang) : ''
                       : session.activity
                         ? displayActivityName(session.activity, lang)
                         : ''
@@ -488,7 +488,7 @@ import type { StreakInfo } from '@/interfaces/User.interface'
 import ScheduleSessionDialog from '@/components/Session/ScheduleSessionDialog.vue'
 import AddPastSessionDialog from '@/components/Session/AddPastSessionDialog.vue'
 import ScheduledSessionBottomSheet from '@/components/Session/ScheduledSessionBottomSheet.vue'
-import { displayActivityName } from '@/utils/exerciseDisplay'
+import { displayActivityName, displayWorkoutName } from '@/utils/exerciseDisplay'
 import { useUserLanguage } from '@/composables/useUserLanguage'
 
 const { t, locale } = useI18n({ useScope: 'global' })
@@ -706,7 +706,7 @@ const allCompletedEvents = computed<CalendarEvent[]>(() => {
         events.push({
           id: `workout-${session.id}`,
           sessionId: session.id,
-          name: session.workout?.title || t('calendar.workoutNumber', { number: index + 1 }),
+          name: session.workout ? displayWorkoutName(session.workout, lang.value) : t('calendar.workoutNumber', { number: index + 1 }),
           date: new Date(session.endedAt),
           type: 'workout',
           rawData: session,
@@ -743,7 +743,7 @@ const scheduledEvents = computed<CalendarEvent[]>(() => {
       sessionId: s.id,
       name:
         s.type === 'workout'
-          ? s.workout?.title || 'Workout'
+          ? s.workout ? displayWorkoutName(s.workout, lang.value) : t('schedule.workout')
           : s.activity
             ? displayActivityName(s.activity, lang.value)
             : 'Activity',

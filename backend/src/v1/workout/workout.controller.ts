@@ -25,6 +25,8 @@ import {
   UseGuards,
   UnauthorizedException,
   ParseIntPipe,
+  Query,
+  BadRequestException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -59,8 +61,15 @@ export class WorkoutController {
   @Get()
   @ApiOperation({ summary: 'Get all workouts for the logged-in user' })
   @ApiOkResponse({ type: [WorkoutResponseDto] })
-  getWorkoutList(@Req() req: RequestWithUser) {
-    return this.workoutService.getWorkoutList(this.getUserId(req));
+  async getWorkoutList(
+    @Req() req: RequestWithUser,
+    @Query('filter') filter: 'mine' | 'global' | 'all' = 'mine',
+  ) {
+    if (!['mine', 'global', 'all'].includes(filter)) throw new BadRequestException('Invalid filter');
+    if (filter === 'global') return this.workoutService.getGlobalWorkoutList();
+    const mine = await this.workoutService.getWorkoutList(this.getUserId(req));
+    if (filter === 'mine') return mine;
+    return [...mine, ...(await this.workoutService.getGlobalWorkoutList())];
   }
 
   @Post()

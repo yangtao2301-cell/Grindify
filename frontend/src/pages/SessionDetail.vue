@@ -423,7 +423,7 @@ import { mapSessionToWorkoutInitialData } from '@/utils/sessionToWorkout'
 import CreateWorkout from '@/components/Workout/CreateWorkout.vue'
 import EditWorkoutSessionDialog from '@/components/Session/EditWorkoutSessionDialog.vue'
 import EditSessionExerciseSetsDialog from '@/components/Session/EditSessionExerciseSetsDialog.vue'
-import { displayExerciseName, displayActivityName, resolveI18n } from '@/utils/exerciseDisplay'
+import { displayExerciseName, displayActivityName, displayWorkoutName, resolveI18n } from '@/utils/exerciseDisplay'
 import { useUserLanguage } from '@/composables/useUserLanguage'
 import { navigateBackTo, routeBackTarget } from '@/navigation/backNavigation'
 
@@ -529,7 +529,7 @@ const sessionIcon = computed(() => {
 const sessionTitle = computed(() => {
   if (type.value === 'workout') {
     return (
-      workoutSession.value?.workout?.title ?? t('sessionDetail.sessionFallback', { id: id.value })
+      workoutSession.value?.workout ? displayWorkoutName(workoutSession.value.workout, lang.value) : t('sessionDetail.sessionFallback', { id: id.value })
     )
   }
   return activityLog.value?.activity

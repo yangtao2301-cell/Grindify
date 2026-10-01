@@ -28,6 +28,7 @@ import {
 import { User } from '../user/user.entity';
 import { WorkoutExercise } from './workoutExercise.entity';
 import { MuscleGroup } from '../muscleGroup/muscleGroup.entity';
+import { I18nString } from '../common/types/i18n.types';
 
 export enum WorkoutType {
   STRENGTH = 'strength',
@@ -48,6 +49,36 @@ export class Workout {
   @Column({ nullable: true })
   description: string;
 
+  @Column({ type: 'jsonb', nullable: true })
+  titleI18n?: I18nString | null;
+
+  @Column({ type: 'jsonb', nullable: true })
+  descriptionI18n?: I18nString | null;
+
+  @Column({ default: false })
+  isGlobal: boolean;
+
+  @Column({ type: 'varchar', nullable: true, unique: true })
+  templateKey?: string;
+
+  @Column({ type: 'varchar', default: 'published' })
+  status: 'draft' | 'published' | 'archived';
+
+  @Column({ type: 'varchar', nullable: true })
+  difficulty?: string;
+
+  @Column({ type: 'varchar', nullable: true })
+  goal?: string;
+
+  @Column({ type: 'jsonb', nullable: true })
+  equipment?: string[];
+
+  @Column({ type: 'int', default: 0 })
+  sortOrder: number;
+
+  @Column({ type: 'int', nullable: true })
+  sourceTemplateId?: number;
+
   @Column()
   time: number;
 
@@ -61,8 +92,8 @@ export class Workout {
   })
   defaultWeightAndReps: 'default' | 'latest';
 
-  @ManyToOne(() => User, { onDelete: 'CASCADE' })
-  createdBy: User;
+  @ManyToOne(() => User, { onDelete: 'CASCADE', nullable: true })
+  createdBy: User | null;
 
   @ManyToMany(() => MuscleGroup, { eager: false })
   @JoinTable({ name: 'workout_target_muscle_groups' })

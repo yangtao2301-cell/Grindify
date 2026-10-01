@@ -20,8 +20,17 @@ export type WorkoutType = 'strength' | 'cardio' | 'hiit' | 'flexibility' | 'endu
 export interface Workout {
   id: number
   title: string
+  titleI18n?: I18nString | null
   time: number
   description?: string
+  descriptionI18n?: I18nString | null
+  isGlobal?: boolean
+  sourceTemplateId?: number | null
+  templateKey?: string | null
+  status?: 'draft' | 'published' | 'archived'
+  difficulty?: string | null
+  goal?: string | null
+  equipment?: string[] | null
   type?: WorkoutType | null
   exercises: Exercise[]
   targetMuscleGroups?: MuscleGroup[]
@@ -38,6 +47,7 @@ export interface Exercise {
   weight: number
   setWeights: number[] | null
   pauseSeconds: number
+  distance?: number | null
   exerciseId: number
   exercise: {
     id: number

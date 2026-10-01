@@ -105,7 +105,7 @@ export class AdminService {
   async getStats() {
     const [totalUsers, totalWorkouts, totalSessions] = await Promise.all([
       this.userRepo.count(),
-      this.workoutRepo.count(),
+      this.workoutRepo.count({ where: { isGlobal: false } }),
       this.sessionRepo.count({ where: { status: 'finished' } }),
     ]);
 

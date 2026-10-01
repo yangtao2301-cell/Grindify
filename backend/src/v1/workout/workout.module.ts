@@ -21,14 +21,16 @@ import { WorkoutController } from './workout.controller';
 import { WorkoutExercise } from './workoutExercise.entity';
 import { WorkoutSessionModule } from '../workoutSession/workoutSession.module';
 import { MuscleGroup } from '../muscleGroup/muscleGroup.entity';
+import { Exercise } from '../exercise/exercise.entity';
+import { WorkoutSeedService } from './workoutSeed.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Workout, WorkoutExercise, MuscleGroup]),
+    TypeOrmModule.forFeature([Workout, WorkoutExercise, MuscleGroup, Exercise]),
     forwardRef(() => WorkoutSessionModule),
   ],
-  providers: [WorkoutService],
+  providers: [WorkoutService, WorkoutSeedService],
   controllers: [WorkoutController],
-  exports: [TypeOrmModule],
+  exports: [TypeOrmModule, WorkoutService],
 })
 export class WorkoutModule {}
