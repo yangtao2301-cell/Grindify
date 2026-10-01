@@ -26,9 +26,9 @@ jobs:
       - name: Lint Frontend
         working-directory: ./frontend
         run: |
-# 安装前端依赖（包括 ESLint 插件）
+          # 安装前端依赖（包括 ESLint 插件）
           npm install
-# 运行代码检查，并将结果输出到根目录
+          # 运行代码检查，并将结果输出到根目录
           npx eslint . --ext .js,.jsx,.ts,.tsx --format @microsoft/eslint-formatter-sarif --output-file ../eslint-frontend-results.sarif
         continue-on-error: true
 
