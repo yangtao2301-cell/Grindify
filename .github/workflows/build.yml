@@ -25,9 +25,10 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/falkendev/grindify-api
+          images: ghcr.io/${{ github.repository_owner }}/grindify-api
           tags: |
             type=raw,value=latest,enable=${{ github.ref_type == 'tag' || github.ref == format('refs/heads/{0}', github.event.repository.default_branch) }}
+            type=raw,value=${{ github.sha }}
             type=ref,event=tag
 
       - uses: docker/login-action@v3
@@ -77,9 +78,10 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/falkendev/grindify-frontend
+          images: ghcr.io/${{ github.repository_owner }}/grindify-frontend
           tags: |
             type=raw,value=latest,enable=${{ github.ref_type == 'tag' || github.ref == format('refs/heads/{0}', github.event.repository.default_branch) }}
+            type=raw,value=${{ github.sha }}
             type=ref,event=tag
 
       - uses: docker/login-action@v3
@@ -98,7 +100,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            VITE_API_URL=${{ vars.VITE_API_URL }}
+            VITE_API_URL=${{ vars.VITE_API_URL || 'https://app7592.acapp.acwing.com.cn/v1' }}
             VITE_CONTACT_EMAIL=${{ vars.VITE_CONTACT_EMAIL || '3405351711@qq.com' }}
             VITE_OPERATOR_NAME=${{ vars.VITE_OPERATOR_NAME || 'Yang' }}
             VITE_OPERATOR_ADDRESS=${{ vars.VITE_OPERATOR_ADDRESS || '天津科技大学' }}
@@ -127,9 +129,10 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/falkendev/grindify-adminpanel
+          images: ghcr.io/${{ github.repository_owner }}/grindify-adminpanel
           tags: |
             type=raw,value=latest,enable=${{ github.ref_type == 'tag' || github.ref == format('refs/heads/{0}', github.event.repository.default_branch) }}
+            type=raw,value=${{ github.sha }}
             type=ref,event=tag
 
       - uses: docker/login-action@v3
@@ -149,6 +152,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            VITE_API_URL=${{ vars.VITE_API_URL }}
+            VITE_API_URL=${{ vars.VITE_API_URL || 'https://app7592.acapp.acwing.com.cn/v1' }}
+            ADMIN_BASE_PATH=/admin/
           cache-from: type=gha,scope=adminpanel
           cache-to: type=gha,mode=max,scope=adminpanel
