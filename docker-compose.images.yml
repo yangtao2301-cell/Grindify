@@ -1,0 +1,62 @@
+name: grindify
+
+services:
+  postgres:
+    image: postgres:17
+    container_name: grindify_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      PGDATA: /var/lib/postgresql/data/17/main
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    env_file:
+      - .env
+
+  backend:
+    image: ${GRINDIFY_IMAGE_NAMESPACE:-ghcr.io/yangtao2301-cell}/grindify-api:${GRINDIFY_IMAGE_TAG:?set GRINDIFY_IMAGE_TAG}
+    container_name: grindify_backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:${BACKEND_PORT:-1337}:1337"
+    volumes:
+      - uploads_data:/app/uploads
+    env_file:
+      - .env
+
+  frontend:
+    image: ${GRINDIFY_IMAGE_NAMESPACE:-ghcr.io/yangtao2301-cell}/grindify-frontend:${GRINDIFY_IMAGE_TAG:?set GRINDIFY_IMAGE_TAG}
+    container_name: grindify_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "127.0.0.1:${FRONTEND_PORT:-3000}:3000"
+    env_file:
+      - .env
+
+  adminpanel:
+    image: ${GRINDIFY_IMAGE_NAMESPACE:-ghcr.io/yangtao2301-cell}/grindify-adminpanel:${GRINDIFY_IMAGE_TAG:?set GRINDIFY_IMAGE_TAG}
+    container_name: grindify_adminpanel
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "127.0.0.1:${ADMINPANEL_PORT:-3001}:3001"
+    env_file:
+      - .env
+
+volumes:
+  postgres_data:
+  uploads_data:

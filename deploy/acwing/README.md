@@ -47,3 +47,31 @@ Server public IP: `39.102.99.126` (Ubuntu 24.04)
 8. Check `docker compose -f docker-compose.prod.yml ps`, then `sudo nginx -t` and reload Nginx. Verify `https://app7592.acapp.acwing.com.cn/v1/auth/health` returns `{"ok":true,"at":"auth"}` and the site root, `/acapp.css`, `/acapp.js`, `/manifest.webmanifest`, and `/sw.js` respond. Test register/login and a photo upload before installing the PWA on a phone.
 
 The production Compose file publishes the API, frontend, and admin panel on loopback only and keeps PostgreSQL inside the Docker network. The front-end API URL is baked into the production image, so rebuild after changing it. The admin panel is reachable at `https://app7592.acapp.acwing.com.cn/admin/` only after the Nginx password prompt, and its API still requires an authenticated `superadmin` account. To promote an existing registered account, first inspect it with `ADMIN_CHECK_ONLY=true` using [`promote-admin.js`](promote-admin.js) in the backend container; then run it without `ADMIN_CHECK_ONLY` for that exact email. Never create or change a user's password during promotion.
+
+## Deploy prebuilt Docker images
+
+The server can run prebuilt images without compiling the source. `docker-compose.images.yml` uses the same Compose project name, container names, ports, database volume, and uploads volume as the existing deployment. It does not replace the PostgreSQL data or uploaded files. The first switch from `docker-compose.prod.yml` can therefore keep the existing database and uploads.
+
+On a development machine with Docker and PowerShell, build from a **clean Git checkout** of the desired commit. For the currently deployed version, use a temporary worktree at `bc6aabc`; the archive builder itself can stay in the main checkout:
+
+```powershell
+git worktree add --detach .worktrees/release-bc6aabc bc6aabc
+& .\deploy\acwing\build-image-archive.ps1 -SourceRoot .worktrees/release-bc6aabc -EnvironmentFile .env -ApiUrl 'https://app7592.acapp.acwing.com.cn/v1'
+```
+
+The script builds the API, frontend, and admin images sequentially for `linux/amd64`, tags all three with the commit's short SHA, writes `.deploy/images/grindify-images-<sha>.tar`, and writes its SHA-256 checksum. Only the public `VITE_*` values from `-EnvironmentFile` are used as build arguments. `-ApiUrl` must be the production API URL because Vite embeds it in the built frontend and admin panel. The admin panel is built with the `/admin/` base path.
+
+The `ghcr.io/yangtao2301-cell/...` names in the archive are image identifiers. This archive workflow does not require a GHCR login or a registry pull.
+
+Copy the archive, checksum, `docker-compose.images.yml`, and `deploy/acwing/deploy-image-archive.sh` to the existing `~/Grindify` checkout on the server. Then deploy the matching SHA:
+
+```sh
+cd ~/Grindify
+bash deploy/acwing/deploy-image-archive.sh bc6aabc ~/grindify-images-bc6aabc.tar
+```
+
+The deployment script checks the archive checksum, loads and verifies all three images, takes a PostgreSQL dump and uploads archive under `~/grindify-backups`, then updates the three application containers. It checks the API, frontend version file, and admin panel before recording the active image tag in `.deploy/release.env`. It attempts to restore the previous application images if the update or checks fail. Keep the database dump when a release includes migrations; an image rollback alone may not undo database changes.
+
+The archive and its checksum can be removed from the server after the release has been verified and a rollback copy is available elsewhere. The loaded images and data volumes remain in Docker.
+
+For later releases, build from the new clean commit and deploy its matching archive and tag. Do not run `bootstrap-fresh-db.js` on an existing database. The older `grindify-release-*.tar` files are source archives; `grindify-images-*.tar` files produced by this process are Docker image archives.

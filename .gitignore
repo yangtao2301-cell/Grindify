@@ -18,6 +18,7 @@ yarn-error.log*
 .DS_Store
 .vscode/
 .worktrees/
+.deploy/
 
 .idea/
 *.iml
