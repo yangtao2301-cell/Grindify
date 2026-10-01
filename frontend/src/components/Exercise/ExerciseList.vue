@@ -212,16 +212,16 @@
     </div>
   </div>
 
-  <v-dialog v-model="isCreateExerciseOpen" fullscreen>
-    <CreateExercise @close="onCreateExerciseClose" />
-  </v-dialog>
-  <v-dialog v-model="isViewExerciseOpen" fullscreen>
+  <HistoryDialog v-model="isCreateExerciseOpen" history-key="settings:exercise-create" fullscreen>
+    <CreateExercise history-key="settings:exercise-create" @close="onCreateExerciseClose" />
+  </HistoryDialog>
+  <HistoryDialog v-model="isViewExerciseOpen" history-key="settings:exercise-details" fullscreen>
     <ExerciseDetails
       :selected-exercise="viewExercise"
       :is-view-exercise="true"
       @close="onViewExerciseClose"
     />
-  </v-dialog>
+  </HistoryDialog>
 </template>
 
 <script lang="ts" setup>

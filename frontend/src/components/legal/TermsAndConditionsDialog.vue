@@ -14,8 +14,9 @@
   -->
 
 <template>
-  <v-dialog
+  <HistoryDialog
     :model-value="modelValue"
+    history-key="legal:terms"
     fullscreen
     @update:model-value="$emit('update:modelValue', $event)"
   >
@@ -84,7 +85,7 @@
         </v-btn>
       </v-card-actions>
     </v-card>
-  </v-dialog>
+  </HistoryDialog>
 </template>
 
 <script setup lang="ts">

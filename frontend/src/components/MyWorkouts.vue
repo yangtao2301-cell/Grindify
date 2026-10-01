@@ -104,12 +104,12 @@
       </v-btn>
     </div>
 
-    <v-dialog v-model="isWorkoutListOpen" fullscreen transition="slide-y-transition" persistent>
+    <HistoryDialog v-model="isWorkoutListOpen" history-key="home:workout-list" fullscreen transition="slide-y-transition" persistent>
       <WorkoutList @close="isWorkoutListOpen = false" />
-    </v-dialog>
-    <v-dialog v-model="isCreateWorkoutOpen" fullscreen>
-      <CreateWorkout @close="isCreateWorkoutOpen = false" />
-    </v-dialog>
+    </HistoryDialog>
+    <HistoryDialog v-model="isCreateWorkoutOpen" history-key="home:workout-create" fullscreen>
+      <CreateWorkout history-key="home:workout-create" @close="isCreateWorkoutOpen = false" />
+    </HistoryDialog>
   </div>
 </template>
 

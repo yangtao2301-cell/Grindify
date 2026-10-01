@@ -27,7 +27,7 @@
     <BackHeader
       :title="sessionTitle"
       show-menu
-      @close="isDialogMode ? emit('close') : $router.back()"
+      @close="handleBack"
     >
       <template #menuAppend>
         <v-list
@@ -325,7 +325,7 @@
     </div>
 
 <!-- 训练动作详情对话框 -->
-    <v-dialog v-model="exerciseDialog" fullscreen>
+    <HistoryDialog v-model="exerciseDialog" history-key="session-detail:exercise" fullscreen>
       <ExerciseDetails
         v-if="selectedExercise"
         :selected-exercise="selectedExercise"
@@ -333,27 +333,28 @@
         :hide-menu="true"
         @close="exerciseDialog = false"
       />
-    </v-dialog>
+    </HistoryDialog>
 
-    <v-dialog v-model="editActivityDialog" fullscreen>
+    <HistoryDialog v-model="editActivityDialog" history-key="session-detail:edit-activity" fullscreen>
       <EditActivityLog
         v-if="editActivityDialog && activityLog"
         :log="activityLog"
+        history-key="session-detail:edit-activity"
         @close="editActivityDialog = false"
         @saved="handleActivitySaved"
       />
-    </v-dialog>
+    </HistoryDialog>
 
-    <v-dialog v-model="editWorkoutDialog" fullscreen>
+    <HistoryDialog v-model="editWorkoutDialog" history-key="session-detail:edit-workout" fullscreen>
       <EditWorkoutSessionDialog
         v-if="editWorkoutDialog && workoutSession"
         :session="workoutSession"
         @close="editWorkoutDialog = false"
         @saved="handleWorkoutSaved"
       />
-    </v-dialog>
+    </HistoryDialog>
 
-    <v-dialog v-model="editExerciseSetsDialog" fullscreen>
+    <HistoryDialog v-model="editExerciseSetsDialog" history-key="session-detail:edit-exercise-sets" fullscreen>
       <EditSessionExerciseSetsDialog
         v-if="editExerciseSetsDialog && selectedSessionExercise && workoutSession"
         :session-id="workoutSession.id"
@@ -361,7 +362,7 @@
         @close="editExerciseSetsDialog = false"
         @saved="handleExerciseSetsSaved"
       />
-    </v-dialog>
+    </HistoryDialog>
 
 <!-- 删除确认对话框 -->
     <v-dialog v-model="deleteDialog" max-width="360">
@@ -387,13 +388,14 @@
     </v-dialog>
 
 <!-- 保存为训练对话框 -->
-    <v-dialog v-model="saveAsWorkoutDialog" fullscreen>
+    <HistoryDialog v-model="saveAsWorkoutDialog" history-key="session-detail:save-as-workout" fullscreen>
       <CreateWorkout
         v-if="saveAsWorkoutDialog && workoutInitialData"
         :initial-data="workoutInitialData"
+        history-key="session-detail:save-as-workout"
         @close="saveAsWorkoutDialog = false"
       />
-    </v-dialog>
+    </HistoryDialog>
   </div>
 </template>
 
@@ -416,6 +418,7 @@ import EditWorkoutSessionDialog from '@/components/Session/EditWorkoutSessionDia
 import EditSessionExerciseSetsDialog from '@/components/Session/EditSessionExerciseSetsDialog.vue'
 import { displayExerciseName, displayActivityName, resolveI18n } from '@/utils/exerciseDisplay'
 import { useUserLanguage } from '@/composables/useUserLanguage'
+import { navigateBack } from '@/navigation/backNavigation'
 
 const props = defineProps<{ sessionType?: 'workout' | 'activity'; sessionId?: number }>()
 const emit = defineEmits<{ (e: 'close'): void }>()
@@ -429,6 +432,14 @@ const workoutSessionStore = useWorkoutSessionStore()
 const activityStore = useActivityStore()
 
 const isDialogMode = computed(() => props.sessionId !== undefined)
+
+function handleBack() {
+  if (isDialogMode.value) {
+    emit('close')
+    return
+  }
+  void navigateBack(router, route.meta.backTo as string | undefined)
+}
 
 const type = computed(
   () =>
@@ -657,7 +668,7 @@ async function executeDelete() {
     if (isDialogMode.value) {
       emit('close')
     } else {
-      router.back()
+      await navigateBack(router, route.meta.backTo as string | undefined)
     }
   } finally {
     isDeleting.value = false

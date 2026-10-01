@@ -72,6 +72,11 @@ export default {
   },
   navigation: {
     resumeWorkout: 'Resume workout',
+    unsavedChangesTitle: 'Unsaved changes',
+    unsavedChangesMessage: 'This page has changes that have not been saved. Save them before leaving?',
+    saveAndContinue: 'Save and leave',
+    discardChanges: 'Discard changes',
+    keepEditing: 'Keep editing',
   },
   home: {
     guest: 'Guest',

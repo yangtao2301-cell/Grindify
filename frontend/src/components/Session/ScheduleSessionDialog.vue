@@ -14,7 +14,7 @@
   -->
 
 <template>
-  <v-dialog v-model="dialogOpen" fullscreen :scrim="false" transition="dialog-bottom-transition">
+  <HistoryDialog v-model="dialogOpen" history-key="calendar:schedule-session" fullscreen :scrim="false" transition="dialog-bottom-transition">
     <v-card class="bg-background">
 <!-- 标题 -->
       <BackHeader
@@ -194,7 +194,7 @@
         </div>
       </div>
     </v-card>
-  </v-dialog>
+  </HistoryDialog>
 </template>
 
 <script lang="ts" setup>
@@ -207,6 +207,7 @@ import type { Activity } from '@/interfaces/Activity.interface'
 import { useI18n } from 'vue-i18n'
 import { displayActivityName } from '@/utils/exerciseDisplay'
 import { useUserLanguage } from '@/composables/useUserLanguage'
+import { useUnsavedChanges } from '@/composables/useUnsavedChanges'
 
 const props = defineProps<{
   modelValue: boolean
@@ -237,6 +238,36 @@ const selectedDays = ref<number[]>([])
 const recurringEndDate = ref('')
 const notes = ref('')
 const isSubmitting = ref(false)
+const initialValues = ref('')
+
+function currentValues() {
+  return JSON.stringify({
+    sessionType: sessionType.value,
+    selectedItemId: selectedItemId.value,
+    scheduleMode: scheduleMode.value,
+    selectedDateDisplay: selectedDateDisplay.value,
+    selectedDays: selectedDays.value,
+    recurringEndDate: recurringEndDate.value,
+    notes: notes.value,
+  })
+}
+
+function saveBaseline() {
+  initialValues.value = currentValues()
+}
+
+function resetForm() {
+  sessionType.value = 'workout'
+  selectedItemId.value = null
+  scheduleMode.value = 'one-time'
+  selectedDateDisplay.value = props.preselectedDate || ''
+  selectedDays.value = []
+  recurringEndDate.value = ''
+  notes.value = ''
+  saveBaseline()
+}
+
+const isDirty = computed(() => currentValues() !== initialValues.value)
 
 const dayLabels = computed(() => tm('schedule.dayLabels') as string[])
 
@@ -271,13 +302,7 @@ const canSubmit = computed(() => {
 // 对话框打开时重置表单
 watch(dialogOpen, async open => {
   if (open) {
-    sessionType.value = 'workout'
-    selectedItemId.value = null
-    scheduleMode.value = 'one-time'
-    selectedDateDisplay.value = props.preselectedDate || ''
-    selectedDays.value = []
-    recurringEndDate.value = ''
-    notes.value = ''
+    resetForm()
 
     await Promise.all([workoutStore.setWorkouts(), activityStore.fetchActivities()])
   }
@@ -296,8 +321,8 @@ function close() {
   dialogOpen.value = false
 }
 
-async function submit() {
-  if (!canSubmit.value) return
+async function submit(closeAfterSave = true): Promise<boolean> {
+  if (!canSubmit.value || isSubmitting.value) return false
   isSubmitting.value = true
 
   try {
@@ -329,11 +354,22 @@ async function submit() {
     }
 
     emit('scheduled')
-    close()
+    saveBaseline()
+    if (closeAfterSave) close()
+    return true
   } catch (error) {
     console.error('Failed to create scheduled session:', error)
+    return false
   } finally {
     isSubmitting.value = false
   }
 }
+
+useUnsavedChanges({
+  key: 'calendar:schedule-session',
+  layerKey: 'calendar:schedule-session',
+  isDirty,
+  save: () => submit(false),
+  discard: resetForm,
+})
 </script>

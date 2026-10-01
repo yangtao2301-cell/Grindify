@@ -250,7 +250,7 @@
   </v-bottom-sheet>
 
 <!-- 全屏照片查看器 -->
-  <v-dialog v-model="viewerOpen" fullscreen>
+  <HistoryDialog v-model="viewerOpen" history-key="progress-photos:viewer" fullscreen>
     <v-card class="bg-black d-flex flex-column">
       <div class="d-flex align-center justify-space-between pa-4">
         <p v-if="viewerPhoto" class="text-body-2 text-white">{{ formatDate(viewerPhoto.date) }}</p>
@@ -283,10 +283,10 @@
         />
       </div>
     </v-card>
-  </v-dialog>
+  </HistoryDialog>
 
 <!-- 分屏对比视图 -->
-  <v-dialog v-model="compareViewOpen" fullscreen>
+  <HistoryDialog v-model="compareViewOpen" history-key="progress-photos:compare" fullscreen>
     <v-card class="bg-black d-flex flex-column">
       <div class="d-flex align-center justify-space-between pa-4">
         <p class="text-body-2 text-white">{{ $t('progressPhotos.comparing') }}</p>
@@ -326,7 +326,7 @@
         </div>
       </div>
     </v-card>
-  </v-dialog>
+  </HistoryDialog>
 
 <!-- 删除确认 -->
   <v-dialog v-model="deleteDialogOpen" max-width="360">

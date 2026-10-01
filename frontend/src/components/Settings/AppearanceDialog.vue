@@ -60,6 +60,7 @@ import type { User } from '@/interfaces/User.interface'
 import { toast } from 'vuetify-sonner'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth.store'
+import { useUnsavedChanges } from '@/composables/useUnsavedChanges'
 
 const props = defineProps<{
   user: User | null
@@ -76,17 +77,24 @@ const { t } = useI18n({ useScope: 'global' })
 const isSaving = ref(false)
 const useRpe = ref(props.user?.showRpe ?? true)
 const weightTrackingEnabled = ref(props.user?.showWeightTracking ?? false)
+const initialForm = ref(JSON.stringify({ useRpe: useRpe.value, weightTrackingEnabled: weightTrackingEnabled.value }))
+const currentFormSnapshot = () =>
+  JSON.stringify({ useRpe: useRpe.value, weightTrackingEnabled: weightTrackingEnabled.value })
+const isDirty = computed(() => currentFormSnapshot() !== initialForm.value)
+
+function resetForm() {
+  useRpe.value = props.user?.showRpe ?? true
+  weightTrackingEnabled.value = props.user?.showWeightTracking ?? false
+  initialForm.value = currentFormSnapshot()
+}
 
 watch(
   () => props.user,
-  u => {
-    useRpe.value = u?.showRpe ?? true
-    weightTrackingEnabled.value = u?.showWeightTracking ?? false
-  }
+  resetForm,
 )
 
-const savePreferences = async () => {
-  if (isSaving.value) return
+const savePreferences = async (): Promise<boolean> => {
+  if (isSaving.value) return false
   isSaving.value = true
   try {
     const updated = await updateUser({
@@ -96,14 +104,24 @@ const savePreferences = async () => {
     emit('updated', updated)
     await authStore.refreshUser()
     toast.success(t('settings.preferencesSaved'), { progressBar: true, duration: 1000 })
+    initialForm.value = currentFormSnapshot()
+    return true
   } catch (error) {
     console.error('Failed saving preferences:', error)
     toast.error(t('settings.failedToSavePreferences'), { progressBar: true, duration: 1000 })
 // 将界面回滚到最近一次已知的有效值
-    useRpe.value = props.user?.showRpe ?? true
-    weightTrackingEnabled.value = props.user?.showWeightTracking ?? false
+    resetForm()
+    return false
   } finally {
     isSaving.value = false
   }
 }
+
+useUnsavedChanges({
+  key: 'appearance-preferences',
+  layerKey: 'settings:appearance',
+  isDirty,
+  save: savePreferences,
+  discard: resetForm,
+})
 </script>

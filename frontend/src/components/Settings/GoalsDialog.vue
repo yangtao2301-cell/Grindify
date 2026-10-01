@@ -171,6 +171,7 @@ import { toast } from 'vuetify-sonner'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth.store'
 import { parseDecimalInput, normalizeDecimalStr, formatDecimalDisplay } from '@/utils/decimalInput'
+import { useUnsavedChanges } from '@/composables/useUnsavedChanges'
 
 const props = defineProps<{
   user: User | null
@@ -209,6 +210,44 @@ const targetWeightStr = ref<string>(formatDecimalDisplay(fromKg(props.user?.targ
 // 目标时长
 const goalDurationValue = ref<number | undefined>(undefined)
 const goalDurationUnit = ref<'weeks' | 'months'>('weeks')
+const initialValues = ref({
+  weeklyGoal: weeklyGoal.value,
+  weightGoalType: weightGoalType.value,
+  targetWeightStr: targetWeightStr.value,
+  goalDurationValue: goalDurationValue.value,
+  goalDurationUnit: goalDurationUnit.value,
+})
+
+function currentValues() {
+  return {
+    weeklyGoal: weeklyGoal.value,
+    weightGoalType: weightGoalType.value,
+    targetWeightStr: targetWeightStr.value,
+    goalDurationValue: goalDurationValue.value,
+    goalDurationUnit: goalDurationUnit.value,
+  }
+}
+
+function markWeeklyGoalSaved() {
+  initialValues.value.weeklyGoal = weeklyGoal.value
+}
+
+function markWeightGoalsSaved() {
+  initialValues.value.weightGoalType = weightGoalType.value
+  initialValues.value.targetWeightStr = targetWeightStr.value
+  initialValues.value.goalDurationValue = goalDurationValue.value
+  initialValues.value.goalDurationUnit = goalDurationUnit.value
+}
+
+function resetForm() {
+  weeklyGoal.value = props.user?.weeklyWorkoutGoal ?? 3
+  weightGoalType.value = props.user?.weightGoalType ?? null
+  targetWeightStr.value = formatDecimalDisplay(fromKg(props.user?.targetWeight))
+  initDuration(props.user?.goalTimeframe)
+  initialValues.value = currentValues()
+}
+
+const isDirty = computed(() => JSON.stringify(currentValues()) !== JSON.stringify(initialValues.value))
 
 const initDuration = (gtf: number | undefined | null) => {
   if (gtf) {
@@ -225,6 +264,7 @@ const initDuration = (gtf: number | undefined | null) => {
   }
 }
 initDuration(props.user?.goalTimeframe)
+initialValues.value = currentValues()
 
 const goalTypeItems = computed(() => [
   { title: t('weightLog.goalLose'), value: 'lose' },
@@ -245,18 +285,20 @@ onMounted(async () => {
 watch(
   () => props.user,
   u => {
+    if (isDirty.value) return
     weeklyGoal.value = u?.weeklyWorkoutGoal ?? 3
     weightGoalType.value = u?.weightGoalType ?? null
     targetWeightStr.value = formatDecimalDisplay(fromKg(u?.targetWeight))
     initDuration(u?.goalTimeframe)
+    initialValues.value = currentValues()
   }
 )
 
-const saveWeeklyGoal = async () => {
-  if (isSavingGoal.value) return
+const saveWeeklyGoal = async (): Promise<boolean> => {
+  if (isSavingGoal.value) return false
   if (weeklyGoal.value < 1 || weeklyGoal.value > 7) {
     toast.error(t('settings.invalidGoalValue'), { progressBar: true, duration: 1000 })
-    return
+    return false
   }
 
   isSavingGoal.value = true
@@ -268,17 +310,19 @@ const saveWeeklyGoal = async () => {
 // 刷新连续打卡信息
     streakInfo.value = await getStreakInfo()
     toast.success(t('settings.goalUpdated'), { progressBar: true, duration: 1000 })
+    markWeeklyGoalSaved()
+    return true
   } catch (error) {
     console.error('Failed saving weekly goal:', error)
     toast.error(t('settings.failedToUpdateGoal'), { progressBar: true, duration: 1000 })
-    weeklyGoal.value = props.user?.weeklyWorkoutGoal ?? 3
+    return false
   } finally {
     isSavingGoal.value = false
   }
 }
 
-const saveWeightGoals = async () => {
-  if (isSavingWeightGoals.value) return
+const saveWeightGoals = async (): Promise<boolean> => {
+  if (isSavingWeightGoals.value) return false
   isSavingWeightGoals.value = true
   try {
     const prefs: Record<string, unknown> = {}
@@ -300,13 +344,37 @@ const saveWeightGoals = async () => {
     await authStore.refreshUser()
     emit('updated', authStore.user!)
     toast.success(t('settings.goalUpdated'), { progressBar: true, duration: 1000 })
+    markWeightGoalsSaved()
+    return true
   } catch (error) {
     console.error('Failed saving weight goals:', error)
     toast.error(t('settings.failedToUpdateGoal'), { progressBar: true, duration: 1000 })
+    return false
   } finally {
     isSavingWeightGoals.value = false
   }
 }
+
+async function saveChanges(): Promise<boolean> {
+  if (weeklyGoal.value !== initialValues.value.weeklyGoal && !(await saveWeeklyGoal())) return false
+
+  const weightGoalsChanged =
+    weightGoalType.value !== initialValues.value.weightGoalType ||
+    targetWeightStr.value !== initialValues.value.targetWeightStr ||
+    goalDurationValue.value !== initialValues.value.goalDurationValue ||
+    goalDurationUnit.value !== initialValues.value.goalDurationUnit
+  if (props.weightTrackingEnabled && weightGoalsChanged && !(await saveWeightGoals())) return false
+
+  return !isDirty.value
+}
+
+useUnsavedChanges({
+  key: 'settings:goals',
+  layerKey: 'settings:goals',
+  isDirty,
+  save: saveChanges,
+  discard: resetForm,
+})
 </script>
 <style scoped>
 :deep(.v-field) {

@@ -152,14 +152,14 @@
     </div>
 
 <!-- 编辑个人信息对话框 -->
-    <v-dialog v-model="isEditOpen" fullscreen transition="slide-y-transition" persistent>
+    <HistoryDialog v-model="isEditOpen" history-key="account:edit-personal-info" fullscreen transition="slide-y-transition" persistent>
       <EditPersonalInfoDialog
         v-if="currentUser"
         :user="currentUser"
         @close="isEditOpen = false"
         @updated="onPersonalInfoUpdated"
       />
-    </v-dialog>
+    </HistoryDialog>
 
 <!-- 修改密码底部抽屉 -->
     <v-dialog v-model="isPasswordSheetOpen" max-width="500">

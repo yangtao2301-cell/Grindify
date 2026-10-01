@@ -89,6 +89,7 @@ import { toast } from 'vuetify-sonner'
 import { useI18n } from 'vue-i18n'
 import type { VForm } from 'vuetify/components'
 import { parseDecimalInput, normalizeDecimalStr, formatDecimalDisplay } from '@/utils/decimalInput'
+import { useUnsavedChanges } from '@/composables/useUnsavedChanges'
 
 const props = defineProps<{
   user: User
@@ -126,6 +127,18 @@ const email = ref('')
 const dateOfBirth = ref('')
 const weightStr = ref('')
 const heightStr = ref('')
+const initialForm = ref('')
+const currentFormSnapshot = () =>
+  JSON.stringify({
+    firstName: firstName.value,
+    lastName: lastName.value,
+    fullName: fullName.value,
+    email: email.value,
+    dateOfBirth: dateOfBirth.value,
+    weightStr: weightStr.value,
+    heightStr: heightStr.value,
+  })
+const isDirty = computed(() => initialForm.value !== '' && currentFormSnapshot() !== initialForm.value)
 
 const emailRules = [
   (v: string) => !!v || t('auth.emailRequired'),
@@ -141,16 +154,17 @@ const initForm = () => {
   dateOfBirth.value = u.dateOfBirth ? u.dateOfBirth.substring(0, 10) : ''
   weightStr.value = formatDecimalDisplay(fromKg(u.weight))
   heightStr.value = formatDecimalDisplay(fromCm(u.height))
+  initialForm.value = currentFormSnapshot()
 }
 
 watch(() => props.user, initForm, { immediate: true })
 
-const save = async () => {
-  if (isSaving.value) return
-  if (!formRef.value) return
+const save = async (closeAfterSave = true): Promise<boolean> => {
+  if (isSaving.value) return false
+  if (!formRef.value) return false
 
   const { valid } = await formRef.value.validate()
-  if (!valid) return
+  if (!valid) return false
 
   isSaving.value = true
   try {
@@ -180,12 +194,23 @@ const save = async () => {
     await authStore.refreshUser()
     emit('updated', updated)
     toast.success(t('settings.accountUpdated'), { progressBar: true, duration: 1000 })
-    emit('close')
+    initialForm.value = currentFormSnapshot()
+    if (closeAfterSave) emit('close')
+    return true
   } catch (error) {
     console.error('Error saving personal info:', error)
     toast.error(t('settings.failedToUpdateAccount'), { progressBar: true, duration: 1000 })
+    return false
   } finally {
     isSaving.value = false
   }
 }
+
+useUnsavedChanges({
+  key: 'edit-personal-info',
+  layerKey: 'account:edit-personal-info',
+  isDirty,
+  save: () => save(false),
+  discard: initForm,
+})
 </script>

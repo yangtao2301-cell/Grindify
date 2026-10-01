@@ -66,6 +66,7 @@
 <!-- 目标肌群 -->
       <FullscreenListSelect
         v-model="form.muscleGroupIds"
+        history-key="edit-exercise:muscle-groups"
         :label="$t('exerciseForm.muscleGroupsLabel')"
         :items="muscleGroupItems.map(g => ({ title: g.name, value: g.id }))"
         multiple
@@ -75,6 +76,7 @@
 <!-- 主要肌群 -->
       <FullscreenListSelect
         v-model="form.primaryMuscleGroupIds"
+        history-key="edit-exercise:primary-muscles"
         :label="$t('exerciseForm.primaryMuscleLabel')"
         :items="selectedMuscleGroupItems.map(g => ({ title: g.name, value: g.id }))"
         multiple
@@ -195,9 +197,11 @@ import { toast } from 'vuetify-sonner'
 import { useI18n } from 'vue-i18n'
 import { resolveI18n, resolveI18nArray } from '@/utils/exerciseDisplay'
 import { useUserLanguage } from '@/composables/useUserLanguage'
+import { useUnsavedChanges } from '@/composables/useUnsavedChanges'
 
 const props = defineProps<{
   exercise: Exercise
+  historyKey?: string
 }>()
 
 const emit = defineEmits<{
@@ -232,6 +236,36 @@ const form = ref({
   proTips: resolveI18nArray(props.exercise.proTips, lang.value),
   mistakes: resolveI18nArray(props.exercise.mistakes, lang.value),
 })
+
+const initialForm = ref('')
+const currentFormSnapshot = () =>
+  JSON.stringify({
+    form: form.value,
+    media: newMediaItems.value.map(item => ({
+      id: item.id,
+      url: item.url,
+      name: item.file?.name,
+      size: item.file?.size,
+    })),
+  })
+initialForm.value = currentFormSnapshot()
+const isDirty = computed(() => currentFormSnapshot() !== initialForm.value)
+
+function resetForm() {
+  form.value = {
+    name: resolveI18n(props.exercise.title, lang.value),
+    description: resolveI18n(props.exercise.description, lang.value),
+    exerciseType: props.exercise.exerciseType || (null as ExerciseType | null | undefined),
+    muscleGroupIds: props.exercise.muscleGroups?.map(mg => mg.id) || [],
+    primaryMuscleGroupIds: props.exercise.primaryMuscleGroups?.map(mg => mg.id) || [],
+    equipment: props.exercise.equipment ? [...props.exercise.equipment] : [],
+    instructions: resolveI18nArray(props.exercise.instructions, lang.value),
+    proTips: resolveI18nArray(props.exercise.proTips, lang.value),
+    mistakes: resolveI18nArray(props.exercise.mistakes, lang.value),
+  }
+  newMediaItems.value = []
+  initialForm.value = currentFormSnapshot()
+}
 
 const muscleGroupItems = computed(() =>
   muscleGroupStore.muscleGroups.map(g => ({ name: t(`muscleGroups.${g.name}`), id: g.id }))
@@ -269,10 +303,10 @@ const removeExistingMedia = async (mediaId: number) => {
   }
 }
 
-const saveExercise = async () => {
+const saveExercise = async (closeAfterSave = true): Promise<boolean> => {
   if (!form.value.name.trim()) {
     toast.error(t('exerciseForm.nameRequired'), { progressBar: true, duration: 1000 })
-    return
+    return false
   }
 
   isSaving.value = true
@@ -318,17 +352,31 @@ const saveExercise = async () => {
       toast.success(t('exercise.updated'), { progressBar: true, duration: 1000 })
       await exerciseStore.setExercises(true)
       newMediaItems.value = []
-      emit('saved')
-      emit('close')
+      initialForm.value = currentFormSnapshot()
+      if (closeAfterSave) {
+        emit('saved')
+        emit('close')
+      }
+      return true
     } else {
       toast.error(t('exercise.failedToUpdate'), { progressBar: true, duration: 1000 })
+      return false
     }
   } catch {
     toast.error(t('exercise.updateError'), { progressBar: true, duration: 1000 })
+    return false
   } finally {
     isSaving.value = false
   }
 }
+
+useUnsavedChanges({
+  key: `edit-exercise-${props.exercise.id}`,
+  layerKey: props.historyKey || 'exercise:edit',
+  isDirty,
+  save: () => saveExercise(false),
+  discard: resetForm,
+})
 
 const confirmDelete = async () => {
   isDeleting.value = true
@@ -337,6 +385,7 @@ const confirmDelete = async () => {
     if (response) {
       toast.success(t('exercise.deleted'), { progressBar: true, duration: 1000 })
       await exerciseStore.setExercises(true)
+      initialForm.value = currentFormSnapshot()
       isDeleteDialogOpen.value = false
       emit('close')
     }

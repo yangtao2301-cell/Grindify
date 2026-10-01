@@ -134,7 +134,11 @@ import { createActivity } from '@/services/activity.service'
 import { ActivityIcon } from '@/interfaces/Activity.interface'
 import { toast } from 'vuetify-sonner'
 import { useI18n } from 'vue-i18n'
+import { useUnsavedChanges } from '@/composables/useUnsavedChanges'
 
+const props = withDefaults(defineProps<{ historyKey?: string }>(), {
+  historyKey: 'settings:activity-create',
+})
 const emit = defineEmits<{ close: [] }>()
 const { t } = useI18n()
 const activityStore = useActivityStore()
@@ -177,9 +181,34 @@ const form = ref({
   trackCalories: false,
 })
 
-async function saveActivity() {
+const initialForm = ref(JSON.stringify(form.value))
+const isDirty = computed(() => JSON.stringify(form.value) !== initialForm.value)
+
+function resetForm() {
+  form.value = {
+    name: '',
+    description: '',
+    icon: ActivityIcon.OTHER,
+    equipment: [],
+    trackDistance: false,
+    trackPace: false,
+    trackElevation: false,
+    trackCalories: false,
+  }
+  initialForm.value = JSON.stringify(form.value)
+}
+
+useUnsavedChanges({
+  key: 'create-activity',
+  layerKey: props.historyKey,
+  isDirty,
+  save: () => saveActivity(false),
+  discard: resetForm,
+})
+
+async function saveActivity(closeAfterSave = true): Promise<boolean> {
   const { valid } = await formRef.value.validate()
-  if (!valid) return
+  if (!valid) return false
 
   isSaving.value = true
   try {
@@ -195,12 +224,15 @@ async function saveActivity() {
     })
     toast.success(t('activity.created'), { progressBar: true, duration: 1000 })
     await activityStore.fetchActivities(true)
-    emit('close')
+    resetForm()
+    if (closeAfterSave) emit('close')
+    return true
   } catch (error: unknown) {
     toast.error((error as Error).message || t('activity.failedToCreate'), {
       progressBar: true,
       duration: 1000,
     })
+    return false
   } finally {
     isSaving.value = false
   }

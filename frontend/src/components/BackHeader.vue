@@ -67,6 +67,7 @@
 </template>
 <script lang="ts" setup>
 import router from '@/router'
+import { navigateBackTo } from '@/navigation/backNavigation'
 
 const props = defineProps<{
   title: string
@@ -82,7 +83,7 @@ const emit = defineEmits<{
 
 const routeTo = () => {
   if (props.routeTo) {
-    router.push(props.routeTo)
+    void navigateBackTo(router, props.routeTo)
   }
 }
 

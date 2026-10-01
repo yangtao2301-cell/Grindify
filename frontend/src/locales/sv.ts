@@ -72,6 +72,11 @@ export default {
   },
   navigation: {
     resumeWorkout: 'Fortsätt passet',
+    unsavedChangesTitle: 'Osparade ändringar',
+    unsavedChangesMessage: 'Den här sidan har ändringar som inte har sparats. Vill du spara innan du lämnar?',
+    saveAndContinue: 'Spara och lämna',
+    discardChanges: 'Släng ändringar',
+    keepEditing: 'Fortsätt redigera',
   },
   home: {
     guest: 'Gäst',

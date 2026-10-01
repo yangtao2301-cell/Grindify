@@ -198,9 +198,14 @@
   </div>
 
 <!-- 编辑对话框 -->
-  <v-dialog v-model="isEditOpen" fullscreen>
-    <EditExercise :exercise="exercise" @close="onEditClose" @saved="onEditClose" />
-  </v-dialog>
+  <HistoryDialog v-model="isEditOpen" history-key="exercise:edit" fullscreen>
+    <EditExercise
+      :exercise="exercise"
+      history-key="exercise:edit"
+      @close="onEditClose"
+      @saved="onEditClose"
+    />
+  </HistoryDialog>
 
 <!-- 个性化（复制）对话框 -->
   <DuplicateExerciseDialog

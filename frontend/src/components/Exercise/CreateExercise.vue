@@ -57,6 +57,7 @@
 <!-- 目标肌群 -->
       <FullscreenListSelect
         v-model="form.muscleGroupIds"
+        history-key="create-exercise:muscle-groups"
         :label="$t('exerciseForm.muscleGroupsLabel')"
         :items="muscleGroupItems.map(g => ({ title: g.name, value: g.id }))"
         multiple
@@ -66,6 +67,7 @@
 <!-- 主要肌群 -->
       <FullscreenListSelect
         v-model="form.primaryMuscleGroupIds"
+        history-key="create-exercise:primary-muscles"
         :label="$t('exerciseForm.primaryMuscleLabel')"
         :items="selectedMuscleGroupItems.map(g => ({ title: g.name, value: g.id }))"
         multiple
@@ -145,6 +147,11 @@ import { useMuscleGroupStore } from '@/stores/muscleGroup.store'
 import { useExerciseStore } from '@/stores/exercise.store'
 import { toast } from 'vuetify-sonner'
 import { useI18n } from 'vue-i18n'
+import { useUnsavedChanges } from '@/composables/useUnsavedChanges'
+
+const props = withDefaults(defineProps<{ historyKey?: string }>(), {
+  historyKey: 'exercise-picker:create',
+})
 
 const emit = defineEmits<{
   (e: 'close'): void
@@ -173,6 +180,20 @@ const form = ref({
   proTips: [] as string[],
   mistakes: [] as string[],
 })
+
+const initialForm = ref('')
+const currentFormSnapshot = () =>
+  JSON.stringify({
+    form: form.value,
+    media: newMediaItems.value.map(item => ({
+      id: item.id,
+      url: item.url,
+      name: item.file?.name,
+      size: item.file?.size,
+    })),
+  })
+initialForm.value = currentFormSnapshot()
+const isDirty = computed(() => currentFormSnapshot() !== initialForm.value)
 
 const muscleGroupItems = computed(() =>
   muscleGroupStore.muscleGroups.map(g => ({ name: t(`muscleGroups.${g.name}`), id: g.id }))
@@ -212,12 +233,21 @@ const resetForm = () => {
     mistakes: [],
   }
   newMediaItems.value = []
+  initialForm.value = currentFormSnapshot()
 }
 
-const createNewExercise = async () => {
+useUnsavedChanges({
+  key: 'create-exercise',
+  layerKey: props.historyKey,
+  isDirty,
+  save: () => createNewExercise(false),
+  discard: resetForm,
+})
+
+const createNewExercise = async (closeAfterSave = true): Promise<boolean> => {
   if (!form.value.name.trim()) {
     toast.error(t('exerciseForm.nameRequired'), { progressBar: true, duration: 1000 })
-    return
+    return false
   }
 
   isCreating.value = true
@@ -263,12 +293,15 @@ const createNewExercise = async () => {
       toast.success(t('exercise.created'), { progressBar: true, duration: 1000 })
       resetForm()
       exerciseStore.setExercises(true)
-      emit('close')
+      if (closeAfterSave) emit('close')
+      return true
     } else {
       toast.error(t('exercise.failedToCreate'), { progressBar: true, duration: 1000 })
+      return false
     }
   } catch {
     toast.error(t('exercise.createGenericError'), { progressBar: true, duration: 1000 })
+    return false
   } finally {
     isCreating.value = false
   }

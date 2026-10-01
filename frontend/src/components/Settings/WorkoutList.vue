@@ -137,17 +137,17 @@
       </div>
     </div>
 
-    <v-dialog v-model="isCreateWorkoutOpen" fullscreen>
-      <CreateWorkout @close="isCreateWorkoutOpen = false" />
-    </v-dialog>
+    <HistoryDialog v-model="isCreateWorkoutOpen" history-key="settings:workout-create" fullscreen>
+      <CreateWorkout history-key="settings:workout-create" @close="isCreateWorkoutOpen = false" />
+    </HistoryDialog>
 
-    <v-dialog v-model="isWorkoutDetailsOpen" fullscreen>
+    <HistoryDialog v-model="isWorkoutDetailsOpen" history-key="settings:workout-details" fullscreen>
       <WorkoutDetails
         v-if="selectedWorkoutId !== null"
         :workout-id="selectedWorkoutId"
         @close="isWorkoutDetailsOpen = false"
       />
-    </v-dialog>
+    </HistoryDialog>
   </div>
 </template>
 <script setup lang="ts">

@@ -17,6 +17,7 @@
   <v-app>
     <VSonner position="top-center" />
     <PWAUpdatePrompt />
+    <UnsavedChangesPrompt />
     <v-main :style="{ '--extra-pb': showResumeBar ? '45px' : '0px' }">
       <router-view :key="$route.name" />
     </v-main>

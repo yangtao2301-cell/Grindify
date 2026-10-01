@@ -88,18 +88,18 @@
     </div>
 
 <!-- 活动详情对话框 -->
-    <v-dialog v-model="isDetailsOpen" fullscreen>
+    <HistoryDialog v-model="isDetailsOpen" history-key="settings:activity-details" fullscreen>
       <ActivityDetails
         v-if="selectedActivity"
         :activity="selectedActivity"
         @close="isDetailsOpen = false"
       />
-    </v-dialog>
+    </HistoryDialog>
 
 <!-- 创建活动对话框 -->
-    <v-dialog v-model="isCreateOpen" fullscreen>
-      <CreateActivity @close="isCreateOpen = false" />
-    </v-dialog>
+    <HistoryDialog v-model="isCreateOpen" history-key="settings:activity-create" fullscreen>
+      <CreateActivity history-key="settings:activity-create" @close="isCreateOpen = false" />
+    </HistoryDialog>
 
 <!-- 删除确认对话框 -->
     <v-dialog v-model="isDeleteDialogOpen" max-width="400">

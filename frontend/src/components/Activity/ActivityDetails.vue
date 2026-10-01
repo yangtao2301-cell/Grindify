@@ -235,19 +235,20 @@
   </div>
 
 <!-- 编辑活动对话框 -->
-  <v-dialog v-model="isEditOpen" fullscreen>
+  <HistoryDialog v-model="isEditOpen" history-key="activity:edit" fullscreen>
     <EditActivity :activity="activity" @close="onEditClose" @deleted="emit('close')" />
-  </v-dialog>
+  </HistoryDialog>
 
 <!-- 编辑日志对话框 -->
-  <v-dialog v-model="isEditLogOpen" fullscreen>
+  <HistoryDialog v-model="isEditLogOpen" history-key="activity:edit-log" fullscreen>
     <EditActivityLog
       v-if="selectedLog"
       :log="selectedLog"
+      history-key="activity:edit-log"
       @close="isEditLogOpen = false"
       @saved="isEditLogOpen = false"
     />
-  </v-dialog>
+  </HistoryDialog>
 
 <!-- 个性化（复制）对话框 -->
   <DuplicateActivityDialog

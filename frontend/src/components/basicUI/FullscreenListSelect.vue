@@ -50,7 +50,7 @@
     />
 
 <!-- 全屏对话框（放在根节点内以使 inheritAttrs 生效） -->
-    <v-dialog v-model="isOpen" fullscreen>
+    <HistoryDialog v-model="isOpen" :history-key="props.historyKey" fullscreen>
       <div class="d-flex flex-column fill-height bg-background">
         <BackHeader :title="label" :show-menu="false" @close="isOpen = false">
           <template v-if="multiple || (clearable && hasSelection)" #right>
@@ -106,7 +106,7 @@
           </v-list-item>
         </v-list>
       </div>
-    </v-dialog>
+    </HistoryDialog>
   </div>
 </template>
 
@@ -117,12 +117,14 @@ const props = withDefaults(
     modelValue: T
     items: readonly { title: string; value: unknown }[]
     label?: string
+    historyKey?: string
     multiple?: boolean
     clearable?: boolean
     disabled?: boolean
   }>(),
   {
     label: '',
+    historyKey: 'form:fullscreen-select',
     multiple: false,
     clearable: false,
     disabled: false,

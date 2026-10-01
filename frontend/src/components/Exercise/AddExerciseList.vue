@@ -194,17 +194,17 @@
     </div>
   </div>
 
-  <v-dialog v-model="isViewExerciseOpen" fullscreen>
+  <HistoryDialog v-model="isViewExerciseOpen" history-key="exercise-picker:details" fullscreen>
     <ExerciseDetails
       :selected-exercise="viewExercise"
       :is-view-exercise="true"
       hide-menu
       @close="isViewExerciseOpen = false"
     />
-  </v-dialog>
-  <v-dialog v-model="isCreateExerciseOpen" fullscreen>
-    <CreateExercise @close="onCreateExerciseClose" />
-  </v-dialog>
+  </HistoryDialog>
+  <HistoryDialog v-model="isCreateExerciseOpen" history-key="exercise-picker:create" fullscreen>
+    <CreateExercise history-key="exercise-picker:create" @close="onCreateExerciseClose" />
+  </HistoryDialog>
 </template>
 
 <script lang="ts" setup>

@@ -15,7 +15,7 @@
 
 <template>
   <div>
-    <BackHeader :title="$t('activity.logActivity')" route-to="/" />
+    <BackHeader :title="$t('activity.logActivity')" :route-to="returnTo" />
 
     <div class="px-5 py-4">
 <!-- 活动卡片网格 -->
@@ -69,7 +69,7 @@
     </div>
 
 <!-- 记录活动对话框 -->
-    <v-dialog v-model="isLogDialogOpen" max-width="500" :fullscreen="$vuetify.display.smAndDown">
+    <HistoryDialog v-model="isLogDialogOpen" history-key="activity:log-form" max-width="500" :fullscreen="$vuetify.display.smAndDown">
       <v-card class="bg-background">
         <div class="d-flex justify-space-between align-center px-5 py-3 border-b-sm">
           <v-btn icon density="compact" variant="flat" color="transparent" @click="closeLogDialog">
@@ -186,12 +186,12 @@
           </v-form>
         </div>
       </v-card>
-    </v-dialog>
+    </HistoryDialog>
 
 <!-- 创建活动对话框（全屏） -->
-    <v-dialog v-model="isCreateOpen" fullscreen transition="dialog-bottom-transition">
-      <CreateActivity @close="onCreateClose" />
-    </v-dialog>
+    <HistoryDialog v-model="isCreateOpen" history-key="activity:log-create" fullscreen transition="dialog-bottom-transition">
+      <CreateActivity history-key="activity:log-create" @close="onCreateClose" />
+    </HistoryDialog>
   </div>
 </template>
 
@@ -207,6 +207,8 @@ import { useI18n } from 'vue-i18n'
 import { displayActivityName, resolveI18n } from '@/utils/exerciseDisplay'
 import { useUserLanguage } from '@/composables/useUserLanguage'
 import { parseDecimalInput, normalizeDecimalStr } from '@/utils/decimalInput'
+import { useUnsavedChanges } from '@/composables/useUnsavedChanges'
+import { navigateBackTo } from '@/navigation/backNavigation'
 
 const router = useRouter()
 const route = useRoute()
@@ -234,6 +236,12 @@ const formData = ref<CreateActivityLogDto>({
 })
 
 const isSubmitting = ref(false)
+const returnTo = computed(() => {
+  const value = route.query.returnTo
+  return typeof value === 'string' && value.startsWith('/') && !value.startsWith('//')
+    ? value
+    : (route.meta.backTo as string) || '/'
+})
 
 // 小数输入字段的字符串引用
 const durationStr = ref('')
@@ -241,6 +249,49 @@ const distanceStr = ref('')
 const elevationGainStr = ref('')
 const maxElevationStr = ref('')
 const caloriesStr = ref('')
+const initialLogForm = ref('')
+
+function currentLogForm() {
+  return JSON.stringify({
+    activityId: selectedActivity.value?.id ?? formData.value.activityId,
+    date: formData.value.date,
+    durationStr: durationStr.value,
+    distanceStr: distanceStr.value,
+    elevationGainStr: elevationGainStr.value,
+    maxElevationStr: maxElevationStr.value,
+    caloriesStr: caloriesStr.value,
+    notes: formData.value.notes,
+  })
+}
+
+function saveLogBaseline() {
+  initialLogForm.value = currentLogForm()
+}
+
+function resetLogForm() {
+  const activity = selectedActivity.value
+  formData.value = {
+    activityId: activity?.id ?? (null as unknown as number),
+    date: new Date().toISOString().split('T')[0],
+    duration: null as unknown as number,
+    distance: undefined,
+    elevationGain: undefined,
+    maxElevation: undefined,
+    calories: undefined,
+    notes: undefined,
+    scheduledSessionId: route.query.scheduledSessionId
+      ? Number(route.query.scheduledSessionId)
+      : undefined,
+  }
+  durationStr.value = ''
+  distanceStr.value = ''
+  elevationGainStr.value = ''
+  maxElevationStr.value = ''
+  caloriesStr.value = ''
+  saveLogBaseline()
+}
+
+const isLogDirty = computed(() => currentLogForm() !== initialLogForm.value)
 
 const rules = {
   required: (v: string | number | null) => !!v || t('common.fieldRequired'),
@@ -268,12 +319,12 @@ function openLogDialog(activity: Activity) {
   elevationGainStr.value = ''
   maxElevationStr.value = ''
   caloriesStr.value = ''
+  saveLogBaseline()
   isLogDialogOpen.value = true
 }
 
 function closeLogDialog() {
   isLogDialogOpen.value = false
-  selectedActivity.value = null
 }
 
 // 根据时长和距离字符串引用计算配速
@@ -287,9 +338,10 @@ const calculatedPace = computed(() => {
   return `${minutes}:${seconds.toString().padStart(2, '0')}`
 })
 
-async function handleSubmit() {
+async function submitLog(closeAfterSave: boolean): Promise<boolean> {
+  if (isSubmitting.value) return false
   const { valid } = await formRef.value.validate()
-  if (!valid) return
+  if (!valid) return false
 
 // 提交前将字符串引用解析为数字
   formData.value.duration = parseDecimalInput(durationStr.value)
@@ -303,16 +355,29 @@ async function handleSubmit() {
     await createActivityLog(formData.value)
     await activityStore.fetchActivityLogs(true)
     toast.success(t('activity.logCreated'), { progressBar: true, duration: 1000 })
-    closeLogDialog()
-    const returnTo = (route.query.returnTo as string) || '/'
-    router.push(returnTo)
+    saveLogBaseline()
+    if (closeAfterSave) await navigateBackTo(router, returnTo.value)
+    return true
   } catch (error) {
     console.error('Error creating activity log:', error)
     toast.error(t('activity.failedToCreateLog'), { progressBar: true, duration: 1000 })
+    return false
   } finally {
     isSubmitting.value = false
   }
 }
+
+async function handleSubmit(): Promise<boolean> {
+  return submitLog(true)
+}
+
+useUnsavedChanges({
+  key: 'activity:log-form',
+  layerKey: 'activity:log-form',
+  isDirty: isLogDirty,
+  save: () => submitLog(false),
+  discard: resetLogForm,
+})
 
 async function onCreateClose() {
   isCreateOpen.value = false

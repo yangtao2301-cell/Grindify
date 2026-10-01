@@ -60,9 +60,9 @@
         <MyWorkouts />
       </div>
     </div>
-    <v-dialog v-model="isCreateWorkoutOpen" fullscreen>
-      <CreateWorkout @close="isCreateWorkoutOpen = false" />
-    </v-dialog>
+    <HistoryDialog v-model="isCreateWorkoutOpen" history-key="workout:create" fullscreen>
+      <CreateWorkout history-key="workout:create" @close="isCreateWorkoutOpen = false" />
+    </HistoryDialog>
   </div>
 </template>
 <script lang="ts" setup>

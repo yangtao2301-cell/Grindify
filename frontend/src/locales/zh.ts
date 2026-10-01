@@ -78,6 +78,11 @@ export default {
   navigation: {
     ...en.navigation,
     resumeWorkout: '继续训练',
+    unsavedChangesTitle: '有未保存的更改',
+    unsavedChangesMessage: '此页面有尚未保存的更改。要先保存再离开吗？',
+    saveAndContinue: '保存并离开',
+    discardChanges: '放弃更改',
+    keepEditing: '继续编辑',
   },
   home: {
     ...en.home,

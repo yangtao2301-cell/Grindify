@@ -14,7 +14,7 @@
   -->
 
 <template>
-  <v-dialog v-model="dialogOpen" fullscreen :scrim="false" transition="dialog-bottom-transition">
+  <HistoryDialog v-model="dialogOpen" history-key="calendar:add-past-session" fullscreen :scrim="false" transition="dialog-bottom-transition">
     <v-card class="bg-background d-flex flex-column" style="height: 100dvh">
 <!-- 标题 -->
       <BackHeader
@@ -366,7 +366,7 @@
         </v-card>
       </v-dialog>
     </v-card>
-  </v-dialog>
+  </HistoryDialog>
 </template>
 
 <script lang="ts" setup>
@@ -380,6 +380,7 @@ import type { Workout } from '@/interfaces/Workout.interface'
 import { parseDecimalInput, parseIntInput, normalizeDecimalStr } from '@/utils/decimalInput'
 import { displayExerciseName, displayActivityName } from '@/utils/exerciseDisplay'
 import { useUserLanguage } from '@/composables/useUserLanguage'
+import { useUnsavedChanges } from '@/composables/useUnsavedChanges'
 
 interface InlineSet {
   set: number
@@ -417,6 +418,7 @@ const activityStore = useActivityStore()
 const sessionType = ref<'workout' | 'activity'>('workout')
 const notesText = ref('')
 const isSubmitting = ref(false)
+const initialValues = ref('')
 
 // --- 训练状态 ---
 const selectedWorkoutId = ref<number | null>(null)
@@ -455,6 +457,55 @@ const activityDistanceStr = ref('')
 const activityElevationGainStr = ref('')
 const activityMaxElevationStr = ref('')
 const activityCaloriesStr = ref('')
+
+function currentValues() {
+  return JSON.stringify({
+    sessionType: sessionType.value,
+    notesText: notesText.value,
+    selectedWorkoutId: selectedWorkoutId.value,
+    startTime: startTime.value,
+    endTime: endTime.value,
+    exerciseSets: Object.fromEntries(
+      Object.entries(exerciseSets)
+        .sort(([left], [right]) => Number(left) - Number(right))
+        .map(([id, sets]) => [id, sets.map(set => ({ ...set }))]),
+    ),
+    selectedActivityId: selectedActivityId.value,
+    activityDurationStr: activityDurationStr.value,
+    activityDistanceStr: activityDistanceStr.value,
+    activityElevationGainStr: activityElevationGainStr.value,
+    activityMaxElevationStr: activityMaxElevationStr.value,
+    activityCaloriesStr: activityCaloriesStr.value,
+  })
+}
+
+function saveBaseline() {
+  initialValues.value = currentValues()
+}
+
+function resetForm() {
+  sessionType.value = props.preselectedType || 'workout'
+  notesText.value = ''
+  selectedWorkoutId.value = props.preselectedWorkoutId ?? null
+  startTime.value = '09:00'
+  endTime.value = '10:00'
+  selectedActivityId.value = props.preselectedActivityId ?? null
+  activityDuration.value = 30
+  activityDistance.value = undefined
+  activityElevationGain.value = undefined
+  activityMaxElevation.value = undefined
+  activityCalories.value = undefined
+  activityDurationStr.value = '30'
+  activityDistanceStr.value = ''
+  activityElevationGainStr.value = ''
+  activityMaxElevationStr.value = ''
+  activityCaloriesStr.value = ''
+  showPropagateDialog.value = false
+  Object.keys(exerciseSets).forEach(key => delete exerciseSets[Number(key)])
+  saveBaseline()
+}
+
+const isDirty = computed(() => currentValues() !== initialValues.value)
 
 // --- 计算属性 ---
 const formattedDate = computed(() => {
@@ -499,24 +550,7 @@ const canSubmit = computed(() => {
 // --- 监听器 ---
 watch(dialogOpen, async open => {
   if (open) {
-    sessionType.value = props.preselectedType || 'workout'
-    selectedWorkoutId.value = props.preselectedWorkoutId ?? null
-    selectedActivityId.value = props.preselectedActivityId ?? null
-    startTime.value = '09:00'
-    endTime.value = '10:00'
-    activityDuration.value = 30
-    activityDistance.value = undefined
-    activityElevationGain.value = undefined
-    activityMaxElevation.value = undefined
-    activityCalories.value = undefined
-    activityDurationStr.value = '30'
-    activityDistanceStr.value = ''
-    activityElevationGainStr.value = ''
-    activityMaxElevationStr.value = ''
-    activityCaloriesStr.value = ''
-    notesText.value = ''
-// 清空 exerciseSets
-    Object.keys(exerciseSets).forEach(k => delete exerciseSets[Number(k)])
+    resetForm()
 
     await Promise.all([workoutStore.setWorkouts(), activityStore.fetchActivities()])
 
@@ -526,6 +560,8 @@ watch(dialogOpen, async open => {
     } else if (props.preselectedType === 'activity' && props.preselectedActivityId) {
       selectedActivityId.value = props.preselectedActivityId
     }
+    await nextTick()
+    saveBaseline()
   } else {
     requestAnimationFrame(() => window.dispatchEvent(new Event('resize')))
   }
@@ -618,8 +654,8 @@ function confirmPropagate(shouldPropagate: boolean) {
   pendingSetIndex.value = null
 }
 
-async function submit() {
-  if (!canSubmit.value) return
+async function submit(closeAfterSave = true): Promise<boolean> {
+  if (!canSubmit.value || isSubmitting.value) return false
   isSubmitting.value = true
 
   try {
@@ -682,11 +718,22 @@ async function submit() {
     }
 
     emit('session-added')
-    close()
+    saveBaseline()
+    if (closeAfterSave) close()
+    return true
   } catch (error) {
     console.error('Failed to log past session:', error)
+    return false
   } finally {
     isSubmitting.value = false
   }
 }
+
+useUnsavedChanges({
+  key: 'calendar:add-past-session',
+  layerKey: 'calendar:add-past-session',
+  isDirty,
+  save: () => submit(false),
+  discard: resetForm,
+})
 </script>

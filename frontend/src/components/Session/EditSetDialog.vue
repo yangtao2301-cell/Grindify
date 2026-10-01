@@ -14,8 +14,9 @@
   -->
 
 <template>
-  <v-dialog
+  <HistoryDialog
     :model-value="modelValue"
+    history-key="session:edit-set"
     fullscreen
     :scrim="false"
     transition="dialog-bottom-transition"
@@ -82,12 +83,13 @@
         </v-btn>
       </div>
     </v-card>
-  </v-dialog>
+  </HistoryDialog>
 </template>
 
 <script lang="ts" setup>
 import { type PropType } from 'vue';
 import { parseDecimalInput, parseIntInput, normalizeDecimalStr, formatDecimalDisplay } from '@/utils/decimalInput';
+import { useUnsavedChanges } from '@/composables/useUnsavedChanges'
 
 // 定义训练组的数据结构
 interface WorkoutSet {
@@ -113,26 +115,48 @@ const emit = defineEmits(['update:modelValue', 'save', 'delete']);
 
 const editableSet = ref<WorkoutSet | null>(null);
 const weightStr = ref('');
+const initialForm = ref('')
+const currentFormSnapshot = () => JSON.stringify({ set: editableSet.value, weightStr: weightStr.value })
+const isDirty = computed(() => currentFormSnapshot() !== initialForm.value)
 
 watch(
   () => props.set,
   (newSet) => {
     editableSet.value = newSet ? JSON.parse(JSON.stringify(newSet)) : null;
     weightStr.value = formatDecimalDisplay(editableSet.value?.weight);
+    initialForm.value = currentFormSnapshot()
   },
   { immediate: true },
 );
 
-function onSave() {
+function resetForm() {
+  editableSet.value = props.set ? JSON.parse(JSON.stringify(props.set)) : null
+  weightStr.value = formatDecimalDisplay(editableSet.value?.weight)
+  initialForm.value = currentFormSnapshot()
+}
+
+function onSave(closeAfterSave = true): boolean {
   if (editableSet.value) {
     editableSet.value.weight = parseDecimalInput(weightStr.value);
     emit('save', editableSet.value);
+    initialForm.value = currentFormSnapshot()
+    if (closeAfterSave) emit('update:modelValue', false)
+    return true
   }
-  emit('update:modelValue', false);
+  return false
 }
 
 function onDelete() {
+  initialForm.value = currentFormSnapshot()
   emit('delete');
   emit('update:modelValue', false);
 }
+
+useUnsavedChanges({
+  key: 'edit-workout-set',
+  layerKey: 'session:edit-set',
+  isDirty,
+  save: async () => onSave(false),
+  discard: resetForm,
+})
 </script>

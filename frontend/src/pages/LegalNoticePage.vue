@@ -16,7 +16,7 @@
 <template>
   <v-card class="fill-height" rounded="0">
     <v-toolbar color="surface" flat>
-      <v-btn icon @click="router.back()">
+      <v-btn icon @click="goBack">
         <v-icon>mdi-arrow-left</v-icon>
       </v-btn>
       <v-toolbar-title>{{ $t('settings.imprint') }}</v-toolbar-title>
@@ -55,9 +55,12 @@
 </template>
 
 <script setup lang="ts">
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+import { navigateBack } from '@/navigation/backNavigation'
 
 const router = useRouter()
+const route = useRoute()
+const goBack = () => void navigateBack(router, route.meta.backTo as string | undefined)
 const contactEmail = import.meta.env.VITE_CONTACT_EMAIL ?? '3405351711@qq.com'
 const operatorName = import.meta.env.VITE_OPERATOR_NAME ?? 'Yang'
 const operatorAddress = import.meta.env.VITE_OPERATOR_ADDRESS ?? '天津科技大学'

@@ -351,7 +351,7 @@ const profileChoice = (value: unknown, labels: Labels) => {
   const text = textOf(value)
   const labelKey = profileChoiceKeys[text]
   if (labelKey) return labels[labelKey]
-  return text.replaceAll('_', ' ')
+  return text.replace(/_/g, ' ')
 }
 
 const numberOf = (value: unknown): number => {
@@ -377,7 +377,7 @@ const dateValue = (value: unknown): Date | null => {
   return Number.isNaN(parsed.getTime()) ? null : parsed
 }
 
-const formatDate = (value: unknown, locale: ReportLocale, style: 'short' | 'long' = 'medium') => {
+const formatDate = (value: unknown, locale: ReportLocale, style: 'short' | 'long' = 'long') => {
   const date = dateValue(value)
   if (!date) return '—'
   return new Intl.DateTimeFormat(locale, {

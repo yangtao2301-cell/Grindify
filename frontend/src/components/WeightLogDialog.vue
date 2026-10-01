@@ -14,7 +14,7 @@
   -->
 
 <template>
-  <v-dialog v-model="dialogOpen" fullscreen transition="slide-y-transition" persistent>
+  <HistoryDialog v-model="dialogOpen" history-key="home:weight-log" fullscreen transition="slide-y-transition" persistent>
     <v-card class="d-flex flex-column bg-background" style="height: 100dvh; overflow: hidden">
       <BackHeader :title="$t('weightLog.title')" @close="close" />
 
@@ -365,10 +365,10 @@
         </div>
       </template>
     </v-card>
-  </v-dialog>
+  </HistoryDialog>
 
 <!-- 添加/编辑体重记录对话框 -->
-  <v-dialog v-model="entryDialogOpen" max-width="400" persistent>
+  <HistoryDialog v-model="entryDialogOpen" history-key="home:weight-log-entry" max-width="400" persistent>
     <v-card class="bg-cardBg rounded-lg" style="border: 1px solid rgb(var(--v-theme-borderColor))">
       <v-card-title class="text-h6 pa-4">
         {{ editingEntry ? $t('weightLog.editEntry') : $t('weightLog.addEntry') }}
@@ -407,13 +407,13 @@
           color="primary"
           :loading="isSavingEntry"
           :disabled="parseDecimalInput(entryWeightStr) <= 0"
-          @click="saveEntry"
+          @click="saveEntry()"
         >
           {{ $t('common.save') }}
         </v-btn>
       </v-card-actions>
     </v-card>
-  </v-dialog>
+  </HistoryDialog>
 
 <!-- 删除确认对话框 -->
   <v-dialog v-model="deleteDialogOpen" max-width="360">
@@ -458,6 +458,7 @@ import type { WeightLog } from '@/interfaces/WeightLog.interface'
 import { toast } from 'vuetify-sonner'
 import { useI18n } from 'vue-i18n'
 import ProgressPhotosPanel from '@/components/ProgressPhotosPanel.vue'
+import { useUnsavedChanges } from '@/composables/useUnsavedChanges'
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Filler)
 
@@ -515,6 +516,36 @@ const setupGoalType = ref<string | null>(null)
 const setupGoalDurationValue = ref<number | undefined>(undefined)
 const setupGoalDurationUnit = ref<'weeks' | 'months'>('weeks')
 const isSavingSetup = ref(false)
+const initialSetupForm = ref('')
+
+function currentSetupForm() {
+  return JSON.stringify({
+    weight: setupWeightStr.value,
+    targetWeight: setupTargetWeightStr.value,
+    goalType: setupGoalType.value,
+    duration: setupGoalDurationValue.value,
+    durationUnit: setupGoalDurationUnit.value,
+  })
+}
+
+function saveSetupBaseline() {
+  initialSetupForm.value = currentSetupForm()
+}
+
+function resetSetupForm() {
+  setupWeight.value = null
+  setupTargetWeight.value = null
+  setupWeightStr.value = ''
+  setupTargetWeightStr.value = ''
+  setupGoalType.value = null
+  setupGoalDurationValue.value = undefined
+  setupGoalDurationUnit.value = 'weeks'
+  saveSetupBaseline()
+}
+
+const isSetupDirty = computed(() => currentSetupForm() !== initialSetupForm.value)
+
+saveSetupBaseline()
 
 // 目标设置面板
 const goalSettingsTargetWeight = ref<number | null>(null)
@@ -754,6 +785,41 @@ const entryDialogOpen = ref(false)
 const editingEntry = ref<WeightLog | null>(null)
 const isSavingEntry = ref(false)
 const entryForm = ref({ date: '', weight: null as number | null, notes: '' })
+const initialEntryForm = ref('')
+
+function currentEntryForm() {
+  return JSON.stringify({
+    entry: entryForm.value,
+    entryWeightStr: entryWeightStr.value,
+    editingEntryId: editingEntry.value?.id ?? null,
+  })
+}
+
+function saveEntryBaseline() {
+  initialEntryForm.value = currentEntryForm()
+}
+
+function resetEntryForm() {
+  if (editingEntry.value) {
+    const displayWeight = Number(fromKg(Number(editingEntry.value.weight)).toFixed(1))
+    entryForm.value = {
+      date: editingEntry.value.date.split('T')[0],
+      weight: displayWeight,
+      notes: editingEntry.value.notes || '',
+    }
+    entryWeightStr.value = formatDecimalDisplay(displayWeight)
+  } else {
+    entryForm.value = {
+      date: new Date().toISOString().split('T')[0],
+      weight: null,
+      notes: '',
+    }
+    entryWeightStr.value = ''
+  }
+  saveEntryBaseline()
+}
+
+const isEntryDirty = computed(() => currentEntryForm() !== initialEntryForm.value)
 
 const rules = {
   required: (v: string | number | null) => !!v || t('weightLog.fieldRequired'),
@@ -768,6 +834,7 @@ const openAddDialog = () => {
     notes: '',
   }
   entryWeightStr.value = ''
+  saveEntryBaseline()
   entryDialogOpen.value = true
 }
 
@@ -780,12 +847,14 @@ const openEditDialog = (entry: WeightLog) => {
     notes: entry.notes || '',
   }
   entryWeightStr.value = formatDecimalDisplay(displayWeight)
+  saveEntryBaseline()
   entryDialogOpen.value = true
 }
 
-const saveEntry = async () => {
+const saveEntry = async (closeAfterSave = true): Promise<boolean> => {
+  if (isSavingEntry.value) return false
   const parsedWeight = parseDecimalInput(entryWeightStr.value)
-  if (parsedWeight <= 0) return
+  if (parsedWeight <= 0) return false
   entryForm.value.weight = parsedWeight
   isSavingEntry.value = true
 
@@ -810,14 +879,25 @@ const saveEntry = async () => {
     await weightLogStore.refreshAll()
     await authStore.refreshUser()
     emit('weight-updated')
-    entryDialogOpen.value = false
+    saveEntryBaseline()
+    if (closeAfterSave) entryDialogOpen.value = false
+    return true
   } catch (error) {
     console.error('Failed to save weight log:', error)
     toast.error(t('weightLog.failedToSave'), { progressBar: true, duration: 1000 })
+    return false
   } finally {
     isSavingEntry.value = false
   }
 }
+
+useUnsavedChanges({
+  key: 'weight-log-entry',
+  layerKey: 'home:weight-log-entry',
+  isDirty: isEntryDirty,
+  save: () => saveEntry(false),
+  discard: resetEntryForm,
+})
 
 // 删除
 const deleteDialogOpen = ref(false)
@@ -849,10 +929,11 @@ const doDelete = async () => {
 }
 
 // 保存首次设置
-const saveFirstTimeSetup = async () => {
+const saveFirstTimeSetup = async (): Promise<boolean> => {
   setupWeight.value = parseDecimalInput(setupWeightStr.value) || null
   setupTargetWeight.value = parseDecimalInput(setupTargetWeightStr.value) || null
-  if (!setupWeight.value || setupWeight.value <= 0) return
+  if (!setupWeight.value || setupWeight.value <= 0) return false
+  if (isSavingSetup.value) return false
   isSavingSetup.value = true
 
   try {
@@ -886,13 +967,24 @@ const saveFirstTimeSetup = async () => {
     await authStore.refreshUser()
     emit('weight-updated')
     toast.success(t('weightLog.trackingStarted'), { progressBar: true, duration: 1000 })
+    saveSetupBaseline()
+    return true
   } catch (error) {
     console.error('Failed to save first-time setup:', error)
     toast.error(t('weightLog.failedToSave'), { progressBar: true, duration: 1000 })
+    return false
   } finally {
     isSavingSetup.value = false
   }
 }
+
+useUnsavedChanges({
+  key: 'weight-log-first-time-setup',
+  layerKey: 'home:weight-log',
+  isDirty: isSetupDirty,
+  save: saveFirstTimeSetup,
+  discard: resetSetupForm,
+})
 
 const close = () => {
   dialogOpen.value = false

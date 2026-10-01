@@ -150,6 +150,7 @@ import { toast } from 'vuetify-sonner'
 import { useI18n } from 'vue-i18n'
 import { resolveI18n } from '@/utils/exerciseDisplay'
 import { useUserLanguage } from '@/composables/useUserLanguage'
+import { useUnsavedChanges } from '@/composables/useUnsavedChanges'
 
 const props = defineProps<{ activity: Activity }>()
 const emit = defineEmits<{ close: []; deleted: [] }>()
@@ -197,9 +198,34 @@ const form = ref({
   trackCalories: props.activity.trackCalories,
 })
 
-async function saveActivity() {
+const initialForm = ref(JSON.stringify(form.value))
+const isDirty = computed(() => JSON.stringify(form.value) !== initialForm.value)
+
+function resetForm() {
+  form.value = {
+    name: resolveI18n(props.activity.title, lang.value),
+    description: resolveI18n(props.activity.description, lang.value),
+    icon: props.activity.icon,
+    equipment: props.activity.equipment ? [...props.activity.equipment] : [],
+    trackDistance: props.activity.trackDistance,
+    trackPace: props.activity.trackPace,
+    trackElevation: props.activity.trackElevation,
+    trackCalories: props.activity.trackCalories,
+  }
+  initialForm.value = JSON.stringify(form.value)
+}
+
+useUnsavedChanges({
+  key: `edit-activity-${props.activity.id}`,
+  layerKey: 'activity:edit',
+  isDirty,
+  save: () => saveActivity(false),
+  discard: resetForm,
+})
+
+async function saveActivity(closeAfterSave = true): Promise<boolean> {
   const { valid } = await formRef.value.validate()
-  if (!valid) return
+  if (!valid) return false
 
   isSaving.value = true
   try {
@@ -215,12 +241,15 @@ async function saveActivity() {
     })
     toast.success(t('activity.updated'), { progressBar: true, duration: 1000 })
     await activityStore.fetchActivities(true)
-    emit('close')
+    initialForm.value = JSON.stringify(form.value)
+    if (closeAfterSave) emit('close')
+    return true
   } catch (error: unknown) {
     toast.error((error as Error).message || t('activity.failedToUpdate'), {
       progressBar: true,
       duration: 1000,
     })
+    return false
   } finally {
     isSaving.value = false
   }
@@ -232,8 +261,8 @@ async function deleteActivity() {
     await deleteActivityService(props.activity.id)
     toast.success(t('activity.deleted'), { progressBar: true, duration: 1000 })
     await activityStore.fetchActivities(true)
+    initialForm.value = JSON.stringify(form.value)
     emit('deleted')
-    emit('close')
   } catch (error: unknown) {
     toast.error((error as Error).message || t('activity.failedToDelete'), {
       progressBar: true,

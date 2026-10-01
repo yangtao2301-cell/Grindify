@@ -14,15 +14,16 @@
   -->
 
 <template>
-  <v-dialog
+  <HistoryDialog
     :model-value="modelValue"
+    history-key="legal:privacy"
     fullscreen
     @update:model-value="$emit('update:modelValue', $event)"
   >
     <v-card class="bg-background">
       <BackHeader
         :title="$t('auth.privacyPolicyTitle')"
-        @click="$emit('update:modelValue', false)"
+        @close="$emit('update:modelValue', false)"
       />
       <v-card-text class="pa-6">
         <p class="text-caption text-textSecondary mb-6">{{ $t('legal.lastUpdated') }}</p>
@@ -129,7 +130,7 @@
         </v-btn>
       </v-card-actions>
     </v-card>
-  </v-dialog>
+  </HistoryDialog>
 </template>
 
 <script setup lang="ts">

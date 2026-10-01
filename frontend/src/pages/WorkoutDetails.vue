@@ -27,7 +27,7 @@
     <BackHeader
       :title="workout?.title || ''"
       show-menu
-      @close="isDialogMode ? emit('close') : $router.back()"
+      @close="handleBack"
     >
       <template #menuAppend>
         <v-list
@@ -236,23 +236,24 @@
   </div>
 
 <!-- 对话框 -->
-  <v-dialog v-model="isEditWorkoutOpen" fullscreen>
+  <HistoryDialog v-model="isEditWorkoutOpen" history-key="workout-details:edit" fullscreen>
     <EditWorkout
       :workout="workout"
+      history-key="workout-details:edit"
       @close="onEditWorkoutClose"
       @save="workoutStore.setWorkouts(true)"
     />
-  </v-dialog>
+  </HistoryDialog>
 
-  <v-dialog v-model="isWeightAndRepsOpen" fullscreen>
+  <HistoryDialog v-model="isWeightAndRepsOpen" history-key="workout-details:weight-reps" fullscreen>
     <WeightAndRepsSettings
       :workout-id="workout?.id || undefined"
       :default-weight-and-reps="workout?.defaultWeightAndReps ?? ''"
       @close="isWeightAndRepsOpen = false"
     />
-  </v-dialog>
+  </HistoryDialog>
 
-  <v-dialog v-model="isExerciseDetailsOpen" fullscreen>
+  <HistoryDialog v-model="isExerciseDetailsOpen" history-key="workout-details:exercise" fullscreen>
     <ExerciseDetails
       v-if="isExerciseDetailsOpen && selectedExerciseForDetails"
       :selected-exercise="selectedExerciseForDetails"
@@ -260,7 +261,7 @@
       :hide-menu="true"
       @close="isExerciseDetailsOpen = false"
     />
-  </v-dialog>
+  </HistoryDialog>
 </template>
 
 <script setup lang="ts">
@@ -281,6 +282,7 @@ import { useUserLanguage } from '@/composables/useUserLanguage'
 import router from '@/router'
 import { useRoute } from 'vue-router'
 import BackHeader from '@/components/BackHeader.vue'
+import { navigateBack } from '@/navigation/backNavigation'
 
 const props = defineProps<{ workoutId?: number }>()
 const emit = defineEmits<{ (e: 'close'): void }>()
@@ -301,6 +303,14 @@ const isEditWorkoutOpen = ref(false)
 const isWeightAndRepsOpen = ref(false)
 const isExerciseDetailsOpen = ref(false)
 const selectedExerciseForDetails = ref<ExerciseCatalog | null>(null)
+
+function handleBack() {
+  if (isDialogMode.value) {
+    emit('close')
+    return
+  }
+  void navigateBack(router, route.meta.backTo as string | undefined)
+}
 
 const workout = computed<Workout | null>(() => workoutStore.currentWorkout)
 

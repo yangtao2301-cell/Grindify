@@ -118,14 +118,14 @@
     </div>
   </div>
 
-  <v-dialog v-model="isSessionDetailOpen" fullscreen>
+  <HistoryDialog v-model="isSessionDetailOpen" history-key="settings:session-detail" fullscreen>
     <SessionDetail
       v-if="selectedSession !== null"
       :session-type="selectedSession.type"
       :session-id="selectedSession.id"
       @close="isSessionDetailOpen = false"
     />
-  </v-dialog>
+  </HistoryDialog>
 </template>
 
 <script setup lang="ts">

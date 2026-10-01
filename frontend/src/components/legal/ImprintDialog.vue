@@ -14,13 +14,14 @@
   -->
 
 <template>
-  <v-dialog
+  <HistoryDialog
     :model-value="modelValue"
+    history-key="legal:imprint"
     fullscreen
     @update:model-value="$emit('update:modelValue', $event)"
   >
     <v-card class="bg-background">
-      <BackHeader :title="$t('settings.imprint')" @click="$emit('update:modelValue', false)" />
+      <BackHeader :title="$t('settings.imprint')" @close="$emit('update:modelValue', false)" />
       <v-card-text class="pa-6">
         <p class="text-caption text-textSecondary mb-6">{{ $t('legal.lastUpdated') }}</p>
 
@@ -63,7 +64,7 @@
         </v-btn>
       </v-card-actions>
     </v-card>
-  </v-dialog>
+  </HistoryDialog>
 </template>
 
 <script setup lang="ts">

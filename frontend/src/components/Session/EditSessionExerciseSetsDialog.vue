@@ -80,6 +80,7 @@ import { toast } from 'vuetify-sonner'
 import { useI18n } from 'vue-i18n'
 import { displayExerciseName } from '@/utils/exerciseDisplay'
 import { useUserLanguage } from '@/composables/useUserLanguage'
+import { useUnsavedChanges } from '@/composables/useUnsavedChanges'
 
 const props = defineProps<{
   sessionId: number
@@ -103,6 +104,25 @@ const weightStrings = ref<string[]>(
 const repsStrings = ref<string[]>(
   editableSets.value.map(s => (s.reps !== undefined && s.reps !== null ? String(s.reps) : ''))
 )
+
+const initialForm = ref('')
+const currentFormSnapshot = () =>
+  JSON.stringify({ sets: editableSets.value, weights: weightStrings.value, reps: repsStrings.value })
+initialForm.value = currentFormSnapshot()
+const isDirty = computed(() => currentFormSnapshot() !== initialForm.value)
+
+function resetForm() {
+  editableSets.value = [...(props.exercise.sets || [])]
+    .sort((a, b) => a.setNumber - b.setNumber)
+    .map(set => ({ ...set }))
+  weightStrings.value = editableSets.value.map(set =>
+    set.weight !== undefined && set.weight !== null ? String(set.weight).replace('.', ',') : ''
+  )
+  repsStrings.value = editableSets.value.map(set =>
+    set.reps !== undefined && set.reps !== null ? String(set.reps) : ''
+  )
+  initialForm.value = currentFormSnapshot()
+}
 
 const exerciseName = computed(
   () => props.exercise.exercise ? displayExerciseName(props.exercise.exercise, lang.value) : t('sessionList.exerciseFallback')
@@ -156,7 +176,7 @@ function toOptionalInt(value: unknown): number | undefined {
   return Number.isFinite(parsed) ? parsed : undefined
 }
 
-async function saveSets() {
+async function saveSets(closeAfterSave = true): Promise<boolean> {
   try {
     const payload = editableSets.value.map((set, idx) => ({
       setNumber: idx + 1,
@@ -166,15 +186,28 @@ async function saveSets() {
 
     await updateSessionExerciseSets(props.sessionId, props.exercise.id, payload)
     toast.success(t('sessionDetail.setsUpdated'), { progressBar: true, duration: 1000 })
-    emit('saved')
-    emit('close')
+    initialForm.value = currentFormSnapshot()
+    if (closeAfterSave) {
+      emit('saved')
+      emit('close')
+    }
+    return true
   } catch (error: unknown) {
     toast.error((error as Error).message || t('sessionDetail.failedToUpdateSets'), {
       progressBar: true,
       duration: 1000,
     })
+    return false
   }
 }
+
+useUnsavedChanges({
+  key: `edit-session-exercise-sets-${props.exercise.id}`,
+  layerKey: 'session-detail:edit-exercise-sets',
+  isDirty,
+  save: () => saveSets(false),
+  discard: resetForm,
+})
 </script>
 
 <style scoped>

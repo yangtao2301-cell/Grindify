@@ -16,7 +16,6 @@
 <template>
   <div
     class="d-flex justify-space-between align-center px-5 py-3"
-    @click="routeTo"
   >
     <v-btn
       v-if="showMenu"
@@ -26,7 +25,7 @@
       size="40"
       variant="flat"
       :loading="isLoading"
-      @click.stop="emit('close')"
+      @click.stop="handleBack"
     >
       <template v-if="!isLoading">
         <v-icon>mdi-arrow-left</v-icon>
@@ -56,7 +55,8 @@
   </div>
 </template>
 <script lang="ts" setup>
-import router from "@/router";
+import router from '@/router'
+import { navigateBackTo } from '@/navigation/backNavigation'
 
 const emit = defineEmits<{
   (e: "close"): void;
@@ -69,9 +69,11 @@ const props = defineProps<{
   isLoading?: boolean;
 }>();
 
-const routeTo = () => {
+const handleBack = () => {
   if (props.routeTo) {
-    router.push(props.routeTo);
+    void navigateBackTo(router, props.routeTo)
+  } else {
+    emit('close')
   }
-};
+}
 </script>

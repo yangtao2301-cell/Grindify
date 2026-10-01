@@ -155,13 +155,14 @@
     </div>
 
 <!-- 保存为训练对话框 -->
-    <v-dialog v-model="saveAsWorkoutDialog" fullscreen>
+    <HistoryDialog v-model="saveAsWorkoutDialog" history-key="session-summary:save-as-workout" fullscreen>
       <CreateWorkout
         v-if="saveAsWorkoutDialog && workoutInitialData"
         :initial-data="workoutInitialData"
+        history-key="session-summary:save-as-workout"
         @close="saveAsWorkoutDialog = false"
       />
-    </v-dialog>
+    </HistoryDialog>
   </div>
 </template>
 

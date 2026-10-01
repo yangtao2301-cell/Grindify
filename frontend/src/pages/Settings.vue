@@ -156,52 +156,52 @@
     </div>
 
 <!-- 账号编辑对话框 -->
-    <v-dialog v-model="isAccountDialogOpen" fullscreen transition="slide-y-transition" persistent>
+    <HistoryDialog v-model="isAccountDialogOpen" history-key="settings:account" fullscreen transition="slide-y-transition" persistent>
       <AccountDialog
         :user="currentUser"
         @close="isAccountDialogOpen = false"
         @updated="onUserUpdated"
       />
-    </v-dialog>
+    </HistoryDialog>
 
-    <v-dialog v-model="isExerciseListOpen" fullscreen transition="slide-y-transition" persistent>
+    <HistoryDialog v-model="isExerciseListOpen" history-key="settings:exercise-list" fullscreen transition="slide-y-transition" persistent>
       <ExerciseList @close="isExerciseListOpen = false" />
-    </v-dialog>
-    <v-dialog v-model="isActivityListOpen" fullscreen transition="slide-y-transition" persistent>
+    </HistoryDialog>
+    <HistoryDialog v-model="isActivityListOpen" history-key="settings:activity-list" fullscreen transition="slide-y-transition" persistent>
       <ActivityList @close="isActivityListOpen = false" />
-    </v-dialog>
-    <v-dialog v-model="isSessionListOpen" fullscreen transition="slide-y-transition" persistent>
+    </HistoryDialog>
+    <HistoryDialog v-model="isSessionListOpen" history-key="settings:session-list" fullscreen transition="slide-y-transition" persistent>
       <SessionList @close="isSessionListOpen = false" />
-    </v-dialog>
-    <v-dialog v-model="isWorkoutListOpen" fullscreen transition="slide-y-transition" persistent>
+    </HistoryDialog>
+    <HistoryDialog v-model="isWorkoutListOpen" history-key="settings:workout-list" fullscreen transition="slide-y-transition" persistent>
       <WorkoutList @close="isWorkoutListOpen = false" />
-    </v-dialog>
+    </HistoryDialog>
 
-    <v-dialog v-model="isAppearanceOpen" fullscreen transition="slide-y-transition" persistent>
+    <HistoryDialog v-model="isAppearanceOpen" history-key="settings:appearance" fullscreen transition="slide-y-transition" persistent>
       <AppearanceDialog
         :user="currentUser"
         @close="isAppearanceOpen = false"
         @updated="onUserUpdated"
       />
-    </v-dialog>
+    </HistoryDialog>
 
-    <v-dialog v-model="isLanguageDialogOpen" max-width="500" fullscreen>
+    <HistoryDialog v-model="isLanguageDialogOpen" history-key="settings:language" max-width="500" fullscreen>
       <LanguageDialog @close="isLanguageDialogOpen = false" />
-    </v-dialog>
+    </HistoryDialog>
 
-    <v-dialog v-model="isVersionHistoryOpen" fullscreen transition="slide-y-transition" persistent>
+    <HistoryDialog v-model="isVersionHistoryOpen" history-key="settings:version-history" fullscreen transition="slide-y-transition" persistent>
       <VersionHistoryDialog @close="isVersionHistoryOpen = false" />
-    </v-dialog>
+    </HistoryDialog>
 
 <!-- 目标对话框 -->
-    <v-dialog v-model="isGoalsDialogOpen" fullscreen transition="slide-y-transition" persistent>
+    <HistoryDialog v-model="isGoalsDialogOpen" history-key="settings:goals" fullscreen transition="slide-y-transition" persistent>
       <GoalsDialog
         :user="currentUser"
         :weight-tracking-enabled="weightTrackingEnabled"
         @close="isGoalsDialogOpen = false"
         @updated="onUserUpdated"
       />
-    </v-dialog>
+    </HistoryDialog>
 
     <PrivacyPolicyDialog v-model="isPrivacyPolicyOpen" />
     <TermsAndConditionsDialog v-model="isTermsOpen" />

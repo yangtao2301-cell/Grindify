@@ -14,8 +14,9 @@
   -->
 
 <template>
-  <v-dialog
+  <HistoryDialog
     :model-value="modelValue"
+    history-key="session:timer"
     fullscreen
     :scrim="false"
     transition="dialog-bottom-transition"
@@ -74,7 +75,7 @@
         {{ $t('timer.closeTimer') }}
       </v-btn>
     </v-card>
-  </v-dialog>
+  </HistoryDialog>
 </template>
 
 <script lang="ts" setup>

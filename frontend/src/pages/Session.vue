@@ -15,7 +15,7 @@
 
 <template>
   <div>
-    <BackHeader :show-menu="true" :title="$t('session.workoutSessionTitle')" :route-to="'/'">
+    <BackHeader :show-menu="true" :title="$t('session.workoutSessionTitle')" :route-to="returnTo">
       <template #menuAppend>
         <v-list>
           <v-list-item @click="isAddExerciseOpen = true">
@@ -64,16 +64,16 @@
       </v-btn>
     </div>
 
-    <v-dialog v-model="isAddExerciseOpen" fullscreen>
+    <HistoryDialog v-model="isAddExerciseOpen" history-key="session:add-exercises" fullscreen>
       <AddExerciseList
         v-if="isAddExerciseOpen"
         :initial-selected-ids="processedExercises.map(e => e.exerciseId)"
         @close="isAddExerciseOpen = false"
         @save="updateWorkoutSessionExercises"
       />
-    </v-dialog>
+    </HistoryDialog>
 
-    <v-dialog v-model="isViewExerciseDetailsOpen" fullscreen>
+    <HistoryDialog v-model="isViewExerciseDetailsOpen" history-key="session:exercise-details" fullscreen>
       <ExerciseDetails
         v-if="isViewExerciseDetailsOpen && viewExerciseDetails"
         :selected-exercise="viewExerciseDetails"
@@ -81,12 +81,13 @@
         hide-menu
         @close="onCloseExerciseDetails"
       />
-    </v-dialog>
+    </HistoryDialog>
   </div>
 </template>
 
 <script lang="ts" setup>
 import router from '@/router'
+import { navigateBackTo } from '@/navigation/backNavigation'
 import { useRoute } from 'vue-router'
 import { toast } from 'vuetify-sonner'
 import { useI18n } from 'vue-i18n'
@@ -108,6 +109,12 @@ const isViewExerciseDetailsOpen = ref(false)
 const viewExerciseDetails = ref<ExerciseDetailType | null>(null)
 const { t } = useI18n({ useScope: 'global' })
 const route = useRoute()
+const returnTo = computed(() => {
+  const value = route.query.returnTo
+  return typeof value === 'string' && value.startsWith('/') && !value.startsWith('//')
+    ? value
+    : (route.meta.backTo as string) || '/'
+})
 const workoutSessionStore = useWorkoutSessionStore()
 const authStore = useAuthStore()
 const processedExercises = ref<Exercise[]>([])
@@ -343,7 +350,7 @@ const finnishSession = async () => {
       workoutSessionStore.resetClock()
       workoutSessionStore.clearLiveSession(sessionId.value)
       await workoutSessionStore.setWorkoutSessions(true)
-      router.push((route.query.returnTo as string) || '/')
+      await navigateBackTo(router, returnTo.value)
     } else {
       const finalPayload = { completedExercises, notes: '' }
       const durationSeconds = workoutSessionStore.secondsElapsed

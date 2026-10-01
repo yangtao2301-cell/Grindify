@@ -177,6 +177,7 @@ import { useI18n } from 'vue-i18n'
 import TermsAndConditionsDialog from '@/components/legal/TermsAndConditionsDialog.vue'
 import PrivacyPolicyDialog from '@/components/legal/PrivacyPolicyDialog.vue'
 import ImprintDialog from '@/components/legal/ImprintDialog.vue'
+import { navigateBackTo } from '@/navigation/backNavigation'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -232,7 +233,7 @@ const handleCreateAccount = async () => {
 }
 
 const navigateToLogin = () => {
-  router.push('/login')
+  void navigateBackTo(router, '/login')
 }
 </script>
 

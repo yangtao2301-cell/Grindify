@@ -136,7 +136,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useActivityStore } from '@/stores/activity.store'
 import { updateActivityLog, deleteActivityLog } from '@/services/activityLog.service'
 import type { ActivityLog } from '@/interfaces/Activity.interface'
@@ -144,8 +144,11 @@ import AcceptDialog from '@/components/basicUI/AcceptDialog.vue'
 import { toast } from 'vuetify-sonner'
 import { useI18n } from 'vue-i18n'
 import { parseDecimalInput, normalizeDecimalStr, formatDecimalDisplay } from '@/utils/decimalInput'
+import { useUnsavedChanges } from '@/composables/useUnsavedChanges'
 
-const props = defineProps<{ log: ActivityLog }>()
+const props = withDefaults(defineProps<{ log: ActivityLog; historyKey?: string }>(), {
+  historyKey: 'activity:edit-log',
+})
 const emit = defineEmits<{ close: []; saved: [] }>()
 const { t } = useI18n()
 const activityStore = useActivityStore()
@@ -173,9 +176,45 @@ const distanceStr = ref(formatDecimalDisplay(props.log.distance ?? undefined))
 const elevationGainStr = ref(formatDecimalDisplay(props.log.elevationGain ?? undefined))
 const caloriesStr = ref(formatDecimalDisplay(props.log.calories ?? undefined))
 
-async function saveLog() {
+const initialForm = ref('')
+const currentFormSnapshot = () =>
+  JSON.stringify({
+    ...form.value,
+    durationStr: durationStr.value,
+    distanceStr: distanceStr.value,
+    elevationGainStr: elevationGainStr.value,
+    caloriesStr: caloriesStr.value,
+  })
+initialForm.value = currentFormSnapshot()
+const isDirty = computed(() => currentFormSnapshot() !== initialForm.value)
+
+function resetForm() {
+  form.value = {
+    date: formatDateForInput(props.log.date),
+    duration: props.log.duration,
+    distance: props.log.distance ?? undefined,
+    elevationGain: props.log.elevationGain ?? undefined,
+    calories: props.log.calories ?? undefined,
+    notes: props.log.notes ?? '',
+  }
+  durationStr.value = String(props.log.duration ?? '')
+  distanceStr.value = formatDecimalDisplay(props.log.distance ?? undefined)
+  elevationGainStr.value = formatDecimalDisplay(props.log.elevationGain ?? undefined)
+  caloriesStr.value = formatDecimalDisplay(props.log.calories ?? undefined)
+  initialForm.value = currentFormSnapshot()
+}
+
+useUnsavedChanges({
+  key: `edit-activity-log-${props.log.id}`,
+  layerKey: props.historyKey,
+  isDirty,
+  save: () => saveLog(false),
+  discard: resetForm,
+})
+
+async function saveLog(closeAfterSave = true): Promise<boolean> {
   const { valid } = await formRef.value.validate()
-  if (!valid) return
+  if (!valid) return false
 
 // 保存前将字符串引用解析为数字
   form.value.duration = parseDecimalInput(durationStr.value)
@@ -195,13 +234,18 @@ async function saveLog() {
     })
     toast.success(t('activity.logUpdated'), { progressBar: true, duration: 1000 })
     await activityStore.fetchActivityLogs(true)
-    emit('saved')
-    emit('close')
+    initialForm.value = currentFormSnapshot()
+    if (closeAfterSave) {
+      emit('saved')
+      emit('close')
+    }
+    return true
   } catch (error: unknown) {
     toast.error((error as Error).message || t('activity.failedToUpdateLog'), {
       progressBar: true,
       duration: 1000,
     })
+    return false
   } finally {
     isSaving.value = false
   }
@@ -213,6 +257,7 @@ async function deleteLog() {
     await deleteActivityLog(props.log.id)
     toast.success(t('activity.logDeleted'), { progressBar: true, duration: 1000 })
     await activityStore.fetchActivityLogs(true)
+    initialForm.value = currentFormSnapshot()
     emit('saved')
     emit('close')
   } catch (error: unknown) {

@@ -213,14 +213,14 @@
     </v-form>
 
 <!-- 添加训练动作对话框 -->
-    <v-dialog v-model="isAddExerciseOpen" fullscreen>
+    <HistoryDialog v-model="isAddExerciseOpen" history-key="workout:add-exercises" fullscreen>
       <AddExerciseList
         v-if="isAddExerciseOpen"
         :initial-selected-ids="form.exercises.map(e => e.exerciseId)"
         @close="isAddExerciseOpen = false"
         @save="onExerciseListSave"
       />
-    </v-dialog>
+    </HistoryDialog>
   </div>
 </template>
 
@@ -250,6 +250,7 @@ import { displayExerciseName } from '@/utils/exerciseDisplay'
 import { useUserLanguage } from '@/composables/useUserLanguage'
 import { useRouter } from 'vue-router'
 import type { WorkoutInitialData } from '@/utils/sessionToWorkout'
+import { useUnsavedChanges } from '@/composables/useUnsavedChanges'
 
 const { t } = useI18n({ useScope: 'global' })
 const { lang } = useUserLanguage()
@@ -259,8 +260,9 @@ const emit = defineEmits<{
   (e: 'close'): void
 }>()
 
-const props = withDefaults(defineProps<{ initialData?: WorkoutInitialData }>(), {
+const props = withDefaults(defineProps<{ initialData?: WorkoutInitialData; historyKey?: string }>(), {
   initialData: undefined,
+  historyKey: 'workout:create',
 })
 
 const workoutStore = useWorkoutStore()
@@ -290,14 +292,30 @@ const form = reactive({
 
 const selectedTargetMuscleIds = ref(new Set<number>())
 
-onMounted(() => {
+const initialForm = ref('')
+const currentFormSnapshot = () =>
+  JSON.stringify({ form, targetMuscles: Array.from(selectedTargetMuscleIds.value).sort((a, b) => a - b) })
+const isDirty = computed(() => initialForm.value !== '' && currentFormSnapshot() !== initialForm.value)
+
+function initializeForm() {
+  form.title = ''
+  form.description = ''
+  form.type = null
+  form.time = 0
+  form.exercises = []
+  selectedTargetMuscleIds.value = new Set<number>()
+
   if (props.initialData) {
     if (props.initialData.time != null) form.time = props.initialData.time
     if (props.initialData.exercises.length) {
-// 浅拷贝即可；WorkoutExerciseInitialData 只包含基本类型值。
       form.exercises = props.initialData.exercises.map(ex => ({ ...ex }))
     }
   }
+  initialForm.value = currentFormSnapshot()
+}
+
+onMounted(() => {
+  initializeForm()
 })
 
 // -- 训练类型项目 --
@@ -393,8 +411,16 @@ const onDragEnd = () => {
 }
 
 // -- 保存（创建） --
-const saveWorkout = async () => {
-  if (!form.title || isSaving.value) return
+useUnsavedChanges({
+  key: 'create-workout',
+  layerKey: props.historyKey,
+  isDirty,
+  save: () => saveWorkout(false),
+  discard: initializeForm,
+})
+
+const saveWorkout = async (openDetails = true): Promise<boolean> => {
+  if (!form.title || isSaving.value) return false
   isSaving.value = true
 
   try {
@@ -460,11 +486,18 @@ const saveWorkout = async () => {
     await workoutStore.setWorkouts(true)
     await workoutStore.setCurrentWorkout(workoutId)
     toast.success(t('workout.created'), { progressBar: true, duration: 1000 })
-    router.push(`/workout/${workoutId}`)
-    emit('close')
+    if (openDetails) {
+      initialForm.value = currentFormSnapshot()
+      await router.push(`/workout/${workoutId}`)
+      emit('close')
+    } else {
+      initializeForm()
+    }
+    return true
   } catch (error) {
     console.error('Error creating workout:', error)
     toast.error(t('workout.failedToCreate'), { progressBar: true, duration: 1000 })
+    return false
   } finally {
     isSaving.value = false
   }

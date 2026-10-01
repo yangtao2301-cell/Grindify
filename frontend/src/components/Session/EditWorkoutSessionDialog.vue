@@ -57,6 +57,7 @@ import { updateWorkoutSession } from '@/services/workoutSession.service'
 import type { WorkoutSession } from '@/interfaces/workoutSession.interface'
 import { toast } from 'vuetify-sonner'
 import { useI18n } from 'vue-i18n'
+import { useUnsavedChanges } from '@/composables/useUnsavedChanges'
 
 const props = defineProps<{ session: WorkoutSession }>()
 const emit = defineEmits<{ close: []; saved: [] }>()
@@ -65,6 +66,9 @@ const { t } = useI18n()
 const formRef = ref()
 const durationMinutes = ref(String(getDurationMinutes(props.session)))
 const notes = ref(props.session.notes ?? '')
+const initialForm = ref(JSON.stringify({ durationMinutes: durationMinutes.value, notes: notes.value }))
+const currentFormSnapshot = () => JSON.stringify({ durationMinutes: durationMinutes.value, notes: notes.value })
+const isDirty = computed(() => currentFormSnapshot() !== initialForm.value)
 
 function getDurationMinutes(session: WorkoutSession): number {
   const startedAt = new Date(session.startedAt).getTime()
@@ -77,9 +81,15 @@ function validateDuration(value: string) {
   return Number.isInteger(parsed) && parsed > 0 ? true : t('common.error')
 }
 
-async function saveSession() {
+function resetForm() {
+  durationMinutes.value = String(getDurationMinutes(props.session))
+  notes.value = props.session.notes ?? ''
+  initialForm.value = currentFormSnapshot()
+}
+
+async function saveSession(closeAfterSave = true): Promise<boolean> {
   const { valid } = await formRef.value.validate()
-  if (!valid) return
+  if (!valid) return false
 
   const parsedDuration = Number.parseInt(durationMinutes.value, 10)
 
@@ -89,15 +99,28 @@ async function saveSession() {
       notes: notes.value || undefined,
     })
     toast.success(t('sessionDetail.updated'), { progressBar: true, duration: 1000 })
-    emit('saved')
-    emit('close')
+    initialForm.value = currentFormSnapshot()
+    if (closeAfterSave) {
+      emit('saved')
+      emit('close')
+    }
+    return true
   } catch (error: unknown) {
     toast.error((error as Error).message || t('sessionDetail.failedToUpdate'), {
       progressBar: true,
       duration: 1000,
     })
+    return false
   }
 }
+
+useUnsavedChanges({
+  key: `edit-workout-session-${props.session.id}`,
+  layerKey: 'session-detail:edit-workout',
+  isDirty,
+  save: () => saveSession(false),
+  discard: resetForm,
+})
 </script>
 
 <style scoped>

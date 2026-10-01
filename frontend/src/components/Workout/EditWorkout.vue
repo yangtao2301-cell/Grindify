@@ -252,14 +252,14 @@
     </v-form>
 
 <!-- 添加训练动作对话框 -->
-    <v-dialog v-model="isAddExerciseOpen" fullscreen>
+    <HistoryDialog v-model="isAddExerciseOpen" history-key="workout:add-exercises" fullscreen>
       <AddExerciseList
         v-if="isAddExerciseOpen"
         :initial-selected-ids="form.exercises.map(e => e.exerciseId)"
         @close="isAddExerciseOpen = false"
         @save="onExerciseListSave"
       />
-    </v-dialog>
+    </HistoryDialog>
 
 <!-- 删除训练确认 -->
     <AcceptDialog
@@ -301,12 +301,14 @@ import { displayExerciseName } from '@/utils/exerciseDisplay'
 import { useUserLanguage } from '@/composables/useUserLanguage'
 import router from '@/router'
 import { parseDecimalInput } from '@/utils/decimalInput'
+import { useUnsavedChanges } from '@/composables/useUnsavedChanges'
 
 const { t } = useI18n({ useScope: 'global' })
 const { lang } = useUserLanguage()
 
 const props = defineProps<{
   workout: Workout | null
+  historyKey?: string
 }>()
 
 const emit = defineEmits<{
@@ -344,6 +346,11 @@ const form = reactive({
 
 const selectedTargetMuscleIds = ref(new Set<number>())
 
+const initialForm = ref('')
+const currentFormSnapshot = () =>
+  JSON.stringify({ form, targetMuscles: Array.from(selectedTargetMuscleIds.value).sort((a, b) => a - b) })
+const isDirty = computed(() => initialForm.value !== '' && currentFormSnapshot() !== initialForm.value)
+
 // 根据训练初始化表单
 const initForm = () => {
   if (!props.workout) return
@@ -369,6 +376,7 @@ const initForm = () => {
 // 加载目标肌群 ID
   const targetIds = (props.workout.targetMuscleGroups || []).map(mg => mg.id)
   selectedTargetMuscleIds.value = new Set(targetIds)
+  initialForm.value = currentFormSnapshot()
 }
 
 initForm()
@@ -377,7 +385,7 @@ initForm()
 watch(
   () => props.workout,
   () => {
-    if (!isSaving.value) {
+    if (!isSaving.value && !isDirty.value) {
       initForm()
     }
   },
@@ -509,8 +517,8 @@ function fillDownWeight(exercise: ExerciseForm, fromIndex: number) {
 }
 
 // -- 保存 --
-const saveWorkout = async () => {
-  if (!props.workout || isSaving.value) return
+const saveWorkout = async (closeAfterSave = true): Promise<boolean> => {
+  if (!props.workout || isSaving.value) return false
   isSaving.value = true
 
   try {
@@ -589,15 +597,28 @@ const saveWorkout = async () => {
 
     await workoutStore.setWorkouts(true)
     toast.success(t('workout.updated'), { progressBar: true, duration: 1000 })
-    emit('save')
-    emit('close')
+    initialForm.value = currentFormSnapshot()
+    if (closeAfterSave) {
+      emit('save')
+      emit('close')
+    }
+    return true
   } catch (error) {
     console.error('Error saving workout:', error)
     toast.error(t('workout.failedToUpdate'), { progressBar: true, duration: 1000 })
+    return false
   } finally {
     isSaving.value = false
   }
 }
+
+useUnsavedChanges({
+  key: `edit-workout-${props.workout?.id ?? 'missing'}`,
+  layerKey: props.historyKey || 'workout-details:edit',
+  isDirty,
+  save: () => saveWorkout(false),
+  discard: initForm,
+})
 
 // -- 删除 --
 const confirmDelete = async () => {
@@ -607,10 +628,10 @@ const confirmDelete = async () => {
     if (response) {
       await workoutStore.setWorkouts(true)
       workoutStore.currentWorkout = null
+      initialForm.value = currentFormSnapshot()
       isDeleteDialogOpen.value = false
       toast.success(t('workout.deleted'), { progressBar: true, duration: 1000 })
-      emit('close')
-      router.push('/')
+      await router.push('/')
     }
   } catch (error) {
     console.error('Error deleting workout:', error)

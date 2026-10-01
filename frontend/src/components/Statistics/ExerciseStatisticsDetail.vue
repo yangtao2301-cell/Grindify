@@ -14,7 +14,7 @@
   -->
 
 <template>
-  <v-dialog v-model="dialogModel" fullscreen transition="dialog-bottom-transition">
+  <HistoryDialog v-model="dialogModel" history-key="statistics:exercise-detail" fullscreen transition="dialog-bottom-transition">
     <v-card class="bg-background">
       <div class="pa-5 d-flex flex-column ga-4">
 <!-- 标题 -->
@@ -202,7 +202,7 @@
         </div>
       </div>
     </v-card>
-  </v-dialog>
+  </HistoryDialog>
 </template>
 
 <script setup lang="ts">

@@ -35,6 +35,7 @@ import SessionDetail from '@/pages/SessionDetail.vue'
 import PrivacyPage from '@/pages/PrivacyPage.vue'
 import TermsPage from '@/pages/TermsPage.vue'
 import LegalNoticePage from '@/pages/LegalNoticePage.vue'
+import { requestUnsavedNavigation } from '@/navigation/unsavedChanges'
 
 const routes = [
   {
@@ -95,19 +96,19 @@ const routes = [
     path: '/log-activity',
     name: 'LogActivity',
     component: LogActivity,
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, backTo: '/' },
   },
   {
     path: '/workout/:workoutId',
     name: 'WorkoutDetails',
     component: WorkoutDetails,
-    meta: { requiresAuth: true, hideBottomNav: true },
+    meta: { requiresAuth: true, hideBottomNav: true, backTo: '/' },
   },
   {
     path: '/session/:sessionId',
     name: 'SessionDetails',
     component: Session,
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, backTo: '/' },
   },
   {
     path: '/session-summary',
@@ -119,7 +120,7 @@ const routes = [
     path: '/session-history/:type/:id',
     name: 'SessionDetail',
     component: SessionDetail,
-    meta: { requiresAuth: true, hideBottomNav: true },
+    meta: { requiresAuth: true, hideBottomNav: true, backTo: '/calendar' },
   },
   {
     path: '/calendar',
@@ -137,19 +138,19 @@ const routes = [
     path: '/privacy',
     name: 'Privacy',
     component: PrivacyPage,
-    meta: { hideBottomNav: true },
+    meta: { hideBottomNav: true, backTo: '/login' },
   },
   {
     path: '/terms',
     name: 'Terms',
     component: TermsPage,
-    meta: { hideBottomNav: true },
+    meta: { hideBottomNav: true, backTo: '/login' },
   },
   {
     path: '/legal',
     name: 'LegalNotice',
     component: LegalNoticePage,
-    meta: { hideBottomNav: true },
+    meta: { hideBottomNav: true, backTo: '/login' },
   },
   {
   path: '/:pathMatch(.*)*', // 404 页面
@@ -163,6 +164,11 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
+  if (!(await requestUnsavedNavigation(from, to))) {
+    next(false)
+    return
+  }
+
 const authStore = useAuthStore() // 在守卫中获取 store 实例
   const isAuthenticated = authStore.isAuthenticated
 
