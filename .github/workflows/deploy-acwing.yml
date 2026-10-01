@@ -30,6 +30,38 @@ jobs:
           ref: ${{ github.sha }}
           persist-credentials: false
 
+      - name: Configure SSH
+        shell: bash
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+          DEPLOY_PORT: ${{ vars.DEPLOY_PORT || '22' }}
+        run: |
+          set -euo pipefail
+          : "${DEPLOY_HOST:?Set the DEPLOY_HOST repository secret}"
+          : "${DEPLOY_USER:?Set the DEPLOY_USER repository secret}"
+          : "${DEPLOY_SSH_KEY:?Set the DEPLOY_SSH_KEY repository secret}"
+          : "${DEPLOY_KNOWN_HOSTS:?Set the DEPLOY_KNOWN_HOSTS repository secret}"
+          [[ "$DEPLOY_HOST" =~ ^[A-Za-z0-9.-]+$ ]] || { echo 'Invalid DEPLOY_HOST' >&2; exit 1; }
+          [[ "$DEPLOY_USER" =~ ^[A-Za-z_][A-Za-z0-9_-]*$ ]] || { echo 'Invalid DEPLOY_USER' >&2; exit 1; }
+          [[ "$DEPLOY_PORT" =~ ^[0-9]{1,5}$ ]] || { echo 'Invalid DEPLOY_PORT' >&2; exit 1; }
+
+          umask 077
+          printf '%s\n' "$DEPLOY_SSH_KEY" > "$RUNNER_TEMP/grindify-deploy-key"
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > "$RUNNER_TEMP/grindify-known-hosts"
+          printf 'Host grindify-target\n  HostName %s\n  User %s\n  Port %s\n  IdentityFile %s\n  UserKnownHostsFile %s\n  StrictHostKeyChecking yes\n  IdentitiesOnly yes\n  BatchMode yes\n' \
+            "$DEPLOY_HOST" "$DEPLOY_USER" "$DEPLOY_PORT" \
+            "$RUNNER_TEMP/grindify-deploy-key" "$RUNNER_TEMP/grindify-known-hosts" \
+            > "$RUNNER_TEMP/grindify-ssh-config"
+
+      - name: Check server access
+        shell: bash
+        run: |
+          ssh -F "$RUNNER_TEMP/grindify-ssh-config" grindify-target \
+            'test -f "$HOME/Grindify/.env" && docker info >/dev/null && docker compose version >/dev/null && mkdir -p "$HOME/Grindify/.deploy/incoming" "$HOME/Grindify/deploy/acwing"'
+
       - name: Build image archive
         id: archive
         shell: pwsh
@@ -64,32 +96,6 @@ jobs:
           "tag=$tag" >> $env:GITHUB_OUTPUT
           "archive=$imageDir/grindify-images-$tag.tar" >> $env:GITHUB_OUTPUT
 
-      - name: Configure SSH
-        shell: bash
-        env:
-          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
-          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
-          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
-          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
-          DEPLOY_PORT: ${{ vars.DEPLOY_PORT || '22' }}
-        run: |
-          set -euo pipefail
-          : "${DEPLOY_HOST:?Set the DEPLOY_HOST repository secret}"
-          : "${DEPLOY_USER:?Set the DEPLOY_USER repository secret}"
-          : "${DEPLOY_SSH_KEY:?Set the DEPLOY_SSH_KEY repository secret}"
-          : "${DEPLOY_KNOWN_HOSTS:?Set the DEPLOY_KNOWN_HOSTS repository secret}"
-          [[ "$DEPLOY_HOST" =~ ^[A-Za-z0-9.-]+$ ]] || { echo 'Invalid DEPLOY_HOST' >&2; exit 1; }
-          [[ "$DEPLOY_USER" =~ ^[A-Za-z_][A-Za-z0-9_-]*$ ]] || { echo 'Invalid DEPLOY_USER' >&2; exit 1; }
-          [[ "$DEPLOY_PORT" =~ ^[0-9]{1,5}$ ]] || { echo 'Invalid DEPLOY_PORT' >&2; exit 1; }
-
-          umask 077
-          printf '%s\n' "$DEPLOY_SSH_KEY" > "$RUNNER_TEMP/grindify-deploy-key"
-          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > "$RUNNER_TEMP/grindify-known-hosts"
-          printf 'Host grindify-target\n  HostName %s\n  User %s\n  Port %s\n  IdentityFile %s\n  UserKnownHostsFile %s\n  StrictHostKeyChecking yes\n  IdentitiesOnly yes\n  BatchMode yes\n' \
-            "$DEPLOY_HOST" "$DEPLOY_USER" "$DEPLOY_PORT" \
-            "$RUNNER_TEMP/grindify-deploy-key" "$RUNNER_TEMP/grindify-known-hosts" \
-            > "$RUNNER_TEMP/grindify-ssh-config"
-
       - name: Upload archive and deployment files
         shell: bash
         env:
@@ -97,8 +103,6 @@ jobs:
           IMAGE_TAG: ${{ steps.archive.outputs.tag }}
         run: |
           set -euo pipefail
-          ssh -F "$RUNNER_TEMP/grindify-ssh-config" grindify-target \
-            'test -f "$HOME/Grindify/.env" && mkdir -p "$HOME/Grindify/.deploy/incoming" "$HOME/Grindify/deploy/acwing"'
           scp -F "$RUNNER_TEMP/grindify-ssh-config" \
             "$IMAGE_ARCHIVE" "$IMAGE_ARCHIVE.sha256" \
             docker-compose.images.yml deploy/acwing/deploy-image-archive.sh \
