@@ -14,16 +14,23 @@
   -->
 
 <template>
-  <HistoryDialog v-model="dialogModel" history-key="statistics:workout-detail" fullscreen transition="dialog-bottom-transition">
+  <HistoryDialog
+    v-model="dialogModel"
+    history-key="statistics:workout-detail"
+    :open-query="{ __workoutId: workout?.id }"
+    :clear-query-keys="['__workoutId']"
+    fullscreen
+    transition="dialog-bottom-transition"
+  >
     <v-card class="bg-background">
       <div class="pa-5 d-flex flex-column ga-4">
 <!-- 标题 -->
-        <BackHeader :title="workout?.title ?? ''" @close="dialogModel = false" />
+        <BackHeader :title="resolvedWorkout?.title ?? ''" @close="dialogModel = false" />
 
         <div class="mt-4">
           <p class="text-caption text-textSecondary">
-            {{ workout?.exercises?.length ?? 0 }} {{ $t('statistics.exercises') }} ·
-            {{ workout?.time ?? 0 }} min
+            {{ resolvedWorkout?.exercises?.length ?? 0 }} {{ $t('statistics.exercises') }} ·
+            {{ resolvedWorkout?.time ?? 0 }} min
           </p>
         </div>
 
@@ -146,6 +153,8 @@ import {
 import { Line } from 'vue-chartjs'
 import { useStatisticsStore } from '@/stores/statistics.store'
 import type { Workout } from '@/interfaces/Workout.interface'
+import { useWorkoutStore } from '@/stores/workout.store'
+import { useRoute } from 'vue-router'
 
 ChartJS.register(
   CategoryScale,
@@ -160,12 +169,22 @@ ChartJS.register(
 
 const { t } = useI18n()
 const statisticsStore = useStatisticsStore()
+const workoutStore = useWorkoutStore()
+const route = useRoute()
 
 const props = defineProps<{
   workout: Workout | null
 }>()
 
 const dialogModel = defineModel<boolean>({ default: false })
+const resolvedWorkout = computed(() => {
+  const id = Number(route.query.__workoutId)
+  if (Number.isInteger(id) && id > 0) {
+    return workoutStore.workouts.find(workout => workout.id === id) ??
+      (props.workout?.id === id ? props.workout : null)
+  }
+  return props.workout
+})
 
 const summaryCards = computed(() => {
   const h = statisticsStore.workoutHistory
@@ -266,15 +285,15 @@ function formatDuration(minutes: number): string {
 }
 
 function loadMore() {
-  if (props.workout) {
-    statisticsStore.loadMoreWorkoutHistory(props.workout.id)
+  if (resolvedWorkout.value) {
+    statisticsStore.loadMoreWorkoutHistory(resolvedWorkout.value.id)
   }
 }
 
 // 对话框打开时加载数据
-watch(dialogModel, async open => {
-  if (open && props.workout) {
-    await statisticsStore.fetchWorkoutHistory(props.workout.id)
+watch([dialogModel, resolvedWorkout], async ([open, workout]) => {
+  if (open && workout) {
+    await statisticsStore.fetchWorkoutHistory(workout.id)
   } else {
     statisticsStore.clearWorkoutData()
   }

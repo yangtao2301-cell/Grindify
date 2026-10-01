@@ -23,7 +23,7 @@
     />
 
     <v-card-text class="pa-5 flex-grow-1 overflow-y-auto">
-      <v-form ref="formRef" @submit.prevent="save">
+      <v-form ref="formRef" @submit.prevent="() => save()">
         <v-text-field
           v-model="fullName"
           :label="$t('settings.fullName')"

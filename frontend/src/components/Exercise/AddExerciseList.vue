@@ -194,12 +194,20 @@
     </div>
   </div>
 
-  <HistoryDialog v-model="isViewExerciseOpen" history-key="exercise-picker:details" fullscreen>
+  <HistoryDialog
+    ref="viewExerciseDialog"
+    v-model="isViewExerciseOpen"
+    history-key="exercise-picker:details"
+    :open-query="{ __pickerExerciseId: viewExercise?.id }"
+    :clear-query-keys="['__pickerExerciseId']"
+    fullscreen
+  >
     <ExerciseDetails
       :selected-exercise="viewExercise"
+      query-id-key="__pickerExerciseId"
       :is-view-exercise="true"
       hide-menu
-      @close="isViewExerciseOpen = false"
+      @close="closeViewExercise"
     />
   </HistoryDialog>
   <HistoryDialog v-model="isCreateExerciseOpen" history-key="exercise-picker:create" fullscreen>
@@ -234,6 +242,7 @@ const searchQuery = ref('')
 const selectedIds = ref<number[]>([...props.initialSelectedIds])
 const viewExercise = ref<Exercise | null>(null)
 const isViewExerciseOpen = ref(false)
+const viewExerciseDialog = ref<{ close: () => Promise<boolean> } | null>(null)
 const isCreateExerciseOpen = ref(false)
 const isFilterMenuOpen = ref(false)
 const selectedMuscleGroups = ref<number[]>([])
@@ -254,6 +263,8 @@ const openViewExercise = (exercise: Exercise) => {
   viewExercise.value = exercise
   isViewExerciseOpen.value = true
 }
+
+const closeViewExercise = () => void viewExerciseDialog.value?.close()
 
 const muscleGroups = computed(() =>
   muscleGroupStore.muscleGroups.map(g => ({ name: g.name, translatedName: t(`muscleGroups.${g.name}`), id: g.id }))

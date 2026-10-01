@@ -954,7 +954,10 @@ async function onScheduleStarted() {
 
 function openCompletedSession(event: CalendarEvent) {
   if (event.type === 'scheduled') return
-  router.push(`/session-history/${event.type}/${event.sessionId}`)
+  router.push({
+    path: `/session-history/${event.type}/${event.sessionId}`,
+    query: { returnTo: router.currentRoute.value.fullPath },
+  })
 }
 
 async function freezeWeek() {

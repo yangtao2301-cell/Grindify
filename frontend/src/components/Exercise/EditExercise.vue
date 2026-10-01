@@ -242,8 +242,10 @@ const currentFormSnapshot = () =>
   JSON.stringify({
     form: form.value,
     media: newMediaItems.value.map(item => ({
-      id: item.id,
-      url: item.url,
+      key: item.key,
+      type: item.type,
+      existingId: item.existingId,
+      existingUrl: item.existingUrl,
       name: item.file?.name,
       size: item.file?.size,
     })),

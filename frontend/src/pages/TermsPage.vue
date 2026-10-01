@@ -74,11 +74,11 @@
 
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router'
-import { navigateBack } from '@/navigation/backNavigation'
+import { navigateBackTo, routeBackTarget } from '@/navigation/backNavigation'
 
 const router = useRouter()
 const route = useRoute()
-const goBack = () => void navigateBack(router, route.meta.backTo as string | undefined)
+const goBack = () => void navigateBackTo(router, routeBackTarget(route))
 const contactEmail = import.meta.env.VITE_CONTACT_EMAIL ?? '3405351711@qq.com'
 const operatorName = import.meta.env.VITE_OPERATOR_NAME ?? 'Yang'
 const operatorPhone = import.meta.env.VITE_OPERATOR_PHONE ?? '+86 18340012138'

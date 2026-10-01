@@ -15,6 +15,7 @@
 
 <template>
   <div
+    v-if="exercise"
     class="w-100 fill-height bg-background overflow-y-auto"
     style="
       background: linear-gradient(135deg, rgba(171, 255, 26, 0.15) 0%, rgba(12, 14, 18, 0) 35%);
@@ -197,8 +198,16 @@
     </div>
   </div>
 
+  <div v-else class="w-100 fill-height bg-background">
+    <BackHeader :title="$t('settings.exercises')" @close="emit('close')" />
+    <div v-if="exerciseStore.isLoading" class="pa-5 d-flex justify-center">
+      <v-progress-circular indeterminate color="primary" />
+    </div>
+    <p v-else class="pa-5 text-textSecondary">{{ $t('exerciseCatalog.noExercisesFound') }}</p>
+  </div>
+
 <!-- 编辑对话框 -->
-  <HistoryDialog v-model="isEditOpen" history-key="exercise:edit" fullscreen>
+  <HistoryDialog v-if="exercise" v-model="isEditOpen" history-key="exercise:edit" fullscreen>
     <EditExercise
       :exercise="exercise"
       history-key="exercise:edit"
@@ -209,6 +218,7 @@
 
 <!-- 个性化（复制）对话框 -->
   <DuplicateExerciseDialog
+    v-if="exercise"
     v-model="isDuplicateDialogOpen"
     :exercise-id="exercise.id"
     :exercise-name="exerciseName"
@@ -243,11 +253,13 @@ import { toast } from 'vuetify-sonner'
 import { useI18n } from 'vue-i18n'
 import { displayExerciseName, resolveI18n, resolveI18nArray } from '@/utils/exerciseDisplay'
 import { useUserLanguage } from '@/composables/useUserLanguage'
+import { useRoute } from 'vue-router'
 
 const props = defineProps<{
   selectedExercise: Exercise | null
   isViewExercise: boolean
   hideMenu?: boolean
+  queryIdKey?: string
 }>()
 
 const emit = defineEmits<{
@@ -255,6 +267,7 @@ const emit = defineEmits<{
 }>()
 
 const exerciseStore = useExerciseStore()
+const route = useRoute()
 const { t } = useI18n({ useScope: 'global' })
 const { lang } = useUserLanguage()
 
@@ -273,11 +286,14 @@ const getMediaUrl = (url: string) => {
 
 // 保持训练动作与 store 的响应式同步
 const exercise = computed(() => {
-  const fromStore = exerciseStore.exercises.find(ex => ex.id === props.selectedExercise?.id)
-  return fromStore || props.selectedExercise!
+  const queryId = Number(route.query[props.queryIdKey ?? '__exerciseId'])
+  const hasQueryId = Number.isInteger(queryId) && queryId > 0
+  const id = hasQueryId ? queryId : props.selectedExercise?.id
+  return exerciseStore.exercises.find(ex => ex.id === id) ??
+    (props.selectedExercise?.id === id ? props.selectedExercise : null)
 })
 
-const exerciseName = computed(() => displayExerciseName(exercise.value, lang.value))
+const exerciseName = computed(() => exercise.value ? displayExerciseName(exercise.value, lang.value) : '')
 const exerciseDescription = computed(() => resolveI18n(exercise.value?.description, lang.value))
 const resolvedInstructions = computed(() => resolveI18nArray(exercise.value?.instructions, lang.value))
 const resolvedProTips = computed(() => resolveI18nArray(exercise.value?.proTips, lang.value))
@@ -316,6 +332,7 @@ const onEditClose = async () => {
 }
 
 const confirmDelete = async () => {
+  if (!exercise.value) return
   isDeleting.value = true
   try {
     const response = await deleteExercise(exercise.value.id)

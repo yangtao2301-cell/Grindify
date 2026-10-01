@@ -215,9 +215,17 @@
   <HistoryDialog v-model="isCreateExerciseOpen" history-key="settings:exercise-create" fullscreen>
     <CreateExercise history-key="settings:exercise-create" @close="onCreateExerciseClose" />
   </HistoryDialog>
-  <HistoryDialog v-model="isViewExerciseOpen" history-key="settings:exercise-details" fullscreen>
+  <HistoryDialog
+    v-model="isViewExerciseOpen"
+    history-key="settings:exercise-details"
+    :back-to="viewExerciseBackTo"
+    :open-query="{ __settingsExerciseId: viewExercise?.id }"
+    :clear-query-keys="['__settingsExerciseId']"
+    fullscreen
+  >
     <ExerciseDetails
       :selected-exercise="viewExercise"
+      query-id-key="__settingsExerciseId"
       :is-view-exercise="true"
       @close="onViewExerciseClose"
     />
@@ -232,14 +240,21 @@ import { useMuscleGroupStore } from '@/stores/muscleGroup.store'
 import { useI18n } from 'vue-i18n'
 import { displayExerciseName, resolveI18n } from '@/utils/exerciseDisplay'
 import { useUserLanguage } from '@/composables/useUserLanguage'
+import { useRoute, useRouter } from 'vue-router'
+import { closeHistoryLayer, historyLayersLocation } from '@/navigation/historyLayers'
 
 const muscleGroupStore = useMuscleGroupStore()
 const searchQuery = ref('')
 const exerciseStore = useExerciseStore()
+const route = useRoute()
+const router = useRouter()
 const { t } = useI18n({ useScope: 'global' })
 const { lang } = useUserLanguage()
 const isLoading = ref(false)
 const viewExercise = ref<Exercise | null>(null)
+const viewExerciseBackTo = computed(() =>
+  historyLayersLocation(route, ['settings:exercise-list'], ['__settingsExerciseId'])
+)
 const isViewExerciseOpen = ref(false)
 const isCreateExerciseOpen = ref(false)
 const isFilterMenuOpen = ref(false)
@@ -278,8 +293,14 @@ const openViewExercise = (exercise: Exercise) => {
 }
 
 const onViewExerciseClose = async () => {
-  isViewExerciseOpen.value = false
-  await exerciseStore.setExercises(true)
+  const target = viewExerciseBackTo.value
+  await closeHistoryLayer(
+    router,
+    router.currentRoute.value,
+    'settings:exercise-details',
+    target,
+    ['__settingsExerciseId'],
+  )
 }
 
 const onCreateExerciseClose = async () => {

@@ -14,25 +14,32 @@
   -->
 
 <template>
-  <HistoryDialog v-model="dialogModel" history-key="statistics:exercise-detail" fullscreen transition="dialog-bottom-transition">
+  <HistoryDialog
+    v-model="dialogModel"
+    history-key="statistics:exercise-detail"
+    :open-query="{ __statisticsExerciseId: exercise?.id }"
+    :clear-query-keys="['__statisticsExerciseId']"
+    fullscreen
+    transition="dialog-bottom-transition"
+  >
     <v-card class="bg-background">
       <div class="pa-5 d-flex flex-column ga-4">
 <!-- 标题 -->
         <BackHeader
-          :title="exercise ? displayExerciseName(exercise, lang) : ''"
+          :title="resolvedExercise ? displayExerciseName(resolvedExercise, lang) : ''"
           :subtitle="
-            exercise
-              ? `${exercise.muscleGroups?.map(mg => $t(`muscleGroups.${mg.name}`)).join(', ')}`
+            resolvedExercise
+              ? `${resolvedExercise.muscleGroups?.map(mg => $t(`muscleGroups.${mg.name}`)).join(', ')}`
               : ''
           "
-          :image="exercise?.image ? getImageUrl(exercise.image) : undefined"
+          :image="resolvedExercise?.image ? getImageUrl(resolvedExercise.image) : undefined"
           icon="mdi-dumbbell"
           @close="dialogModel = false"
         />
 
         <div class="mt-4 mb-2 d-flex ga-2">
           <v-chip
-            v-for="mg in exercise?.muscleGroups?.slice(0, 3)"
+            v-for="mg in resolvedExercise?.muscleGroups?.slice(0, 3)"
             :key="mg.id"
             size="x-small"
             variant="tonal"
@@ -224,11 +231,15 @@ import type { Exercise } from '@/interfaces/Exercise.interface'
 import type { ProgressMetric, ProgressPeriod } from '@/interfaces/Statistics.interface'
 import { displayExerciseName } from '@/utils/exerciseDisplay'
 import { useUserLanguage } from '@/composables/useUserLanguage'
+import { useExerciseStore } from '@/stores/exercise.store'
+import { useRoute } from 'vue-router'
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Filler)
 
 const { t } = useI18n()
 const statisticsStore = useStatisticsStore()
+const exerciseStore = useExerciseStore()
+const route = useRoute()
 const { lang } = useUserLanguage()
 
 const props = defineProps<{
@@ -236,6 +247,14 @@ const props = defineProps<{
 }>()
 
 const dialogModel = defineModel<boolean>({ default: false })
+const resolvedExercise = computed(() => {
+  const id = Number(route.query.__statisticsExerciseId)
+  if (Number.isInteger(id) && id > 0) {
+    return exerciseStore.exercises.find(exercise => exercise.id === id) ??
+      (props.exercise?.id === id ? props.exercise : null)
+  }
+  return props.exercise
+})
 
 const selectedMetric = ref<ProgressMetric>('estimated_1rm')
 const selectedPeriod = ref<ProgressPeriod>('all')
@@ -403,34 +422,34 @@ function toggleExpanded(idx: number) {
 
 function changeMetric(metric: ProgressMetric) {
   selectedMetric.value = metric
-  if (props.exercise) {
-    statisticsStore.fetchExerciseProgress(props.exercise.id, metric, selectedPeriod.value)
+  if (resolvedExercise.value) {
+    statisticsStore.fetchExerciseProgress(resolvedExercise.value.id, metric, selectedPeriod.value)
   }
 }
 
 function changePeriod(period: ProgressPeriod) {
   selectedPeriod.value = period
-  if (props.exercise) {
-    statisticsStore.fetchExerciseProgress(props.exercise.id, selectedMetric.value, period)
+  if (resolvedExercise.value) {
+    statisticsStore.fetchExerciseProgress(resolvedExercise.value.id, selectedMetric.value, period)
   }
 }
 
 function loadMore() {
-  if (props.exercise) {
-    statisticsStore.loadMoreExerciseHistory(props.exercise.id)
+  if (resolvedExercise.value) {
+    statisticsStore.loadMoreExerciseHistory(resolvedExercise.value.id)
   }
 }
 
 // 对话框打开时加载数据
-watch(dialogModel, async open => {
-  if (open && props.exercise) {
+watch([dialogModel, resolvedExercise], async ([open, exercise]) => {
+  if (open && exercise) {
     expandedEntries.value = new Set()
     selectedMetric.value = 'estimated_1rm'
     selectedPeriod.value = 'all'
     await Promise.all([
-      statisticsStore.fetchExerciseRecords(props.exercise.id),
-      statisticsStore.fetchExerciseHistory(props.exercise.id),
-      statisticsStore.fetchExerciseProgress(props.exercise.id, 'estimated_1rm', 'all'),
+      statisticsStore.fetchExerciseRecords(exercise.id),
+      statisticsStore.fetchExerciseHistory(exercise.id),
+      statisticsStore.fetchExerciseProgress(exercise.id, 'estimated_1rm', 'all'),
     ])
   } else {
     statisticsStore.clearExerciseData()

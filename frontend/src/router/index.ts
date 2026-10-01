@@ -102,7 +102,7 @@ const routes = [
     path: '/workout/:workoutId',
     name: 'WorkoutDetails',
     component: WorkoutDetails,
-    meta: { requiresAuth: true, hideBottomNav: true, backTo: '/' },
+    meta: { requiresAuth: true, hideBottomNav: true, backTo: '/workout' },
   },
   {
     path: '/session/:sessionId',

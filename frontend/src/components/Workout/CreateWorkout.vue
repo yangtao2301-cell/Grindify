@@ -251,6 +251,7 @@ import { useUserLanguage } from '@/composables/useUserLanguage'
 import { useRouter } from 'vue-router'
 import type { WorkoutInitialData } from '@/utils/sessionToWorkout'
 import { useUnsavedChanges } from '@/composables/useUnsavedChanges'
+import { historyLayersLocation, readHistoryLayers } from '@/navigation/historyLayers'
 
 const { t } = useI18n({ useScope: 'global' })
 const { lang } = useUserLanguage()
@@ -488,7 +489,14 @@ const saveWorkout = async (openDetails = true): Promise<boolean> => {
     toast.success(t('workout.created'), { progressBar: true, duration: 1000 })
     if (openDetails) {
       initialForm.value = currentFormSnapshot()
-      await router.push(`/workout/${workoutId}`)
+      const origin = router.currentRoute.value
+      const layers = readHistoryLayers(origin.query)
+      const createIndex = layers.lastIndexOf(props.historyKey)
+      const parent = historyLayersLocation(origin, createIndex >= 0 ? layers.slice(0, createIndex) : layers)
+      await router.replace({
+        path: `/workout/${workoutId}`,
+        query: { returnTo: router.resolve(parent).fullPath },
+      })
       emit('close')
     } else {
       initializeForm()

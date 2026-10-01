@@ -104,10 +104,10 @@
       </v-btn>
     </div>
 
-    <HistoryDialog v-model="isWorkoutListOpen" history-key="home:workout-list" fullscreen transition="slide-y-transition" persistent>
+    <HistoryDialog v-model="isWorkoutListOpen" history-key="home:workout-list" :back-to="backTo" fullscreen transition="slide-y-transition" persistent>
       <WorkoutList @close="isWorkoutListOpen = false" />
     </HistoryDialog>
-    <HistoryDialog v-model="isCreateWorkoutOpen" history-key="home:workout-create" fullscreen>
+    <HistoryDialog v-model="isCreateWorkoutOpen" history-key="home:workout-create" :back-to="backTo" fullscreen>
       <CreateWorkout history-key="home:workout-create" @close="isCreateWorkoutOpen = false" />
     </HistoryDialog>
   </div>
@@ -117,6 +117,8 @@
 import { useRouter } from 'vue-router'
 import { useWorkoutStore } from '@/stores/workout.store'
 import type { Workout } from '@/interfaces/Workout.interface'
+
+defineProps<{ backTo: string }>()
 
 const router = useRouter()
 const workoutStore = useWorkoutStore()
@@ -134,6 +136,6 @@ const workouts = computed<Workout[]>(() => {
 
 function routeTo(id: number) {
   workoutStore.setCurrentWorkout(id)
-  router.push(`/workout/${id}`)
+  router.push({ path: `/workout/${id}`, query: { returnTo: router.currentRoute.value.fullPath } })
 }
 </script>

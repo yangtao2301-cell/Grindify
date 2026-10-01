@@ -123,7 +123,7 @@
         <p class="text-caption text-textSecondary mt-1">{{ $t('home.thisWeek') }}</p>
       </v-card>
     </div>
-    <MyWorkouts />
+    <MyWorkouts back-to="/" />
 
     <WeightLogDialog v-model="isWeightLogDialogOpen" @weight-updated="loadStreakInfo" />
   </div>

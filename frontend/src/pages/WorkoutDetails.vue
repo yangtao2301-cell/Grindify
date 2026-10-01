@@ -253,13 +253,20 @@
     />
   </HistoryDialog>
 
-  <HistoryDialog v-model="isExerciseDetailsOpen" history-key="workout-details:exercise" fullscreen>
+  <HistoryDialog
+    ref="exerciseDetailsDialog"
+    v-model="isExerciseDetailsOpen"
+    history-key="workout-details:exercise"
+    :open-query="{ __workoutExerciseId: selectedExerciseForDetails?.id }"
+    :clear-query-keys="['__workoutExerciseId']"
+    fullscreen
+  >
     <ExerciseDetails
-      v-if="isExerciseDetailsOpen && selectedExerciseForDetails"
       :selected-exercise="selectedExerciseForDetails"
+      query-id-key="__workoutExerciseId"
       :is-view-exercise="true"
       :hide-menu="true"
-      @close="isExerciseDetailsOpen = false"
+      @close="closeExerciseDetails"
     />
   </HistoryDialog>
 </template>
@@ -282,7 +289,7 @@ import { useUserLanguage } from '@/composables/useUserLanguage'
 import router from '@/router'
 import { useRoute } from 'vue-router'
 import BackHeader from '@/components/BackHeader.vue'
-import { navigateBack } from '@/navigation/backNavigation'
+import { navigateBackTo, routeBackTarget } from '@/navigation/backNavigation'
 
 const props = defineProps<{ workoutId?: number }>()
 const emit = defineEmits<{ (e: 'close'): void }>()
@@ -302,6 +309,7 @@ const hydrationError = ref<string | null>(null)
 const isEditWorkoutOpen = ref(false)
 const isWeightAndRepsOpen = ref(false)
 const isExerciseDetailsOpen = ref(false)
+const exerciseDetailsDialog = ref<{ close: () => Promise<boolean> } | null>(null)
 const selectedExerciseForDetails = ref<ExerciseCatalog | null>(null)
 
 function handleBack() {
@@ -309,7 +317,11 @@ function handleBack() {
     emit('close')
     return
   }
-  void navigateBack(router, route.meta.backTo as string | undefined)
+  void navigateBackTo(router, routeBackTarget(route))
+}
+
+function closeExerciseDetails() {
+  void exerciseDetailsDialog.value?.close()
 }
 
 const workout = computed<Workout | null>(() => workoutStore.currentWorkout)
@@ -434,7 +446,10 @@ const duplicate = async () => {
         emit('close')
       } else {
         workoutStore.setCurrentWorkout(response.id)
-        router.push(`/workout/${response.id}`)
+        router.replace({
+          path: `/workout/${response.id}`,
+          query: { returnTo: routeBackTarget(route) },
+        })
       }
     }
   } catch (error) {

@@ -1,8 +1,20 @@
-import type { RouteLocationRaw, Router } from 'vue-router'
+import type { RouteLocationNormalizedLoaded, RouteLocationRaw, Router } from 'vue-router'
 import { unsavedPromptState } from './unsavedPromptState'
 
 const POP_FALLBACK_DELAY_MS = 800
 const PROMPT_POLL_DELAY_MS = 150
+
+/** An entry may supply an in-app return destination; direct links use the page default. */
+export function routeBackTarget(route: RouteLocationNormalizedLoaded): string {
+  const candidate = route.query.returnTo
+  const configured = typeof route.meta.backTo === 'string' && route.meta.backTo.startsWith('/')
+    ? route.meta.backTo
+    : '/'
+  return typeof candidate === 'string' && candidate.startsWith('/') && !candidate.startsWith('//') &&
+    candidate !== route.fullPath
+    ? candidate
+    : configured
+}
 
 /**
  * Return to an explicit, manually configured destination. Pop the current
@@ -25,34 +37,16 @@ export async function navigateBackTo(router: Router, target: RouteLocationRaw): 
   return popToTarget(router, target, targetFullPath)
 }
 
-/**
- * Return to the previous Vue Router entry when one exists, with a manually
- * configured fallback for direct links and fresh PWA launches.
- */
-export async function navigateBack(router: Router, fallback?: RouteLocationRaw): Promise<boolean> {
-  const previousFullPath = window.history.state?.back
-  if (typeof previousFullPath === 'string' && previousFullPath.startsWith('/')) {
-    const previousTarget = router.resolve(previousFullPath).fullPath
-    if (router.currentRoute.value.fullPath === previousTarget) {
-      return fallback ? navigateBackTo(router, fallback) : false
-    }
-    return popToTarget(router, previousTarget, previousTarget)
-  }
-
-  return fallback ? navigateBackTo(router, fallback) : false
-}
-
 function popToTarget(router: Router, target: RouteLocationRaw, targetFullPath: string): Promise<boolean> {
   const currentFullPath = router.currentRoute.value.fullPath
 
   return new Promise(resolve => {
     let settled = false
-    let timeout: ReturnType<typeof setTimeout> | undefined
     let poll: ReturnType<typeof setTimeout> | undefined
     let removeAfterEach = () => {}
 
     const cleanup = () => {
-      if (timeout) clearTimeout(timeout)
+      clearTimeout(timeout)
       if (poll) clearTimeout(poll)
       removeAfterEach()
     }
@@ -101,7 +95,7 @@ function popToTarget(router: Router, target: RouteLocationRaw, targetFullPath: s
       }
     })
 
-    timeout = setTimeout(() => void replaceAfterMissedPop(), POP_FALLBACK_DELAY_MS)
+    const timeout = setTimeout(() => void replaceAfterMissedPop(), POP_FALLBACK_DELAY_MS)
     router.back()
   })
 }

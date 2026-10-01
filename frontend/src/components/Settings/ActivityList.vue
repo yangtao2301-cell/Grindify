@@ -88,12 +88,21 @@
     </div>
 
 <!-- 活动详情对话框 -->
-    <HistoryDialog v-model="isDetailsOpen" history-key="settings:activity-details" fullscreen>
+    <HistoryDialog
+      v-model="isDetailsOpen"
+      history-key="settings:activity-details"
+      :open-query="{ __activityId: selectedActivity?.id }"
+      :clear-query-keys="['__activityId']"
+      fullscreen
+    >
       <ActivityDetails
-        v-if="selectedActivity"
-        :activity="selectedActivity"
+        v-if="resolvedActivity"
+        :activity="resolvedActivity"
         @close="isDetailsOpen = false"
       />
+      <div v-else class="fill-height bg-background">
+        <BackHeader :title="$t('settings.activities')" @close="isDetailsOpen = false" />
+      </div>
     </HistoryDialog>
 
 <!-- 创建活动对话框 -->
@@ -134,11 +143,14 @@ import { toast } from 'vuetify-sonner'
 import { useI18n } from 'vue-i18n'
 import { displayActivityName, resolveI18n } from '@/utils/exerciseDisplay'
 import { useUserLanguage } from '@/composables/useUserLanguage'
+import { useRoute } from 'vue-router'
+import BackHeader from '@/components/BackHeader.vue'
 
 const { t } = useI18n()
 const { lang } = useUserLanguage()
 const emit = defineEmits<{ close: [] }>()
 const activityStore = useActivityStore()
+const route = useRoute()
 
 const isLoading = computed(() => activityStore.isLoadingActivities)
 const activities = computed(() => activityStore.activities)
@@ -157,6 +169,14 @@ const filteredActivities = computed(() => {
 const isDetailsOpen = ref(false)
 const isCreateOpen = ref(false)
 const selectedActivity = ref<Activity | null>(null)
+const resolvedActivity = computed(() => {
+  const id = Number(route.query.__activityId)
+  if (Number.isInteger(id) && id > 0) {
+    return activities.value.find((activity: Activity) => activity.id === id) ??
+      (selectedActivity.value?.id === id ? selectedActivity.value : null)
+  }
+  return selectedActivity.value
+})
 
 const isDeleteDialogOpen = ref(false)
 const activityToDelete = ref<Activity | null>(null)

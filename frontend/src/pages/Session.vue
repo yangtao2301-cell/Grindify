@@ -73,10 +73,17 @@
       />
     </HistoryDialog>
 
-    <HistoryDialog v-model="isViewExerciseDetailsOpen" history-key="session:exercise-details" fullscreen>
+    <HistoryDialog
+      ref="exerciseDetailsDialog"
+      v-model="isViewExerciseDetailsOpen"
+      history-key="session:exercise-details"
+      :open-query="{ __sessionExerciseId: viewExerciseDetails?.id }"
+      :clear-query-keys="['__sessionExerciseId']"
+      fullscreen
+    >
       <ExerciseDetails
-        v-if="isViewExerciseDetailsOpen && viewExerciseDetails"
         :selected-exercise="viewExerciseDetails"
+        query-id-key="__sessionExerciseId"
         :is-view-exercise="true"
         hide-menu
         @close="onCloseExerciseDetails"
@@ -106,6 +113,7 @@ import type { Exercise as ExerciseDetailType } from '@/interfaces/Exercise.inter
 
 const isAddExerciseOpen = ref(false)
 const isViewExerciseDetailsOpen = ref(false)
+const exerciseDetailsDialog = ref<{ close: () => Promise<boolean> } | null>(null)
 const viewExerciseDetails = ref<ExerciseDetailType | null>(null)
 const { t } = useI18n({ useScope: 'global' })
 const route = useRoute()
@@ -309,8 +317,7 @@ const onViewExerciseDetails = (exerciseId: number) => {
 }
 
 const onCloseExerciseDetails = () => {
-  isViewExerciseDetailsOpen.value = false
-  viewExerciseDetails.value = null
+  void exerciseDetailsDialog.value?.close()
 }
 
 const finnishSession = async () => {

@@ -118,11 +118,17 @@
     </div>
   </div>
 
-  <HistoryDialog v-model="isSessionDetailOpen" history-key="settings:session-detail" fullscreen>
+  <HistoryDialog
+    v-model="isSessionDetailOpen"
+    history-key="settings:session-detail"
+    :open-query="{ __sessionId: selectedSession?.id, __sessionType: selectedSession?.type }"
+    :clear-query-keys="['__sessionId', '__sessionType']"
+    fullscreen
+  >
     <SessionDetail
-      v-if="selectedSession !== null"
-      :session-type="selectedSession.type"
-      :session-id="selectedSession.id"
+      v-if="resolvedSession !== null"
+      :session-type="resolvedSession.type"
+      :session-id="resolvedSession.id"
       @close="isSessionDetailOpen = false"
     />
   </HistoryDialog>
@@ -137,6 +143,7 @@ import { useI18n } from 'vue-i18n'
 import SessionDetail from '@/pages/SessionDetail.vue'
 import { displayExerciseName, displayActivityName, resolveI18n } from '@/utils/exerciseDisplay'
 import { useUserLanguage } from '@/composables/useUserLanguage'
+import { useRoute } from 'vue-router'
 
 const { t } = useI18n({ useScope: 'global' })
 const { lang } = useUserLanguage()
@@ -144,8 +151,17 @@ const { lang } = useUserLanguage()
 const searchQuery = ref('')
 const workoutSessionStore = useWorkoutSessionStore()
 const activityStore = useActivityStore()
+const route = useRoute()
 const isSessionDetailOpen = ref(false)
 const selectedSession = ref<{ type: 'workout' | 'activity'; id: number } | null>(null)
+const resolvedSession = computed<{ type: 'workout' | 'activity'; id: number } | null>(() => {
+  const id = Number(route.query.__sessionId)
+  const type = route.query.__sessionType
+  if (Number.isInteger(id) && id > 0 && (type === 'workout' || type === 'activity')) {
+    return { id, type }
+  }
+  return selectedSession.value
+})
 
 type UnifiedSession =
   | { type: 'workout'; data: WorkoutSession }

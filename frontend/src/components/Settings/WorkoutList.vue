@@ -141,10 +141,16 @@
       <CreateWorkout history-key="settings:workout-create" @close="isCreateWorkoutOpen = false" />
     </HistoryDialog>
 
-    <HistoryDialog v-model="isWorkoutDetailsOpen" history-key="settings:workout-details" fullscreen>
+    <HistoryDialog
+      v-model="isWorkoutDetailsOpen"
+      history-key="settings:workout-details"
+      :open-query="{ __workoutId: selectedWorkoutId }"
+      :clear-query-keys="['__workoutId']"
+      fullscreen
+    >
       <WorkoutDetails
-        v-if="selectedWorkoutId !== null"
-        :workout-id="selectedWorkoutId"
+        v-if="resolvedWorkoutId !== null"
+        :workout-id="resolvedWorkoutId"
         @close="isWorkoutDetailsOpen = false"
       />
     </HistoryDialog>
@@ -158,12 +164,14 @@ import { useI18n } from 'vue-i18n'
 import WorkoutDetails from '@/pages/WorkoutDetails.vue'
 import { resolveI18n } from '@/utils/exerciseDisplay'
 import { useUserLanguage } from '@/composables/useUserLanguage'
+import { useRoute } from 'vue-router'
 
 const { t } = useI18n({ useScope: 'global' })
 const { lang } = useUserLanguage()
 
 const emit = defineEmits<{ (e: 'close'): void }>()
 const workoutStore = useWorkoutStore()
+const route = useRoute()
 
 const workouts = computed<Workout[]>(() => {
   const w = (workoutStore.workouts as Workout[]) || []
@@ -179,6 +187,10 @@ const selectedMGIds = ref<number[]>([])
 const isCreateWorkoutOpen = ref(false)
 const isWorkoutDetailsOpen = ref(false)
 const selectedWorkoutId = ref<number | null>(null)
+const resolvedWorkoutId = computed(() => {
+  const id = Number(route.query.__workoutId)
+  return Number.isInteger(id) && id > 0 ? id : selectedWorkoutId.value
+})
 
 const activeFilterCount = computed(
   () => selectedMGIds.value.length + (search.value.trim().length > 0 ? 1 : 0)

@@ -325,13 +325,20 @@
     </div>
 
 <!-- 训练动作详情对话框 -->
-    <HistoryDialog v-model="exerciseDialog" history-key="session-detail:exercise" fullscreen>
+    <HistoryDialog
+      ref="exerciseDetailsDialog"
+      v-model="exerciseDialog"
+      history-key="session-detail:exercise"
+      :open-query="{ __sessionDetailExerciseId: selectedExercise?.id }"
+      :clear-query-keys="['__sessionDetailExerciseId']"
+      fullscreen
+    >
       <ExerciseDetails
-        v-if="selectedExercise"
         :selected-exercise="selectedExercise"
+        query-id-key="__sessionDetailExerciseId"
         :is-view-exercise="true"
         :hide-menu="true"
-        @close="exerciseDialog = false"
+        @close="closeExerciseDetails"
       />
     </HistoryDialog>
 
@@ -418,7 +425,7 @@ import EditWorkoutSessionDialog from '@/components/Session/EditWorkoutSessionDia
 import EditSessionExerciseSetsDialog from '@/components/Session/EditSessionExerciseSetsDialog.vue'
 import { displayExerciseName, displayActivityName, resolveI18n } from '@/utils/exerciseDisplay'
 import { useUserLanguage } from '@/composables/useUserLanguage'
-import { navigateBack } from '@/navigation/backNavigation'
+import { navigateBackTo, routeBackTarget } from '@/navigation/backNavigation'
 
 const props = defineProps<{ sessionType?: 'workout' | 'activity'; sessionId?: number }>()
 const emit = defineEmits<{ (e: 'close'): void }>()
@@ -438,7 +445,7 @@ function handleBack() {
     emit('close')
     return
   }
-  void navigateBack(router, route.meta.backTo as string | undefined)
+  void navigateBackTo(router, routeBackTarget(route))
 }
 
 const type = computed(
@@ -451,6 +458,7 @@ const deleteDialog = ref(false)
 const isDeleting = ref(false)
 const saveAsWorkoutDialog = ref(false)
 const exerciseDialog = ref(false)
+const exerciseDetailsDialog = ref<{ close: () => Promise<boolean> } | null>(null)
 const editActivityDialog = ref(false)
 const editWorkoutDialog = ref(false)
 const editExerciseSetsDialog = ref(false)
@@ -600,6 +608,10 @@ function openExercise(ex: WorkoutSession['exercises'][number]) {
   }
 }
 
+function closeExerciseDetails() {
+  void exerciseDetailsDialog.value?.close()
+}
+
 function confirmDelete() {
   deleteDialog.value = true
 }
@@ -668,7 +680,7 @@ async function executeDelete() {
     if (isDialogMode.value) {
       emit('close')
     } else {
-      await navigateBack(router, route.meta.backTo as string | undefined)
+      await navigateBackTo(router, routeBackTarget(route))
     }
   } finally {
     isDeleting.value = false

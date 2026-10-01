@@ -57,7 +57,7 @@
         </div>
       </div>
       <div class="d-flex flex-column ga-4">
-        <MyWorkouts />
+        <MyWorkouts back-to="/workout" />
       </div>
     </div>
     <HistoryDialog v-model="isCreateWorkoutOpen" history-key="workout:create" fullscreen>
