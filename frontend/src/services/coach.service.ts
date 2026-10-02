@@ -57,7 +57,8 @@ async function json<T>(path: string, init?: RequestInit): Promise<T> {
   return (await request(path, init)).json() as Promise<T>
 }
 export const coachApi = {
-  status: () => json<{ available: boolean; dailyLimit: number }>('/status'),
+  feedback: (id: string, data: {rating: 'up'|'down';comment: string;shareContext: boolean}) => json(`/messages/${id}/feedback`, {method:'POST',body:JSON.stringify(data)}),
+  status: () => json<{ available: boolean; dailyLimit: number; name: string; welcome: string; quickQuestions: string[] }>('/status'),
   conversations: () => json<CoachConversation[]>('/conversations'),
   create: () => json<CoachConversation>('/conversations', { method: 'POST' }),
   history: (id: string) => json<CoachMessage[]>(`/conversations/${id}/messages`),

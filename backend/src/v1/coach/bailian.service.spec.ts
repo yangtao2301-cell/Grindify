@@ -1,4 +1,5 @@
 import { ConfigService } from '@nestjs/config';
+import { CoachControlService } from './coach-control.service';
 import { BailianService } from './bailian.service';
 
 describe('Bailian API boundary', () => {
@@ -93,6 +94,53 @@ describe('Bailian API boundary', () => {
       new Response('upstream sensitive diagnostic', { status: 401 }),
     );
     await expect(service.embed(['a'])).rejects.toThrow('百炼调用失败');
+  });
+
+  it('records final stream usage and sanitized HTTP errors without retaining prompts', async () => {
+    const record = jest.fn().mockResolvedValue(undefined);
+    const monitored = new BailianService(
+      new ConfigService({
+        COACH_ENABLED: 'true',
+        DASHSCOPE_API_KEY: 'secret-test-key',
+        DASHSCOPE_BASE_URL: 'https://example.invalid',
+        COACH_EMBEDDING_DIMENSIONS: '64',
+      }),
+      { record } as unknown as CoachControlService,
+    );
+    fetchMock.mockResolvedValueOnce(
+      new Response(
+        'data: {"choices":[{"delta":{"content":"Answer"},"finish_reason":"stop"}]}\n\ndata: {"choices":[],"usage":{"prompt_tokens":12,"completion_tokens":3}}\n\ndata: [DONE]\n\n',
+      ),
+    );
+    for await (const text of monitored.stream(
+      [{ role: 'user', content: 'private question' }],
+      new AbortController().signal,
+      512,
+    ))
+      void text;
+    expect(record.mock.calls[0].slice(0, 3)).toEqual([
+      'chat',
+      'qwen-plus',
+      'success',
+    ]);
+    expect(record.mock.calls[0][4]).toEqual({
+      prompt_tokens: 12,
+      completion_tokens: 3,
+    });
+    expect(JSON.stringify(record.mock.calls)).not.toMatch(
+      /private question|secret-test-key|Answer/,
+    );
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body).max_tokens).toBe(512);
+    fetchMock.mockResolvedValueOnce(
+      new Response('sensitive provider body', { status: 401 }),
+    );
+    await expect(monitored.embed(['private input'])).rejects.toThrow(
+      '百炼调用失败',
+    );
+    expect(record.mock.calls[1][5]).toBe('provider_http_401');
+    expect(JSON.stringify(record.mock.calls)).not.toContain(
+      'sensitive provider body',
+    );
   });
 
   it('refuses unconfigured or placeholder endpoints without calling fetch', () => {

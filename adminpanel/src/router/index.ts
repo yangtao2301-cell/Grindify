@@ -4,6 +4,9 @@ import { useAuthStore } from '@/stores/auth.store'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
+    ...[
+      ['settings','Coach Settings'],['playground','Test Playground'],['monitor','Operations'],['feedback','User Feedback'],
+    ].map(([page,title])=>({path:`/coach-${page}`,name:`coach-${page}`,component:()=>import('@/views/CoachManagementView.vue'),meta:{title,navId:`a-coach-${page}`}})),
     {
       path: '/coach-knowledge',
       name: 'coach-knowledge',

@@ -2,6 +2,9 @@ import { Injectable, Module, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DataSource } from 'typeorm';
 import { AddFitnessCoach1791000000000 } from '../migrations/1791000000000-AddFitnessCoach';
+import { AddCoachManagement1791001000000 } from '../migrations/1791001000000-AddCoachManagement';
+import { CoachControlService } from './coach-control.service';
+import { CoachManagementController } from './coach-management.controller';
 import { BailianService } from './bailian.service';
 import { CoachService } from './coach.service';
 import { KnowledgeService } from './knowledge.service';
@@ -26,6 +29,7 @@ class CoachDevelopmentSchema implements OnModuleInit {
     try {
       await runner.query('SELECT pg_advisory_xact_lock(7531,0)');
       await new AddFitnessCoach1791000000000().up(runner);
+      await new AddCoachManagement1791001000000().up(runner);
       await runner.commitTransaction();
     } catch (error) {
       await runner.rollbackTransaction();
@@ -37,9 +41,14 @@ class CoachDevelopmentSchema implements OnModuleInit {
 }
 
 @Module({
-  controllers: [CoachController, CoachAdminController],
+  controllers: [
+    CoachController,
+    CoachAdminController,
+    CoachManagementController,
+  ],
   providers: [
     CoachDevelopmentSchema,
+    CoachControlService,
     BailianService,
     CoachService,
     KnowledgeService,

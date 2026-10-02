@@ -37,6 +37,10 @@ const { BailianService } = require('../dist/coach/bailian.service');
 const {
   AddFitnessCoach1791000000000,
 } = require('../dist/migrations/1791000000000-AddFitnessCoach');
+const {
+  AddCoachManagement1791001000000,
+} = require('../dist/migrations/1791001000000-AddCoachManagement');
+const { CoachControlService } = require('../dist/coach/coach-control.service');
 const { splitDocument, citedSources } = require('../dist/coach/coach.types');
 
 async function main() {
@@ -112,9 +116,13 @@ async function main() {
     const runner = db.createQueryRunner();
     await runner.connect();
     const migration = new AddFitnessCoach1791000000000();
+    const management = new AddCoachManagement1791001000000();
+    await management.down(runner);
     await migration.down(runner);
     await migration.up(runner);
     await migration.up(runner);
+    await management.up(runner);
+    await management.up(runner);
     await runner.release();
     const [a] = await db.query(
       `INSERT INTO "user"(email,role,"onboardingCompleted") VALUES($1,'superadmin',true) RETURNING id`,
@@ -199,6 +207,78 @@ async function main() {
     const history = await coach.history(a.id, conversation.id);
     assert.equal(history.length, 2);
     assert.equal(history[1].sources[0].title, updated.title);
+    // Feedback shares only the selected turn, and only after explicit opt-in.
+    const feedbackUrl = `/v1/coach/messages/${history[1].id}/feedback`;
+    const feedbackInput = {
+      rating: 'down',
+      comment: 'Please clarify',
+      shareContext: false,
+    };
+    await http
+      .post(feedbackUrl)
+      .set('Cookie', cookieB)
+      .send(feedbackInput)
+      .expect(404);
+    await http
+      .post(feedbackUrl)
+      .set('Cookie', cookieA)
+      .send(feedbackInput)
+      .expect(201);
+    let list = (
+      await http
+        .get('/v1/admin/coach/feedback')
+        .set('Cookie', cookieA)
+        .expect(200)
+    ).body;
+    assert.equal(list.length, 1);
+    assert.equal(list[0].answer, undefined);
+    let detail = (
+      await http
+        .get(`/v1/admin/coach/feedback/${list[0].id}`)
+        .set('Cookie', cookieA)
+        .expect(200)
+    ).body;
+    assert.equal(detail.answer, null);
+    await http
+      .post(feedbackUrl)
+      .set('Cookie', cookieA)
+      .send({ ...feedbackInput, shareContext: true })
+      .expect(201);
+    detail = (
+      await http
+        .get(`/v1/admin/coach/feedback/${list[0].id}`)
+        .set('Cookie', cookieA)
+        .expect(200)
+    ).body;
+    assert.equal(detail.question, body.content);
+    assert.equal(detail.answer, history[1].content);
+    await http
+      .put(`/v1/admin/coach/feedback/${list[0].id}`)
+      .set('Cookie', cookieA)
+      .send({
+        state: 'resolved',
+        resolution: 'Updated source',
+        documentId: doc.id,
+      })
+      .expect(200);
+    await http
+      .get(`/v1/admin/coach/feedback/${list[0].id}`)
+      .set('Cookie', cookieB)
+      .expect(403);
+    await http
+      .post(feedbackUrl)
+      .set('Cookie', cookieA)
+      .send(feedbackInput)
+      .expect(201);
+    detail = (
+      await http
+        .get(`/v1/admin/coach/feedback/${list[0].id}`)
+        .set('Cookie', cookieA)
+        .expect(200)
+    ).body;
+    assert.equal(detail.answer, null, 'revoking context clears the snapshot');
+    assert.equal(detail.state, 'open');
+
     assert.ok(
       capturedMessages.some((m) => m.content.includes('recorded_volume_kg')),
     );
@@ -279,6 +359,106 @@ async function main() {
         ])
       ).length,
       0,
+    );
+    const original = (
+      await http
+        .get('/v1/admin/coach/settings')
+        .set('Cookie', cookieA)
+        .expect(200)
+    ).body;
+    await http
+      .put('/v1/admin/coach/settings')
+      .set('Cookie', cookieB)
+      .send(original)
+      .expect(403);
+    await http
+      .put('/v1/admin/coach/settings')
+      .set('Cookie', cookieA)
+      .send({ ...original, dailyUserLimit: 0 })
+      .expect(400);
+    await http
+      .put('/v1/admin/coach/settings')
+      .set('Cookie', cookieA)
+      .send({ ...original, apiKey: 'forbidden' })
+      .expect(400);
+    const custom = {
+      ...original,
+      name: 'Test Coach',
+      welcome: 'Custom welcome',
+      quickQuestions: ['One question'],
+      style: 'detailed',
+      enabled: false,
+    };
+    await http
+      .put('/v1/admin/coach/settings')
+      .set('Cookie', cookieA)
+      .send(custom)
+      .expect(200);
+    const status = (
+      await http.get('/v1/coach/status').set('Cookie', cookieA).expect(200)
+    ).body;
+    assert.equal(status.name, 'Test Coach');
+    assert.equal(status.available, false);
+    const disabledConversation = await coach.create(a.id);
+    await http
+      .post(`/v1/coach/conversations/${disabledConversation.id}/messages`)
+      .set('Cookie', cookieA)
+      .send({ content: 'hello', requestId: randomUUID() })
+      .expect(503);
+    const playground = await http
+      .post('/v1/admin/coach/test')
+      .set('Cookie', cookieA)
+      .send({ query: 'Training advice' })
+      .expect(201);
+    assert.ok(playground.body.answer);
+    assert.ok(capturedMessages[0].content.includes('detailed'));
+    assert.ok(
+      !JSON.stringify(capturedMessages).includes('recorded_volume_kg'),
+      'playground never reads user training data',
+    );
+    await db.query('UPDATE coach_test_usage SET requests=20 WHERE user_id=$1', [
+      a.id,
+    ]);
+    await http
+      .post('/v1/admin/coach/test')
+      .set('Cookie', cookieA)
+      .send({ query: 'Limit check' })
+      .expect(429);
+    await http
+      .get('/v1/admin/coach/monitor')
+      .set('Cookie', cookieB)
+      .expect(403);
+    const control = app.get(CoachControlService);
+    await control.record('chat', 'test-model', 'success', Date.now() - 500, {
+      prompt_tokens: 15,
+      completion_tokens: 10,
+    });
+    const monitoring = (
+      await http
+        .get('/v1/admin/coach/monitor')
+        .set('Cookie', cookieA)
+        .expect(200)
+    ).body;
+    assert.equal(Number(monitoring.summary.input_tokens), 15);
+    assert.equal(monitoring.recent[0].content, undefined);
+    assert.ok(monitoring.audit.some((a) => a.action === 'feedback.view'));
+    assert.ok(monitoring.audit.some((a) => a.action === 'settings.update'));
+    const health = (
+      await http
+        .get('/v1/admin/coach/health')
+        .set('Cookie', cookieA)
+        .expect(200)
+    ).body;
+    assert.equal(health.vector, true);
+    assert.equal(health.configured, true);
+    await http
+      .put('/v1/admin/coach/settings')
+      .set('Cookie', cookieA)
+      .send(original)
+      .expect(200);
+    await db.query('DELETE FROM coach_test_usage WHERE user_id=$1', [a.id]);
+    console.log(
+      'PASS: management settings validation, admin guards, runtime disable, playground isolation, test quotas, feedback consent/revocation/ownership, audit and operational metadata.',
     );
     const chunks = splitDocument('训练资料。'.repeat(700));
     assert.ok(chunks.length > 1 && chunks.every((c) => c.length <= 901));

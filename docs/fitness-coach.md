@@ -85,3 +85,17 @@ docker rm -f -v grindify-coach-test
 ```
 
 集成脚本固定连接 localhost:15439 的 `coach_test` 数据库，会重建其教练表；测试认证与越权隔离、向量检索、版本切换、发布期间下架、真实训练查询、重试幂等、记忆提取与手动控制、每日限额和迁移回退。真实百炼可用性、正式资料检索质量与 100 人负载需要配置后再验证。
+
+
+## AI coach administration
+
+The sidebar now groups knowledge, Coach Settings, Test Playground, Operations and User Feedback under AI Coach. Existing administration language and superadmin access remain unchanged.
+
+- Settings persist in `coach_settings`; new replies immediately use the saved style, user/site quotas and maximum answer tokens. The launcher fetches display name, welcome and quick questions when opened. Both the server `COACH_ENABLED` switch and the saved switch must be enabled for user replies. Provider secrets and model IDs stay in server environment variables.
+- Playground uses the same base coach instructions, saved style and published RAG documents, with no training records, conversation history or memory. Inputs/outputs are returned to the administrator but not stored. Tests and connection checks share 20 attempts per administrator per Beijing calendar day and count toward the site conversation quota. Only one admin test runs at a time. Knowledge indexing and memory extraction are separate provider calls and do not consume conversation quotas.
+- Operations records provider metadata from installation onward: call type/model, success/failure/cancellation, latency and reported tokens. Missing provider usage is shown as unknown, never estimated cost. An embedding operation can batch multiple HTTP requests. Error codes expose only HTTP status or a generic network/response failure, never provider response bodies or credentials. Recent calls show 100 entries, audits 50, feedback 200; historical metadata remains in PostgreSQL.
+- Health distinguishes configuration presence from an explicit, billable live chat + embedding check. Test success is shown with its time, only in the current view.
+- Feedback initially shares only a rating and optional comment. A separate unchecked consent box enables a snapshot of exactly one question, answer and citations. Other chat messages and memories are never exposed. Re-submitting without consent clears a previously shared snapshot. Conversation deletion does not delete already submitted feedback; deleting the user account cascades feedback deletion. Administrators can set open/reviewing/resolved and associate a knowledge document. Detail access and administrative actions are audited.
+- New migration: `1791001000000-AddCoachManagement.ts`. Development synchronization initializes these SQL-owned tables too; production applies normal migrations. Restart the backend after updating code if Docker bind-mount file watching misses changes.
+
+Integration tests cover settings validation and permissions, runtime enable/disable, playground context isolation and quota, feedback ownership/consent/revocation, audit metadata, and migration lifecycle. Provider unit tests additionally verify SSE token reporting and error redaction. Tests use a disposable database and stub provider.

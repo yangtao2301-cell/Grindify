@@ -19,6 +19,7 @@ declare module 'vue' {
     BackHeader: typeof import('./components/BackHeader.vue')['default']
     BottomNavigation: typeof import('./components/BottomNavigation.vue')['default']
     ChipTextInput: typeof import('./components/basicUI/ChipTextInput.vue')['default']
+    CoachFeedback: typeof import('./components/coach/CoachFeedback.vue')['default']
     ComparisonCards: typeof import('./components/Statistics/ComparisonCards.vue')['default']
     CreateActivity: typeof import('./components/Activity/CreateActivity.vue')['default']
     CreateExercise: typeof import('./components/Exercise/CreateExercise.vue')['default']

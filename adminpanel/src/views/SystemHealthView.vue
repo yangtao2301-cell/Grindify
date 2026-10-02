@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import { CheckCircle2, XCircle, Loader2, RefreshCw } from 'lucide-vue-next'
+import CoachHealth from '@/components/CoachHealth.vue'
 import { adminApi } from '@/services/adminApi'
 
 interface ServiceStatus {
@@ -52,6 +53,7 @@ const overallOk = () => services.value.every((s) => s.status === 'ok')
 </script>
 
 <template>
+  <CoachHealth />
   <div class="page-head">
     <div class="titles">
       <h1>System Health</h1>

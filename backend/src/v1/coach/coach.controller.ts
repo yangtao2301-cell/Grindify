@@ -15,6 +15,8 @@ import {
 import { Request, Response } from 'express';
 import { JwtAuthGuard } from '../guards/jwtAuth.guard';
 import { SuperAdminGuard } from '../guards/superAdmin.guard';
+import { CoachControlService } from './coach-control.service';
+import { CoachFeedbackDto } from './coach.dto';
 import { CoachService } from './coach.service';
 import { KnowledgeService } from './knowledge.service';
 import { BailianService } from './bailian.service';
@@ -31,7 +33,17 @@ type AuthRequest = Request & { user: { id: number } };
 @Controller('coach')
 @UseGuards(JwtAuthGuard)
 export class CoachController {
-  constructor(private readonly coach: CoachService) {}
+  constructor(
+    private readonly coach: CoachService,
+    private readonly control: CoachControlService,
+  ) {}
+  @Post('messages/:id/feedback') feedback(
+    @Req() req: AuthRequest,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: CoachFeedbackDto,
+  ) {
+    return this.control.feedback(req.user.id, id, dto);
+  }
   @Get('status') status() {
     return this.coach.status();
   }
@@ -86,13 +98,11 @@ export class CoachController {
     const emit = (data: object) => {
       if (res.destroyed || res.writableEnded) return;
       if (!res.headersSent) {
-        res
-          .status(200)
-          .set({
-            'Content-Type': 'text/event-stream; charset=utf-8',
-            'Cache-Control': 'no-cache, no-transform',
-            'X-Accel-Buffering': 'no',
-          });
+        res.status(200).set({
+          'Content-Type': 'text/event-stream; charset=utf-8',
+          'Cache-Control': 'no-cache, no-transform',
+          'X-Accel-Buffering': 'no',
+        });
         res.flushHeaders();
       }
       res.write(`data: ${JSON.stringify(data)}\n\n`);
@@ -129,6 +139,7 @@ export class CoachAdminController {
   constructor(
     private readonly knowledge: KnowledgeService,
     private readonly ai: BailianService,
+    private readonly control: CoachControlService,
   ) {}
   @Get('status') status() {
     return {
@@ -141,30 +152,44 @@ export class CoachAdminController {
   @Get('documents') documents() {
     return this.knowledge.list();
   }
-  @Post('documents') create(@Body() dto: SaveKnowledgeDto) {
-    return this.knowledge.save(dto);
+  @Post('documents') async create(
+    @Req() req: AuthRequest,
+    @Body() dto: SaveKnowledgeDto,
+  ) {
+    const result = await this.knowledge.save(dto);
+    await this.control.audit(req.user.id, 'knowledge.create', result.id);
+    return result;
   }
-  @Put('documents/:id') update(
+  @Put('documents/:id') async update(
+    @Req() req: AuthRequest,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: SaveKnowledgeDto,
   ) {
-    return this.knowledge.save(dto, id);
+    const result = await this.knowledge.save(dto, id);
+    await this.control.audit(req.user.id, 'knowledge.update', id);
+    return result;
   }
   @Post('documents/:id/action') async action(
+    @Req() req: AuthRequest,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: KnowledgeActionDto,
   ) {
     await this.knowledge.action(id, dto.action);
+    await this.control.audit(req.user.id, 'knowledge.' + dto.action, id);
     return { ok: true };
   }
   @Delete('documents/:id') async delete(
+    @Req() req: AuthRequest,
     @Param('id', ParseUUIDPipe) id: string,
   ) {
     await this.knowledge.delete(id);
+    await this.control.audit(req.user.id, 'knowledge.delete', id);
     return { ok: true };
   }
-  @Post('demo') seed() {
-    return this.knowledge.seed();
+  @Post('demo') async seed(@Req() req: AuthRequest) {
+    const result = await this.knowledge.seed();
+    await this.control.audit(req.user.id, 'knowledge.seed');
+    return result;
   }
   @Post('search') search(@Body() dto: SearchKnowledgeDto) {
     this.ai.assertConfigured();

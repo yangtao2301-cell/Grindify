@@ -1,10 +1,18 @@
-import { Injectable, ServiceUnavailableException } from '@nestjs/common';
+import {
+  Injectable,
+  Optional,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { CoachControlService } from './coach-control.service';
 import { ChatInput } from './coach.types';
 
 @Injectable()
 export class BailianService {
-  constructor(private readonly config: ConfigService) {}
+  constructor(
+    private readonly config: ConfigService,
+    @Optional() private readonly control?: CoachControlService,
+  ) {}
 
   get model(): string {
     return this.config.get<string>('COACH_CHAT_MODEL') || 'qwen-plus';
@@ -63,22 +71,113 @@ export class BailianService {
       );
     } catch {
       if (signal?.aborted) throw new Error('cancelled');
-      throw new ServiceUnavailableException(
-        '百炼连接超时或暂不可用，请稍后重试。',
+      throw Object.assign(
+        new ServiceUnavailableException('百炼连接超时或暂不可用，请稍后重试。'),
+        { operationCode: 'connection_timeout_or_network_error' },
       );
     }
     if (!response.ok) {
       await response.body?.cancel();
-      throw new ServiceUnavailableException(
-        response.status === 429
-          ? '百炼服务繁忙，请稍后重试。'
-          : '百炼调用失败，请管理员检查地域、模型权限和 API 配置。',
+      throw Object.assign(
+        new ServiceUnavailableException(
+          response.status === 429
+            ? '百炼服务繁忙，请稍后重试。'
+            : '百炼调用失败，请管理员检查地域、模型权限和 API 配置。',
+        ),
+        { operationCode: 'provider_http_' + response.status },
       );
     }
     return response;
   }
 
   async embed(texts: string[], signal?: AbortSignal): Promise<number[][]> {
+    const start = Date.now();
+    let status = 'failed';
+    let errorCode: string | undefined;
+    let total: Usage | undefined;
+    try {
+      const result = await this.embedInner(texts, signal, (u) => {
+        total = {
+          prompt_tokens:
+            (total?.prompt_tokens || 0) +
+            (u.prompt_tokens ?? u.total_tokens ?? 0),
+        };
+      });
+      status = 'success';
+      return result;
+    } catch (e) {
+      errorCode = operationCode(e);
+      throw e;
+    } finally {
+      await this.control?.record(
+        'embedding',
+        this.embeddingModel,
+        signal?.aborted ? 'cancelled' : status,
+        start,
+        total,
+        errorCode,
+      );
+    }
+  }
+  async json(messages: ChatInput[]): Promise<unknown> {
+    const start = Date.now();
+    let status = 'failed';
+    let errorCode: string | undefined;
+    let usage: Usage | undefined;
+    try {
+      const result = await this.jsonInner(messages, (u) => {
+        usage = u;
+      });
+      status = 'success';
+      return result;
+    } catch (e) {
+      errorCode = operationCode(e);
+      throw e;
+    } finally {
+      await this.control?.record(
+        'memory',
+        this.config.get<string>('COACH_MEMORY_MODEL') || this.model,
+        status,
+        start,
+        usage,
+        errorCode,
+      );
+    }
+  }
+  async *stream(
+    messages: ChatInput[],
+    signal: AbortSignal,
+    maxTokens?: number,
+  ): AsyncGenerator<string> {
+    const start = Date.now();
+    let status = 'failed';
+    let errorCode: string | undefined;
+    let usage: Usage | undefined;
+    try {
+      yield* this.streamInner(messages, signal, maxTokens, (u) => {
+        usage = u;
+      });
+      status = 'success';
+    } catch (e) {
+      errorCode = operationCode(e);
+      throw e;
+    } finally {
+      await this.control?.record(
+        'chat',
+        this.model,
+        signal.aborted ? 'cancelled' : status,
+        start,
+        usage,
+        errorCode,
+      );
+    }
+  }
+
+  private async embedInner(
+    texts: string[],
+    signal: AbortSignal | undefined,
+    usage: (value: Usage) => void,
+  ): Promise<number[][]> {
     const results: number[][] = [];
     for (let i = 0; i < texts.length; i += 10) {
       const input = texts.slice(i, i + 10);
@@ -94,7 +193,9 @@ export class BailianService {
       );
       const data = (await response.json()) as {
         data?: { index: number; embedding: number[] }[];
+        usage?: Usage;
       };
+      if (data.usage) usage(data.usage);
       const entries = data.data?.sort((a, b) => a.index - b.index);
       if (
         !entries ||
@@ -114,7 +215,10 @@ export class BailianService {
     return results;
   }
 
-  async json(messages: ChatInput[]): Promise<unknown> {
+  private async jsonInner(
+    messages: ChatInput[],
+    usage: (value: Usage) => void,
+  ): Promise<unknown> {
     const response = await this.request('/chat/completions', {
       model: this.config.get<string>('COACH_MEMORY_MODEL') || this.model,
       messages,
@@ -125,13 +229,17 @@ export class BailianService {
     });
     const data = (await response.json()) as {
       choices?: { message?: { content?: string } }[];
+      usage?: Usage;
     };
+    if (data.usage) usage(data.usage);
     return JSON.parse(data.choices?.[0]?.message?.content || '{}') as unknown;
   }
 
-  async *stream(
+  private async *streamInner(
     messages: ChatInput[],
     signal: AbortSignal,
+    maxTokens: number | undefined,
+    usage: (value: Usage) => void,
   ): AsyncGenerator<string> {
     const response = await this.request(
       '/chat/completions',
@@ -139,8 +247,10 @@ export class BailianService {
         model: this.model,
         messages,
         stream: true,
+        stream_options: { include_usage: true },
         enable_thinking: false,
-        max_tokens: this.number('COACH_MAX_OUTPUT_TOKENS', 1500, 256, 4000),
+        max_tokens:
+          maxTokens ?? this.number('COACH_MAX_OUTPUT_TOKENS', 1500, 256, 4000),
         temperature: 0.4,
       },
       signal,
@@ -168,11 +278,13 @@ export class BailianService {
           }
           const event = JSON.parse(payload) as {
             error?: unknown;
+            usage?: Usage;
             choices?: {
               delta?: { content?: string };
               finish_reason?: string;
             }[];
           };
+          if (event.usage) usage(event.usage);
           if (event.error) throw new Error('provider stream error');
           const choice = event.choices?.[0];
           if (choice?.delta?.content) yield choice.delta.content;
@@ -187,4 +299,18 @@ export class BailianService {
       reader.releaseLock();
     }
   }
+}
+
+type Usage = {
+  prompt_tokens?: number;
+  completion_tokens?: number;
+  total_tokens?: number;
+};
+
+function operationCode(error: unknown): string | undefined {
+  const code = (error as { operationCode?: unknown })?.operationCode;
+  return typeof code === 'string' &&
+    /^(provider_http_[0-9]{3}|connection_timeout_or_network_error)$/.test(code)
+    ? code
+    : undefined;
 }

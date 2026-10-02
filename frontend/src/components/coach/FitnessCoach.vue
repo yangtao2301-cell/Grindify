@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useDisplay } from 'vuetify'
+import CoachFeedback from './CoachFeedback.vue'
 import DOMPurify from 'dompurify'
 import { marked } from 'marked'
 import {
@@ -29,7 +30,9 @@ const deleteTarget = ref<string | null>(null)
 const feed = ref<HTMLElement | null>(null)
 const launcher = ref<HTMLButtonElement | null>(null)
 const input = ref<HTMLTextAreaElement | null>(null)
-const quickQuestions = ['分析我最近的训练', '今天适合练什么？', '如何安排每周训练？']
+const quickQuestions = ref(['分析我最近的训练', '今天适合练什么？', '如何安排每周训练？'])
+const coachName = ref('健身教练')
+const welcome = ref('我可以结合你的训练记录，帮你复盘、解答疑问，找到下一步的方向。')
 const memoryLabels: Record<string, string> = {
   goal: '训练目标',
   experience: '训练经验',
@@ -132,6 +135,9 @@ async function initialize() {
     const [status, history] = await Promise.all([coachApi.status(), coachApi.conversations()])
     if (disposed) return
     available.value = status.available
+    coachName.value = status.name
+    welcome.value = status.welcome
+    quickQuestions.value = status.quickQuestions
     conversations.value = history
     if (history[0]) {
       conversation.value = history[0]
@@ -151,7 +157,11 @@ watch(open, async value => {
   if (!initialized) await initialize()
   else {
     try {
-      available.value = (await coachApi.status()).available
+      const status=await coachApi.status()
+      available.value=status.available
+      coachName.value=status.name
+      welcome.value=status.welcome
+      quickQuestions.value=status.quickQuestions
       if (available.value) notice.value = ''
     } catch {
       /* Sending will surface connection errors. */
@@ -349,7 +359,7 @@ onBeforeUnmount(() => {
       <header class="coach-header">
         <div class="coach-avatar"><v-icon>mdi-dumbbell</v-icon></div>
         <div class="flex-grow-1">
-          <h2 id="coach-title">健身教练</h2>
+          <h2 id="coach-title">{{ coachName }}</h2>
           <p>聊训练，也聊你的进步</p>
         </div>
         <v-btn
@@ -394,7 +404,7 @@ onBeforeUnmount(() => {
         <div v-if="!messages.length" class="coach-welcome">
           <div class="coach-welcome-icon"><v-icon size="32">mdi-dumbbell</v-icon></div>
           <h3>今天想聊点什么？</h3>
-          <p>我可以结合你的训练记录，帮你复盘、解答疑问，找到下一步的方向。</p>
+          <p>{{ welcome }}</p>
           <button
             v-for="question in quickQuestions"
             :key="question"
@@ -413,7 +423,7 @@ onBeforeUnmount(() => {
           class="coach-message"
           :class="message.role"
         >
-          <div class="coach-message-label">{{ message.role === 'user' ? '你' : '健身教练' }}</div>
+          <div class="coach-message-label">{{ message.role === 'user' ? '你' : coachName }}</div>
           <div v-if="message.role === 'user'" class="coach-bubble coach-user-text">
             {{ message.content }}
           </div>
@@ -438,6 +448,7 @@ onBeforeUnmount(() => {
               >{{ message.status === 'stopped' ? '已停止生成' : '回答未完成' }}</small
             >
           </div>
+          <CoachFeedback v-if="message.role === 'assistant' && message.status === 'complete'" :message="message" :question="messages.find(m => m.request_id === message.request_id && m.role === 'user')?.content || ''" />
           <details v-if="message.sources.length" class="coach-sources">
             <summary>参考资料 · {{ message.sources.length }}</summary>
             <div v-for="source in message.sources" :key="source.id">
