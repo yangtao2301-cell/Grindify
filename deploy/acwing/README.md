@@ -91,6 +91,8 @@ bash deploy/acwing/deploy-image-archive.sh bc6aabc ~/grindify-images-bc6aabc.tar
 
 The deployment script checks the archive checksum, loads and verifies all three images, takes a PostgreSQL dump and uploads archive under `~/grindify-backups`, then updates the three application containers. It checks the API, frontend version file, and admin panel before recording the active image tag in `.deploy/release.env`. It attempts to restore the previous application images if the update or checks fail. Keep the database dump when a release includes migrations; an image rollback alone may not undo database changes.
 
+Before updating the application containers, the script also starts the PostgreSQL image declared in `docker-compose.images.yml` and waits for it to become healthy. This is required when a release adds a database extension such as pgvector: the existing data volume is retained, and the new backend can then run its migration against the matching PostgreSQL image.
+
 The archive and its checksum can be removed from the server after the release has been verified and a rollback copy is available elsewhere. The loaded images and data volumes remain in Docker.
 
 For later releases, build from the new clean commit and deploy its matching archive and tag. Do not run `bootstrap-fresh-db.js` on an existing database. The older `grindify-release-*.tar` files are source archives; `grindify-images-*.tar` files produced by this process are Docker image archives.

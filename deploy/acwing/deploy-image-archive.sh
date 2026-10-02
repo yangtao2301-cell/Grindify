@@ -56,6 +56,13 @@ test -s "$uploads_backup"
 chmod 600 "$db_backup" "$uploads_backup"
 echo "Backups: $db_backup and $uploads_backup"
 
+# Apply the database image declared by this release before starting an API that
+# may run migrations requiring extensions provided by that image.
+if ! "${compose[@]}" up -d --no-deps --no-build --pull missing --wait --wait-timeout 120 postgres; then
+  echo "PostgreSQL did not become healthy. Backups and previous application images are retained." >&2
+  exit 1
+fi
+
 rollback_images() {
   echo "Restoring the previous application images..." >&2
   if [[ -f .deploy/release.env ]]; then
