@@ -93,6 +93,8 @@ The deployment script checks the archive checksum, loads and verifies all three 
 
 Before updating the application containers, the script also starts the PostgreSQL image declared in `docker-compose.images.yml` and waits for it to become healthy. This is required when a release adds a database extension such as pgvector: the existing data volume is retained, and the new backend can then run its migration against the matching PostgreSQL image.
 
+After changing the deployment script, start a **new** `Deploy AcWing` workflow run from the latest `main` commit. Re-running an earlier failed run checks out its original commit and therefore uses the old script again.
+
 The archive and its checksum can be removed from the server after the release has been verified and a rollback copy is available elsewhere. The loaded images and data volumes remain in Docker.
 
 For later releases, build from the new clean commit and deploy its matching archive and tag. Do not run `bootstrap-fresh-db.js` on an existing database. The older `grindify-release-*.tar` files are source archives; `grindify-images-*.tar` files produced by this process are Docker image archives.

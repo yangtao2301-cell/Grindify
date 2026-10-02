@@ -92,6 +92,15 @@ for attempt in {1..30}; do
 done
 if [[ $healthy != true ]]; then
   echo "The new containers did not pass health checks. Backups and previous images are retained." >&2
+  if ! curl -fsS --max-time 3 http://127.0.0.1:1337/v1/auth/health >/dev/null 2>&1; then
+    echo "Failed check: backend API health endpoint." >&2
+  fi
+  if ! curl -fsS --max-time 3 http://127.0.0.1:3000/version.json 2>/dev/null | grep -q "$tag"; then
+    echo "Failed check: frontend version does not match $tag." >&2
+  fi
+  if ! curl -fsS --max-time 3 http://127.0.0.1:3001/admin/ >/dev/null 2>&1; then
+    echo "Failed check: admin panel endpoint." >&2
+  fi
   rollback_images
   exit 1
 fi
