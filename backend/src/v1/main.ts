@@ -26,6 +26,8 @@ import { Request, Response, NextFunction } from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  // Knowledge articles may contain up to 100,000 Unicode characters.
+  app.useBodyParser('json', { limit: '1mb' });
 
   // 从环境变量读取允许的来源（用逗号分隔）
   const allowedOrigins = process.env.ALLOWED_ORIGINS

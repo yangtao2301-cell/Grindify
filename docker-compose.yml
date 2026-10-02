@@ -2,7 +2,7 @@ name: grindify
 
 services:
   postgres:
-    image: postgres:17
+    image: pgvector/pgvector:pg17
     container_name: grindify_postgres
     ports:
       - "${POSTGRES_PORT:-5432}:5432"

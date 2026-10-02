@@ -1183,6 +1183,7 @@ export default {
       withdraw: 'Withdraw consent where processing is based on consent, or request account deletion.',
       rightsContact: 'Contact us at {email} or {phone}. We will verify requests and respond in a timely manner as required by law.',
       sharingTitle: '8. Third-Party Services and Disclosures',
+      coachRecipient: 'Alibaba Cloud Model Studio (optional fitness coach): when you use the coach, conversation content, relevant training data and personal memories are sent to the configured Model Studio service for answers, retrieval and memory extraction. Chat history and memories are stored in this application’s database and can be managed and deleted separately in the coach window.',
       sharingText: 'We do not sell personal information. We provide information to service providers only as needed for features you choose or to provide infrastructure, and require them to process it as agreed.',
       thirdPartyTitle: 'Third-Party Service List',
       thirdPartyIntro: 'The Service currently uses the following third-party services. They process necessary information only when you use the related feature:',

@@ -41,6 +41,7 @@
       <v-icon color="primary"> mdi-chevron-right </v-icon>
     </v-card>
     <BottomNavigation v-if="authStore.isAuthenticated && !$route.meta.hideBottomNav" />
+    <FitnessCoach v-if="authStore.isAuthenticated && authStore.user?.id" :key="authStore.user.id" :user-id="authStore.user.id" :bottom-offset="showResumeBar ? 117 : 72" />
   </v-app>
 </template>
 
@@ -51,6 +52,7 @@ import { useWorkoutSessionStore } from './stores/workoutSession.store'
 import 'vuetify-sonner/style.css'
 import router from './router'
 import { useRoute } from 'vue-router'
+import FitnessCoach from './components/coach/FitnessCoach.vue'
 import { useAppStore } from './stores/app'
 import { useTheme } from 'vuetify'
 

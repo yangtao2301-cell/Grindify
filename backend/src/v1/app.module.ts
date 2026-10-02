@@ -32,6 +32,7 @@ import { StatisticsModule } from './statistics/statistics.module';
 import { ProgressPhotoModule } from './progressPhoto/progressPhoto.module';
 import { ReleasesModule } from './releases/releases.module';
 import { AdminModule } from './admin/admin.module';
+import { CoachModule } from './coach/coach.module';
 
 @Module({
   imports: [
@@ -57,7 +58,7 @@ import { AdminModule } from './admin/admin.module';
           synchronize,
           migrations: [__dirname + '/migrations/*.{ts,js}'],
           migrationsRun: !synchronize,
-          logging: ['error', 'warn', 'query'] as const,
+          logging: ['error', 'warn'] as const,
         };
       },
       inject: [ConfigService],
@@ -76,6 +77,7 @@ import { AdminModule } from './admin/admin.module';
     ProgressPhotoModule,
     ReleasesModule,
     AdminModule,
+    CoachModule,
   ],
   providers: [AppService, JwtStrategy],
 })

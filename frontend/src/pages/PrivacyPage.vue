@@ -96,6 +96,7 @@
           {{ $t('legal.privacy.resendRecipient') }}
           (<a href="https://resend.com/legal/privacy-policy" target="_blank" rel="noopener noreferrer">{{ $t('legal.privacy.resendPolicyLink') }}</a>)
         </li>
+        <li>{{ $t('legal.privacy.coachRecipient') }}</li>
       </ul>
 
       <h3 class="text-h6 mb-2">{{ $t('legal.privacy.locationTitle') }}</h3>

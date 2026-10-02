@@ -39,6 +39,13 @@ export const ADMIN_NAV: NavEntry[] = [
   },
   { section: 'Content' },
   {
+    id: 'a-coach',
+    label: '教练知识库',
+    icon: 'BookOpen',
+    path: '/coach-knowledge',
+    description: '维护健身资料并测试检索',
+  },
+  {
     id: 'a-exercises',
     label: 'Global Exercises',
     icon: 'Dumbbell',

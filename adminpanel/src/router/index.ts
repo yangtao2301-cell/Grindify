@@ -5,6 +5,12 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
+      path: '/coach-knowledge',
+      name: 'coach-knowledge',
+      component: () => import('@/views/CoachKnowledgeView.vue'),
+      meta: { title: '教练知识库', description: '维护健身资料并测试检索', navId: 'a-coach' },
+    },
+    {
       path: '/login',
       name: 'login',
       component: () => import('@/views/LoginView.vue'),
