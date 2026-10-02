@@ -93,6 +93,8 @@ The deployment script checks the archive checksum, loads and verifies all three 
 
 Before updating the application containers, the script also starts the PostgreSQL image declared in `docker-compose.images.yml` and waits for it to become healthy. This is required when a release adds a database extension such as pgvector: the existing data volume is retained, and the new backend can then run its migration against the matching PostgreSQL image.
 
+The pgvector image is pinned to PostgreSQL 17 on Debian trixie. The original `postgres:17` deployment used trixie; switching to the default pgvector `pg17` tag (bookworm) changes the system collation version and can invalidate text indexes. Keep the database image on the same Debian release when updating pgvector.
+
 After changing the deployment script, start a **new** `Deploy AcWing` workflow run from the latest `main` commit. Re-running an earlier failed run checks out its original commit and therefore uses the old script again.
 
 The archive and its checksum can be removed from the server after the release has been verified and a rollback copy is available elsewhere. The loaded images and data volumes remain in Docker.

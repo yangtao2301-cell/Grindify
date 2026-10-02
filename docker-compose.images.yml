@@ -2,7 +2,7 @@ name: grindify
 
 services:
   postgres:
-    image: pgvector/pgvector:pg17
+    image: pgvector/pgvector:0.8.6-pg17-trixie
     container_name: grindify_postgres
     restart: unless-stopped
     environment:
