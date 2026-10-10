@@ -74,11 +74,32 @@ rollback_images() {
   fi
 }
 
-if ! "${compose[@]}" up -d --no-deps --no-build --pull never backend frontend adminpanel; then
-  echo "Compose update failed; the backups and previous images are retained." >&2
-  rollback_images
-  exit 1
-fi
+for service in backend frontend adminpanel; do
+  echo "Updating $service..."
+  if ! "${compose[@]}" up -d --no-deps --no-build --pull never "$service"; then
+    echo "Compose update failed for $service; the backups and previous images are retained." >&2
+    rollback_images
+    exit 1
+  fi
+  case "$service" in
+    backend) check_url=http://127.0.0.1:1337/v1/auth/health ;;
+    frontend) check_url=http://127.0.0.1:3000/version.json ;;
+    adminpanel) check_url=http://127.0.0.1:3001/admin/ ;;
+  esac
+  ready=false
+  for attempt in {1..30}; do
+    if curl -fsS --max-time 3 "$check_url" >/dev/null 2>&1; then
+      ready=true
+      break
+    fi
+    sleep 2
+  done
+  if [[ $ready != true ]]; then
+    echo "$service did not become ready; restoring previous application images." >&2
+    rollback_images
+    exit 1
+  fi
+done
 
 healthy=false
 for attempt in {1..30}; do
