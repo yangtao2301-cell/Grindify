@@ -2,6 +2,8 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useDisplay } from 'vuetify'
 import CoachFeedback from './CoachFeedback.vue'
+import CoachPlan from './CoachPlan.vue'
+import { confirmedCyclePattern, type CoachCyclePattern } from './planIntent'
 import DOMPurify from 'dompurify'
 import { marked } from 'marked'
 import {
@@ -14,7 +16,13 @@ import {
 const props = defineProps<{ userId: number; bottomOffset: number }>()
 const { smAndDown } = useDisplay()
 const open = ref(false)
-const tab = ref<'chat' | 'history' | 'memory'>('chat')
+const tab = ref<'chat' | 'history' | 'memory' | 'plan'>('chat')
+const planOpened = ref(false)
+const planSourceRequest = ref<{ messageId: string; requestId: string; suggestedPattern: 'weekly' | CoachCyclePattern; confirmedCycle: boolean } | null>(null)
+const planCardOpen = ref(false)
+const planCardClose = ref<HTMLButtonElement | null>(null)
+const planCard = ref<HTMLElement | null>(null)
+let planTrigger: HTMLButtonElement | null = null
 const loading = ref(false)
 const sending = ref(false)
 const available = ref(false)
@@ -113,7 +121,7 @@ function launcherClick(event: MouseEvent) {
   suppressClick = false
 }
 function inputKey(event: KeyboardEvent) {
-  if (event.key === 'Enter' && !event.shiftKey && !event.isComposing && !smAndDown.value) {
+  if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) {
     event.preventDefault()
     void send()
   }
@@ -153,7 +161,7 @@ async function initialize() {
   }
 }
 watch(open, async value => {
-  if (!value) return
+  if (!value) { planCardOpen.value = false; return }
   if (!initialized) await initialize()
   else {
     try {
@@ -170,6 +178,8 @@ watch(open, async value => {
   }
 })
 watch(tab, async value => {
+  if (value !== 'chat') planCardOpen.value = false
+  if (value === 'plan') planOpened.value = true
   if (sending.value) return
   loading.value = true
   error.value = ''
@@ -193,6 +203,8 @@ async function choose(item: CoachConversation) {
     const history = await coachApi.history(item.id)
     conversation.value = item
     messages.value = history
+    planCardOpen.value = false
+    planSourceRequest.value = null
     draft.value = ''
     tab.value = 'chat'
     error.value = ''
@@ -207,6 +219,8 @@ function newConversation() {
   if (sending.value) return
   conversation.value = null
   messages.value = []
+  planCardOpen.value = false
+  planSourceRequest.value = null
   draft.value = ''
   error.value = ''
   notice.value = ''
@@ -220,6 +234,8 @@ async function deleteConversation(id: string) {
     if (conversation.value?.id === id) {
       conversation.value = null
       messages.value = []
+      planCardOpen.value = false
+      planSourceRequest.value = null
       draft.value = ''
     }
     deleteTarget.value = null
@@ -244,6 +260,53 @@ function retry() {
   const last = [...messages.value].reverse().find(m => m.role === 'user')
   if (last) void send(last.content, last.request_id)
 }
+function newRequestId(): string {
+  const bytes = crypto.getRandomValues(new Uint8Array(16))
+  bytes[6] = (bytes[6]! & 0x0f) | 0x40
+  bytes[8] = (bytes[8]! & 0x3f) | 0x80
+  const hex = Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('')
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`
+}
+function planFromMessage(message: CoachMessage, event: MouseEvent) {
+  if (message.role !== 'assistant' || message.status !== 'complete' || !available.value) return
+  planTrigger = event.currentTarget as HTMLButtonElement
+  if (planSourceRequest.value?.messageId === message.id) {
+    planCardOpen.value = true
+    void nextTick(() => planCardClose.value?.focus())
+    return
+  }
+  const replyIndex = messages.value.findIndex(item => item.id === message.id)
+  const recentUserMessages = messages.value.slice(Math.max(0, replyIndex - 16), replyIndex)
+    .filter(item => item.role === 'user').map(item => item.content)
+  const cyclePattern = confirmedCyclePattern(recentUserMessages)
+  planSourceRequest.value = {
+    messageId: message.id,
+    requestId: newRequestId(),
+    suggestedPattern: cyclePattern || 'weekly',
+    confirmedCycle: !!cyclePattern,
+  }
+  planCardOpen.value = true
+  void nextTick(() => planCardClose.value?.focus())
+}
+function closePlanCard() {
+  planCardOpen.value = false
+  void nextTick(() => planTrigger?.isConnected && planTrigger.focus())
+}
+function trapPlanCardFocus(event: KeyboardEvent) {
+  if (event.key !== 'Tab' || !planCard.value) return
+  const items = Array.from(planCard.value.querySelectorAll<HTMLElement>('button, input, textarea, select, a[href]'))
+    .filter(item => !item.hasAttribute('disabled') && item.getClientRects().length > 0)
+  if (!items.length) return
+  const first = items[0]!
+  const last = items[items.length - 1]!
+  if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault()
+    last.focus()
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault()
+    first.focus()
+  }
+}
 async function send(text = draft.value, retryId?: string) {
   const content = text.trim()
   if (!content || sending.value || loading.value || !available.value) return
@@ -252,13 +315,7 @@ async function send(text = draft.value, retryId?: string) {
   sending.value = true
   tab.value = 'chat'
   abort = new AbortController()
-  const bytes = crypto.getRandomValues(new Uint8Array(16))
-  bytes[6] = (bytes[6]! & 0x0f) | 0x40
-  bytes[8] = (bytes[8]! & 0x3f) | 0x80
-  const hex = Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('')
-  const requestId =
-    retryId ||
-    `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`
+  const requestId = retryId || newRequestId()
   let assistant: CoachMessage | undefined
   try {
     if (!conversation.value) conversation.value = await coachApi.create()
@@ -385,6 +442,7 @@ onBeforeUnmount(() => {
             ['chat', '对话'],
             ['history', '历史'],
             ['memory', '教练记忆'],
+            ['plan', '训练计划'],
           ] as const"
           :key="item[0]"
           :class="{ active: tab === item[0] }"
@@ -405,6 +463,9 @@ onBeforeUnmount(() => {
           <div class="coach-welcome-icon"><v-icon size="32">mdi-dumbbell</v-icon></div>
           <h3>今天想聊点什么？</h3>
           <p>{{ welcome }}</p>
+          <button :disabled="!available || loading" @click="planSourceRequest = null; tab = 'plan'">
+            安排未来一周训练<v-icon size="17">mdi-arrow-top-right</v-icon>
+          </button>
           <button
             v-for="question in quickQuestions"
             :key="question"
@@ -449,6 +510,14 @@ onBeforeUnmount(() => {
             >
           </div>
           <CoachFeedback v-if="message.role === 'assistant' && message.status === 'complete'" :message="message" :question="messages.find(m => m.request_id === message.request_id && m.role === 'user')?.content || ''" />
+          <button
+            v-if="message.role === 'assistant' && message.status === 'complete'"
+            class="coach-retry"
+            :disabled="sending || loading || !available"
+            @click="planFromMessage(message, $event)"
+          >
+            {{ planSourceRequest?.messageId === message.id ? '继续查看训练计划' : '根据这条回复生成计划' }}
+          </button>
           <details v-if="message.sources.length" class="coach-sources">
             <summary>参考资料 · {{ message.sources.length }}</summary>
             <div v-for="source in message.sources" :key="source.id">
@@ -492,7 +561,7 @@ onBeforeUnmount(() => {
           />
         </div>
       </div>
-      <div v-else class="coach-feed">
+      <div v-else-if="tab === 'memory'" class="coach-feed">
         <p class="coach-memory-help">
           这里记录你的长期目标和偏好。手动修改后会固定该条记忆；删除后，该类信息将停止自动记忆。删除对话不会同时删除这些记忆。
         </p>
@@ -524,6 +593,20 @@ onBeforeUnmount(() => {
             >
               保存修改
             </button>
+          </div>
+        </section>
+      </div>
+      <div v-show="tab === 'plan'" class="coach-feed">
+        <CoachPlan v-if="planOpened" :available="available" @navigate="open = false" />
+      </div>
+      <div v-if="planSourceRequest" v-show="planCardOpen && tab === 'chat'" class="coach-plan-overlay" @click.self="closePlanCard">
+        <section ref="planCard" class="coach-plan-card" role="dialog" aria-modal="true" aria-label="训练计划确认卡片" @keydown.esc.stop="closePlanCard" @keydown="trapPlanCardFocus">
+          <header class="coach-plan-card-header">
+            <strong>训练计划</strong>
+            <button ref="planCardClose" type="button" aria-label="关闭训练计划卡片" @click="closePlanCard">×</button>
+          </header>
+          <div class="coach-plan-card-body">
+            <CoachPlan :available="available" :source-request="planSourceRequest" compact @navigate="open = false" />
           </div>
         </section>
       </div>
@@ -604,12 +687,18 @@ onBeforeUnmount(() => {
   background: #50bd87;
 }
 .coach-panel {
+  position: relative;
   height: min(720px, 85dvh);
   display: flex !important;
   flex-direction: column;
   background: rgb(var(--v-theme-background));
   overflow: hidden !important;
 }
+.coach-plan-overlay { position: absolute; z-index: 15; inset: 0; display: flex; align-items: center; justify-content: center; padding: 12px; background: rgba(0, 0, 0, .5); }
+.coach-plan-card { width: 100%; max-width: 410px; max-height: calc(100% - 8px); display: flex; flex-direction: column; overflow: hidden; border-radius: 16px; background: rgb(var(--v-theme-background)); box-shadow: 0 12px 36px rgba(0, 0, 0, .26); }
+.coach-plan-card-header { display: flex; align-items: center; justify-content: space-between; flex: 0 0 auto; padding: 12px 16px; border-bottom: 1px solid rgba(var(--v-theme-on-surface), .1); }
+.coach-plan-card-header button { font-size: 24px; line-height: 1; width: 28px; height: 28px; }
+.coach-plan-card-body { min-height: 0; overflow-y: auto; padding: 14px; }
 .coach-header {
   display: flex;
   align-items: center;
