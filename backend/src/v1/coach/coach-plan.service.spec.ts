@@ -489,6 +489,41 @@ describe('coach reply to plan draft', () => {
 });
 
 describe('coach plan confirmation', () => {
+  it('suggests an available start date when existing workouts occupy cycle rest days', async () => {
+    const { service, row, schedules } = createService();
+    const start = new Date(`${today}T00:00:00Z`).getTime();
+    const dateAt = (offset: number) =>
+      new Date(start + offset * 86400000).toISOString().slice(0, 10);
+    row.payload = {
+      ...payload,
+      pattern: 'five_on_one_off',
+      cycles: 2,
+      windowStart: today,
+      windowEnd: dateAt(11),
+      days: Array.from({ length: 12 }, (_, offset) => offset)
+        .filter((offset) => offset % 6 < 5)
+        .map((offset) => ({ ...payload.days[0], date: dateAt(offset) })),
+    };
+    schedules.findForDateRange.mockResolvedValue([
+      { resolvedDate: dateAt(5), type: ScheduledSessionType.WORKOUT },
+      { resolvedDate: dateAt(11), type: ScheduledSessionType.WORKOUT },
+    ]);
+    const result = await (
+      service as unknown as {
+        present: (
+          userId: number,
+          draft: typeof row,
+        ) => Promise<{
+          suggestedStartDates: string[];
+          restConflicts: string[];
+        }>;
+      }
+    ).present(7, row);
+    expect(result.restConflicts).toEqual([dateAt(5), dateAt(11)]);
+    expect(result.suggestedStartDates).toContain(dateAt(1));
+    expect(result.suggestedStartDates).not.toContain(today);
+  });
+
   it('writes a five-on-one-off plan with rest on days 6 and 12', async () => {
     const { service, row, schedules } = createService();
     const start = new Date(`${future}T00:00:00Z`).getTime();

@@ -58,6 +58,7 @@ export interface CoachPlanDraft {
   payload: CoachPlanPayload
   conflicts: string[]
   restConflicts: string[]
+  suggestedStartDates: string[]
   exerciseOptions: { id: number; name: string; equipment: string[] }[]
 }
 export interface CoachPlanRequest {

@@ -337,6 +337,37 @@ export class CoachPlanService {
       row.status === 'pending'
         ? await this.calendarConflicts(userId, row.payload)
         : { training: [], rest: [] };
+    const suggestedStartDates: string[] = [];
+    const plan = row.payload;
+    if (row.status === 'pending' && plan.pattern && conflicts.rest.length) {
+      const trainingDays = plan.pattern === 'five_on_one_off' ? 5 : 4;
+      const totalDays = plan.cycles ? plan.cycles * (trainingDays + 1) : 14;
+      const today = beijingToday();
+      const nearby = await this.schedules.findForDateRange(
+        userId,
+        today,
+        addDays(today, totalDays + 5),
+      );
+      const occupied = new Set(
+        nearby
+          .filter((item) => item.type === ScheduledSessionType.WORKOUT)
+          .map((item) => item.resolvedDate),
+      );
+      for (
+        let offset = 0;
+        offset <= 6 && suggestedStartDates.length < 3;
+        offset++
+      ) {
+        const start = addDays(today, offset);
+        if (start === plan.windowStart) continue;
+        if (
+          cycleRestDates(start, trainingDays, totalDays).every(
+            (date) => !occupied.has(date),
+          )
+        )
+          suggestedStartDates.push(start);
+      }
+    }
     return {
       id: row.id,
       status: row.status,
@@ -346,6 +377,7 @@ export class CoachPlanService {
       applied: row.applied,
       conflicts: conflicts.training,
       restConflicts: conflicts.rest,
+      suggestedStartDates,
       exerciseOptions: await this.options(userId),
     };
   }

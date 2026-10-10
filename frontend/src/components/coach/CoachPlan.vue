@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import {
   coachApi,
   type CoachPlanDraft,
@@ -117,6 +117,7 @@ const canGenerateNeeds = computed(() => !!sourceForm.value.goal.trim() && !!sour
     (sourceForm.value.daysOfWeek.length >= 1 && sourceForm.value.daysOfWeek.length <= 4)))
 const daysToAdd = computed(() => editing.value?.days.filter(day => conflictChoices.value[day.date] !== 'skip') || [])
 const daysToSkip = computed(() => editing.value?.days.filter(day => conflictChoices.value[day.date] === 'skip') || [])
+const unresolvedConflicts = computed(() => draft.value?.conflicts.filter(date => !conflictChoices.value[date]) || [])
 const visibleDays = computed(() => editing.value?.days.map((day, index) => ({ day, index }))
   .filter((_, index) => !props.compact || index === selectedDayIndex.value) || [])
 const calendarPreview = computed(() => {
@@ -158,6 +159,19 @@ function revisitStartDate() {
   detailsOpen.value = false
   error.value = ''
   sourceStep.value = sourceSteps.value.indexOf('startDate')
+}
+async function regenerateWithStartDate(date: string) {
+  if (!props.sourceRequest || busy.value) return
+  draft.value = null
+  editing.value = null
+  confirmOpen.value = false
+  sourceForm.value.startDate = date
+  sourceStep.value = sourceSteps.value.length
+  await nextTick()
+  await generateFromNeeds()
+}
+function addAllOnSameDay() {
+  for (const date of draft.value?.conflicts || []) conflictChoices.value[date] = 'add'
 }
 function message(cause: unknown): string {
   return cause instanceof Error ? cause.message : '操作失败，请稍后重试。'
@@ -462,6 +476,10 @@ onMounted(() => {
         <strong>休息日已有训练：{{ draft.restConflicts.join('、') }}</strong>
         <p>可调整开始日期，或先到<router-link to="/calendar" @click="emit('navigate')">日历</router-link>处理这些安排。系统不会自动删除原计划。</p>
         <button v-if="cycleDays(editing.pattern) && sourceRequest" class="plan-link" :disabled="busy" @click="revisitStartDate">调整开始日期</button>
+        <div v-if="sourceRequest && draft.suggestedStartDates?.length" class="plan-suggestions">
+          <span>这些开始日期可避开已有训练的休息日：</span>
+          <button v-for="date in draft.suggestedStartDates" :key="date" class="plan-link" :disabled="busy" @click="regenerateWithStartDate(date)">从 {{ date }} 重新生成</button>
+        </div>
         <button class="plan-link" :disabled="busy" @click="refreshDraft">重新检查日历</button>
       </div>
       <div v-if="compact && draft.conflicts.length" class="plan-conflict" role="alert">
@@ -472,6 +490,7 @@ onMounted(() => {
           <label v-if="!cycleDays(editing.pattern)"><input v-model="conflictChoices[date]" type="radio" :name="`conflict-${date}`" value="skip">跳过</label>
         </div>
         <button v-if="cycleDays(editing.pattern) && sourceRequest" class="plan-link" :disabled="busy" @click="revisitStartDate">调整开始日期</button>
+        <button v-if="cycleDays(editing.pattern) && unresolvedConflicts.length" class="plan-link" :disabled="busy" @click="addAllOnSameDay">以上训练日全部同日添加</button>
       </div>
       <button v-if="compact" class="plan-link plan-detail-toggle" :aria-expanded="detailsOpen" @click="detailsOpen = !detailsOpen">{{ detailsOpen ? '收起训练日详情' : '查看并调整训练日详情' }}</button>
       <div v-if="compact && detailsOpen" class="plan-date-strip" aria-label="选择训练日">
@@ -506,8 +525,13 @@ onMounted(() => {
         </div>
       </section>
       <button v-if="!cycleDays(editing.pattern) && (!compact || detailsOpen)" class="plan-link" :disabled="editing.days.length >= 4 || busy" @click="addDay">添加训练日</button>
+      <div v-if="draft.restConflicts?.length || unresolvedConflicts.length" class="plan-conflict" role="status">
+        <p v-if="draft.restConflicts?.length">暂不能确认：休息日 {{ draft.restConflicts.join('、') }} 已有训练。请在上方选择新的开始日期，或到日历处理原安排。</p>
+        <p v-if="unresolvedConflicts.length">还有 {{ unresolvedConflicts.length }} 个训练日冲突需要选择处理方式。</p>
+      </div>
+      <p v-if="error" class="plan-error" role="alert">{{ error }}</p>
       <div class="plan-actions plan-action-bar">
-        <button class="plan-primary" :disabled="busy || !available" @click="openConfirmation">{{ busy ? '正在保存…' : '预览并确认加入' }}</button>
+        <button class="plan-primary" :disabled="busy || !available || !!draft.restConflicts?.length || !!unresolvedConflicts.length" @click="openConfirmation">{{ busy ? '正在保存…' : draft.restConflicts?.length || unresolvedConflicts.length ? '请先处理冲突' : '预览并确认加入' }}</button>
         <button v-if="dirty" :disabled="busy" @click="save">保存草案</button>
       </div>
       <section v-if="confirmOpen" class="plan-confirm" aria-label="确认加入训练计划">
@@ -569,6 +593,8 @@ onMounted(() => {
 .plan-exercise-values { display: grid; grid-template-columns: 1fr 1fr 1.4fr auto; gap: 6px; align-items: end; }
 .plan-exercise-values button { font-size: 20px; min-width: 20px; }
 .plan-conflict { display: grid; gap: 7px; padding: 10px; border-radius: 8px; background: rgba(235, 160, 35, .12); }
+.plan-suggestions { display: flex; flex-wrap: wrap; gap: 7px 12px; align-items: center; }
+.plan-suggestions span { flex-basis: 100%; }
 .plan-conflict label { display: flex; align-items: center; gap: 5px; }
 .plan-confirm { display: grid; gap: 9px; padding: 13px; border: 1px solid rgb(var(--v-theme-primary)); border-radius: 12px; }
 .plan-confirm ul { padding-left: 19px; }
