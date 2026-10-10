@@ -144,6 +144,43 @@ export class BailianService {
       );
     }
   }
+  async planJson(messages: ChatInput[]): Promise<unknown> {
+    const start = Date.now();
+    let status = 'failed';
+    let errorCode: string | undefined;
+    let usage: Usage | undefined;
+    try {
+      const response = await this.request('/chat/completions', {
+        model: this.model,
+        messages,
+        enable_thinking: false,
+        temperature: 0.2,
+        response_format: { type: 'json_object' },
+      });
+      const data = (await response.json()) as {
+        choices?: { message?: { content?: string } }[];
+        usage?: Usage;
+      };
+      usage = data.usage;
+      const result = JSON.parse(
+        data.choices?.[0]?.message?.content || '{}',
+      ) as unknown;
+      status = 'success';
+      return result;
+    } catch (error) {
+      errorCode = operationCode(error);
+      throw error;
+    } finally {
+      await this.control?.record(
+        'plan',
+        this.model,
+        status,
+        start,
+        usage,
+        errorCode,
+      );
+    }
+  }
   async *stream(
     messages: ChatInput[],
     signal: AbortSignal,

@@ -18,6 +18,7 @@ import { SuperAdminGuard } from '../guards/superAdmin.guard';
 import { CoachControlService } from './coach-control.service';
 import { CoachFeedbackDto } from './coach.dto';
 import { CoachService } from './coach.service';
+import { CoachPlanService } from './coach-plan.service';
 import { KnowledgeService } from './knowledge.service';
 import { BailianService } from './bailian.service';
 import {
@@ -26,6 +27,10 @@ import {
   SearchKnowledgeDto,
   SendCoachMessageDto,
   UpdateCoachMemoryDto,
+  GenerateCoachPlanDto,
+  GenerateCoachPlanFromMessageDto,
+  UpdateCoachPlanDto,
+  ApplyCoachPlanDto,
 } from './coach.dto';
 
 type AuthRequest = Request & { user: { id: number } };
@@ -36,7 +41,38 @@ export class CoachController {
   constructor(
     private readonly coach: CoachService,
     private readonly control: CoachControlService,
+    private readonly plans: CoachPlanService,
   ) {}
+  @Get('plan-drafts/latest') latestPlan(@Req() req: AuthRequest) {
+    return this.plans.latest(req.user.id);
+  }
+  @Post('plan-drafts') generatePlan(
+    @Req() req: AuthRequest,
+    @Body() dto: GenerateCoachPlanDto,
+  ) {
+    return this.plans.generate(req.user.id, dto);
+  }
+  @Post('messages/:id/plan-draft') planFromMessage(
+    @Req() req: AuthRequest,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: GenerateCoachPlanFromMessageDto,
+  ) {
+    return this.plans.fromMessage(req.user.id, id, dto);
+  }
+  @Put('plan-drafts/:id') updatePlan(
+    @Req() req: AuthRequest,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateCoachPlanDto,
+  ) {
+    return this.plans.update(req.user.id, id, dto);
+  }
+  @Post('plan-drafts/:id/apply') applyPlan(
+    @Req() req: AuthRequest,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: ApplyCoachPlanDto,
+  ) {
+    return this.plans.apply(req.user.id, id, dto);
+  }
   @Post('messages/:id/feedback') feedback(
     @Req() req: AuthRequest,
     @Param('id', ParseUUIDPipe) id: string,

@@ -3,10 +3,13 @@ import { ConfigService } from '@nestjs/config';
 import { DataSource } from 'typeorm';
 import { AddFitnessCoach1791000000000 } from '../migrations/1791000000000-AddFitnessCoach';
 import { AddCoachManagement1791001000000 } from '../migrations/1791001000000-AddCoachManagement';
+import { AddCoachPlanDraft1791002000000 } from '../migrations/1791002000000-AddCoachPlanDraft';
 import { CoachControlService } from './coach-control.service';
 import { CoachManagementController } from './coach-management.controller';
 import { BailianService } from './bailian.service';
 import { CoachService } from './coach.service';
+import { CoachPlanService } from './coach-plan.service';
+import { ScheduledSessionModule } from '../scheduledSession/scheduledSession.module';
 import { KnowledgeService } from './knowledge.service';
 import { CoachAdminController, CoachController } from './coach.controller';
 
@@ -30,6 +33,7 @@ class CoachDevelopmentSchema implements OnModuleInit {
       await runner.query('SELECT pg_advisory_xact_lock(7531,0)');
       await new AddFitnessCoach1791000000000().up(runner);
       await new AddCoachManagement1791001000000().up(runner);
+      await new AddCoachPlanDraft1791002000000().up(runner);
       await runner.commitTransaction();
     } catch (error) {
       await runner.rollbackTransaction();
@@ -41,6 +45,7 @@ class CoachDevelopmentSchema implements OnModuleInit {
 }
 
 @Module({
+  imports: [ScheduledSessionModule],
   controllers: [
     CoachController,
     CoachAdminController,
@@ -51,6 +56,7 @@ class CoachDevelopmentSchema implements OnModuleInit {
     CoachControlService,
     BailianService,
     CoachService,
+    CoachPlanService,
     KnowledgeService,
   ],
 })
